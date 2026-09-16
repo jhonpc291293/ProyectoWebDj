@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIP PAITA MIX — Pool de edits, remixes y mashups</title>
+<meta name="description" content="Pool de edits, remixes y mashups para DJs. Catálogo por género y BPM, lanzamientos semanales y descargas ilimitadas con tu membresía. Desde 2016 en Paita, Perú.">
+<meta property="og:title" content="VIP PAITA MIX">
+<meta property="og:description" content="El pool de edits, remixes y mashups que suena en las pistas del norte.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lobster&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS DE MARCA ============ */
+:root{
+  --bg:#08070b; --bg2:#0d0b11; --panel:#14111a; --panel2:#1b1724;
+  --line:rgba(255,255,255,.08); --line-g:rgba(var(--gold-rgb),.3);
+  --gold:#e8b23c; --gold-soft:#f6d68c; --gold-deep:#8a5a12;
+  --gold-rgb:232,178,60; --gold-deep-rgb:138,90,18;
+  --txt:#f4f1ea; --muted:#9c948a; --ok:#7ddba0; --bad:#ff6b81;
+  --radius:13px; --maxw:1220px;
+  --display:"Anton","Arial Black",Impact,sans-serif;
+  --script:"Lobster",cursive;
+  --body:"Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+/* ============ TEMAS DE TEMPORADA ============
+   Se activan poniendo data-tema en <html> (lo hace pintarMarca() según
+   Marca y contacto → Tema de temporada). Solo cambian colores; nunca
+   tipografía ni layout, así que no hay riesgo de romper nada. */
+:root[data-tema="halloween"]{
+  --bg:#0a0510; --bg2:#0f0916; --panel:#160f22; --panel2:#1e152e;
+  --gold:#ff7a1a; --gold-soft:#ffcf8a; --gold-deep:#4a1f6b;
+  --gold-rgb:255,122,26; --gold-deep-rgb:74,31,107;
+}
+:root[data-tema="navidad"]{
+  --bg:#070a08; --bg2:#0b100c; --panel:#101a13; --panel2:#16241a;
+  --gold:#c23b3b; --gold-soft:#e8a5a0; --gold-deep:#0b5c33;
+  --gold-rgb:194,59,59; --gold-deep-rgb:11,92,51;
+}
+:root[data-tema="ano-nuevo"]{
+  --bg:#050609; --bg2:#090b12; --panel:#0e111c; --panel2:#151a29;
+  --gold:#f2c14e; --gold-soft:#ffffff; --gold-deep:#17224a;
+  --gold-rgb:242,193,78; --gold-deep-rgb:23,34,74;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;padding-bottom:92px}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:15px}
+::selection{background:var(--gold);color:#0b0a06}
+h1,h2,h3{margin:0}
+
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 22px}
+.section{padding:86px 0;position:relative}
+.eyebrow{font-size:11.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--gold);box-shadow:0 0 14px var(--gold)}
+h2.title{font-family:var(--display);font-weight:400;font-size:clamp(32px,5.5vw,58px);line-height:.95;
+  margin:0 0 16px;text-transform:uppercase;letter-spacing:.01em}
+h2.title em{font-style:normal;color:var(--gold)}
+.lead{color:var(--muted);max-width:64ch;margin:0 0 40px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 24px;border-radius:999px;
+  font-weight:700;font-size:13.5px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line-g);
+  transition:.22s;white-space:nowrap}
+.btn-p{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#120c02;border-color:transparent}
+.btn-p:hover{box-shadow:0 0 30px rgba(var(--gold-rgb),.42);transform:translateY(-2px)}
+.btn-g:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+.btn-sm{padding:9px 16px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.tag{display:inline-block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;
+  border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tag.g{border-color:var(--line-g);color:var(--gold)}
+.tag.ok{border-color:rgba(125,219,160,.4);color:var(--ok)}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.reveal.in{opacity:1;transform:none}
+.grain{position:fixed;inset:0;z-index:9;pointer-events:none;opacity:.26;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.3'/></svg>")}
+
+/* ============ NAV ============ */
+.nav{position:sticky;top:0;z-index:50;background:rgba(8,7,11,.82);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;gap:24px;height:70px}
+.brand{display:flex;align-items:center;gap:11px;white-space:nowrap}
+.brand img{height:40px;width:auto}
+.brand .txt{font-family:var(--script);font-size:26px;letter-spacing:0;line-height:1}
+.brand .txt span{color:var(--gold)}
+.brand small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.22em;color:var(--muted);
+  text-transform:uppercase;margin-top:2px}
+.nav-links{display:flex;gap:24px;margin-left:auto}
+.nav-links a{font-size:12.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);position:relative;transition:.2s}
+.nav-links a:hover{color:var(--txt)}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;height:1px;width:0;background:var(--gold);transition:.25s}
+.nav-links a:hover::after{width:100%}
+.nav-act{display:flex;align-items:center;gap:9px}
+.btn-wa{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:#25d366;color:#0b2412;transition:.2s}
+.btn-wa:hover{background:#2fe374;transform:translateY(-2px)}
+.burger{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;place-items:center}
+.burger i{display:block;width:16px;height:1.5px;background:var(--txt);box-shadow:0 5px 0 var(--txt),0 -5px 0 var(--txt)}
+.chip-user{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;border:1px solid var(--line-g);
+  font-size:12.5px;font-weight:600}
+.chip-user b{color:var(--gold)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+
+/* ============ HERO ============ */
+.hero{position:relative;min-height:84vh;display:grid;align-items:center;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero-img{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.3;filter:saturate(.85)}
+.hero-glow{position:absolute;inset:0}
+.hero-glow::before,.hero-glow::after{content:"";position:absolute;border-radius:50%;filter:blur(100px)}
+.hero-glow::before{width:56vw;height:56vw;left:-14vw;top:-18vw;background:radial-gradient(circle,rgba(var(--gold-rgb),.5),transparent 62%);animation:f1 18s ease-in-out infinite}
+.hero-glow::after{width:44vw;height:44vw;right:-10vw;bottom:-18vw;background:radial-gradient(circle,rgba(var(--gold-deep-rgb),.55),transparent 64%);animation:f2 22s ease-in-out infinite}
+@keyframes f1{50%{transform:translate(7vw,5vh) scale(1.1)}}
+@keyframes f2{50%{transform:translate(-6vw,-7vh) scale(1.08)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,7,11,.55),rgba(8,7,11,.2) 40%,var(--bg))}
+.hero-in{position:relative;z-index:2;padding:96px 0 82px}
+.hero h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(48px,11vw,140px);
+  line-height:.85;margin:16px 0 0;letter-spacing:-.005em;text-shadow:0 10px 60px rgba(0,0,0,.6)}
+.hero h1 em{font-style:normal;-webkit-text-stroke:1.5px var(--gold);color:transparent}
+.hero-claim{margin:22px 0 0;font-size:clamp(15px,2vw,19px);color:#d9d2c6;max-width:54ch}
+.hero-cta{display:flex;flex-wrap:wrap;gap:13px;margin-top:32px}
+.hero-meta{display:flex;flex-wrap:wrap;align-items:center;gap:30px;margin-top:52px;padding-top:24px;border-top:1px solid var(--line)}
+.hero-meta div span{display:block;font-family:var(--display);font-size:27px;color:var(--gold)}
+.hero-meta div small{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.hero-wa{margin-left:auto;display:inline-flex;align-items:center;gap:11px;padding:12px 20px;
+  border-radius:999px;background:#25d366;color:#0b2412;transition:.22s;white-space:nowrap}
+.hero-wa:hover{box-shadow:0 0 24px rgba(37,211,102,.45);transform:translateY(-2px)}
+.hero-wa span{font-size:12.5px;font-weight:700;letter-spacing:.02em;line-height:1.3}
+.hero-wa small{display:block;font-size:10.5px;font-weight:600;opacity:.85}
+
+.ticker{border-block:1px solid var(--line);background:var(--bg2);overflow:hidden;padding:13px 0}
+.tk-track{display:flex;gap:34px;width:max-content;animation:marq 30s linear infinite}
+.tk-track span{font-family:var(--display);font-size:18px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);white-space:nowrap}
+.tk-track span b{color:var(--gold)}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ============ CATÁLOGO ============ */
+.tools{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:18px}
+.tools-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.buscador{flex:1;min-width:230px;position:relative}
+.buscador input{width:100%;padding:12px 14px 12px 40px;border-radius:10px;background:var(--bg2);
+  border:1px solid var(--line);color:var(--txt)}
+.buscador svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5}
+.tools select,.tools input[type=number]{padding:11px 12px;border-radius:10px;background:var(--bg2);
+  border:1px solid var(--line);color:var(--txt)}
+.tools input:focus,.tools select:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(var(--gold-rgb),.13)}
+.catalogo-djs{display:flex;gap:14px;overflow-x:auto;width:100vw;margin:0 0 18px;margin-left:calc(50% - 50vw);padding:8px max(24px,calc((100vw - 1180px)/2)) 14px;
+  scrollbar-color:var(--gold) var(--panel)}
+.catalogo-dj{width:auto;flex:1 1 0;min-width:104px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);
+  color:var(--txt);overflow:hidden;cursor:pointer;transition:.2s;text-align:center}
+.catalogo-dj:hover,.catalogo-dj.on{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold);transform:translateY(-2px)}
+.catalogo-dj .foto{width:100%;height:112px;background-size:contain;background-repeat:no-repeat;background-position:center;display:grid;place-items:center;
+  background-color:var(--panel2);font-family:var(--display);font-size:24px;color:rgba(255,255,255,.5)}
+.catalogo-dj .nombre{display:block;padding:7px 5px 8px;font-size:11px;font-weight:700;line-height:1.15;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.catalogo-dj.todos .foto{background:linear-gradient(135deg,var(--gold),#9b5d14);color:#120c02}
+@media (max-width:700px){
+  .catalogo-djs{padding-inline:16px}
+  .catalogo-dj{flex:0 0 88px;min-width:88px}
+  .catalogo-dj .foto{height:96px}
+}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{padding:7px 14px;border-radius:999px;border:1px solid var(--line);font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);transition:.2s}
+.chip:hover{border-color:var(--line-g);color:var(--txt)}
+.chip.on{background:var(--gold);color:#120c02;border-color:transparent;font-weight:700}
+.res-info{display:flex;align-items:center;gap:12px;margin:0 0 14px;font-size:13px;color:var(--muted)}
+.res-info b{color:var(--txt)}
+
+.lista{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
+.tr{display:grid;grid-template-columns:58px 1fr 130px 118px 74px 62px 96px;gap:16px;align-items:center;
+  padding:13px 18px;border-bottom:1px solid var(--line);transition:background .2s}
+.tr:last-child{border-bottom:0}
+.tr:hover{background:var(--panel2)}
+.tr.playing{background:linear-gradient(90deg,rgba(var(--gold-rgb),.12),transparent)}
+.tr-cab{background:var(--panel2);padding:11px 18px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.art{width:58px;height:58px;border-radius:9px;position:relative;overflow:hidden;background-size:cover;
+  background-position:center;display:grid;place-items:center;flex:none}
+.art .pl{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45);opacity:0;transition:.2s}
+.tr:hover .art .pl,.tr.playing .art .pl{opacity:1}
+.art .pl svg{filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+.tt{min-width:0}
+.tt b{display:block;font-size:15px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tt small{color:var(--muted);font-size:12.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tt .eq{display:none;gap:3px;align-items:flex-end;height:12px;margin-top:4px}
+.tr.playing .tt .eq{display:flex}
+.eq i{width:3px;background:var(--gold);animation:eq .9s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.15s}.eq i:nth-child(3){animation-delay:.3s}.eq i:nth-child(4){animation-delay:.45s}
+@keyframes eq{0%,100%{height:3px}50%{height:12px}}
+.meta-c{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dl{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-g);display:grid;place-items:center;
+  transition:.2s;margin-left:auto}
+.dl:hover{background:var(--gold);color:#120c02;border-color:transparent}
+.dl.lock{border-color:var(--line);color:var(--muted)}
+.dl.lock:hover{background:none;border-color:var(--gold);color:var(--gold)}
+.dl.buy{border-color:var(--line-g);color:var(--gold)}
+.dl.buy:hover{background:var(--gold);color:#120c02;border-color:transparent}
+.dl.en-carrito{border-color:rgba(125,219,160,.4);color:var(--ok)}
+.dl.en-carrito:hover{background:var(--ok);color:#0a1f14;border-color:transparent}
+.vacio{padding:56px 20px;text-align:center;color:var(--muted)}
+.mas{display:block;margin:22px auto 0}
+
+/* ============ MEMBRESÍAS ============ */
+.planes{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:20px}
+.plan{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);padding:26px 24px;
+  display:flex;flex-direction:column;gap:14px;position:relative;transition:.3s}
+.plan:hover{transform:translateY(-5px);border-color:var(--line-g)}
+.plan.top{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 24px 60px rgba(0,0,0,.5)}
+.plan.top::before{content:"El más elegido";position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:var(--gold);color:#120c02;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  padding:4px 12px;border-radius:999px;white-space:nowrap}
+.plan h3{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.02em}
+.plan .precio{font-family:var(--display);font-size:44px;line-height:1;color:var(--gold)}
+.plan .precio small{font-family:var(--body);font-size:12.5px;color:var(--muted);letter-spacing:.06em}
+.plan p{margin:0;color:var(--muted);font-size:13.5px}
+.plan ul{list-style:none;padding:0;margin:6px 0 0;flex:1;display:flex;flex-direction:column;gap:9px}
+.plan li{font-size:13.5px;display:flex;gap:9px;align-items:flex-start}
+.plan li svg{flex:none;margin-top:3px;color:var(--gold)}
+
+/* ============ CREW ============ */
+.crew{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:18px}
+.dj{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel);transition:.3s}
+.dj:hover{transform:translateY(-5px);border-color:var(--line-g)}
+.dj .foto{aspect-ratio:1;background-size:cover;background-position:center;display:grid;place-items:center;
+  font-family:var(--display);font-size:40px;color:rgba(255,255,255,.16)}
+.dj .info{padding:16px 18px}
+.dj .info b{display:block;font-size:16px}
+.dj .info small{color:var(--gold);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.dj .info p{margin:9px 0 0;font-size:13px;color:var(--muted)}
+
+/* ============ COMUNICADOS ============ */
+.comunicados{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.comunicado{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel);
+  transition:.3s;display:flex;flex-direction:column}
+.comunicado:hover{transform:translateY(-5px);border-color:var(--line-g)}
+.comunicado.fijado{border-color:var(--gold)}
+.comunicado .foto{aspect-ratio:1;background-size:cover;background-position:center}
+.comunicado .info{padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.comunicado .info h3{font-family:var(--display);font-size:19px;text-transform:uppercase;letter-spacing:.01em}
+.comunicado .info p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55;white-space:pre-wrap}
+.comunicado .info small{color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+
+/* ============ HISTORIA ============ */
+.linea{position:relative;padding-left:34px}
+.linea::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:1px;
+  background:linear-gradient(var(--gold),transparent)}
+.hito{position:relative;padding:0 0 30px}
+.hito::before{content:"";position:absolute;left:-30px;top:7px;width:11px;height:11px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--gold)}
+.hito b{font-family:var(--display);font-size:22px;color:var(--gold);display:block;line-height:1}
+.hito p{margin:7px 0 0;color:var(--muted);max-width:62ch}
+
+/* ============ CONTACTO ============ */
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.field input,.field textarea,.field select{width:100%;padding:12px 14px;border-radius:10px;background:var(--panel);
+  border:1px solid var(--line);color:var(--txt);transition:.2s}
+.field textarea{min-height:110px;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(var(--gold-rgb),.13)}
+.field.bad input,.field.bad textarea{border-color:var(--bad)}
+.dosc{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.info-l{list-style:none;padding:0;margin:0 0 26px}
+.info-l li{padding:15px 0;border-bottom:1px solid var(--line)}
+.info-l small{display:block;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.info-l a,.info-l span{font-size:16.5px;font-weight:500}
+.redes{display:flex;gap:9px;flex-wrap:wrap}
+.redes a{padding:10px 17px;border-radius:999px;border:1px solid var(--line);font-size:11.5px;
+  letter-spacing:.1em;text-transform:uppercase;transition:.2s}
+.redes a:hover{border-color:var(--gold);color:var(--gold)}
+
+footer{border-top:1px solid var(--line);padding:38px 0;background:var(--bg2)}
+.foot{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+
+/* ============ REPRODUCTOR ============ */
+.player{position:fixed;left:0;right:0;bottom:0;z-index:60;height:84px;background:rgba(13,11,17,.95);
+  backdrop-filter:blur(18px);border-top:1px solid var(--line-g);display:flex;align-items:center;gap:16px;
+  padding:0 20px;transform:translateY(110%);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.player.up{transform:none}
+.p-btn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--muted);transition:.2s}
+.p-btn:hover{color:var(--txt);background:rgba(255,255,255,.07)}
+.p-main{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--gold-soft),var(--gold));
+  color:#120c02;display:grid;place-items:center}
+.p-main:hover{box-shadow:0 0 26px rgba(var(--gold-rgb),.5)}
+.p-info{min-width:0;width:210px}
+.p-info b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-info small{color:var(--muted);font-size:12px}
+.p-bar{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+.p-time{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;width:42px;text-align:center}
+.seek{flex:1;height:26px;position:relative;cursor:pointer;display:grid;align-items:center}
+.seek-t{height:4px;border-radius:4px;background:rgba(255,255,255,.13);overflow:hidden}
+.seek-f{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-soft))}
+.seek::after{content:"";position:absolute;top:50%;left:var(--pos,0);width:11px;height:11px;border-radius:50%;
+  background:#fff;transform:translate(-50%,-50%);opacity:0;transition:.2s}
+.seek:hover::after{opacity:1}
+canvas#viz{width:140px;height:38px;opacity:.9}
+.p-badge{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  border:1px solid var(--line-g);border-radius:999px;padding:3px 8px;white-space:nowrap}
+.p-vol{display:flex;align-items:center;gap:8px;width:110px}
+.p-vol input{width:100%;accent-color:var(--gold)}
+
+/* ============ MODALES ============ */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.74);backdrop-filter:blur(4px);z-index:70;opacity:0;
+  pointer-events:none;transition:.28s}
+.ov.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;pointer-events:none}
+.modal.on{pointer-events:auto;overflow-y:auto}
+.mbox{width:min(520px,100%);max-height:90vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line-g);
+  border-radius:16px;transform:translateY(16px) scale(.98);opacity:0;transition:.28s}
+.modal.on .mbox{transform:none;opacity:1}
+.mbox.ancho{width:min(880px,100%)}
+.mhead{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--line)}
+.mhead h3{font-family:var(--display);font-size:21px;text-transform:uppercase;letter-spacing:.02em}
+.mhead button{margin-left:auto;font-size:25px;line-height:1;color:var(--muted)}
+.mbody{padding:24px}
+.mfoot{padding:16px 24px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--bg2);padding:5px;border-radius:11px}
+.tabs button{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);transition:.2s}
+.tabs button.on{background:var(--panel2);color:var(--txt)}
+.yape{background:var(--bg2);border:1px dashed var(--line-g);border-radius:11px;padding:16px;margin:16px 0}
+.yape b{color:var(--gold);font-size:19px;letter-spacing:.04em}
+.estado-caja{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:18px;margin-bottom:18px}
+.estado-caja .fila{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:14px}
+.estado-caja .fila span{color:var(--muted)}
+.barra{height:6px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft))}
+.hist{max-height:190px;overflow-y:auto;font-size:13px}
+.hist div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);color:var(--muted)}
+.hist div b{color:var(--txt);font-weight:600}
+
+.toast{position:fixed;left:50%;bottom:104px;transform:translate(-50%,18px);z-index:90;background:var(--panel2);
+  border:1px solid var(--line-g);border-left:3px solid var(--gold);border-radius:11px;padding:13px 20px;
+  font-size:14px;opacity:0;pointer-events:none;transition:.3s;box-shadow:0 16px 44px rgba(0,0,0,.65);max-width:90vw}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ============ RIELES LATERALES (aprovechan el margen en monitores anchos) ============
+   viven DENTRO de la sección #catalogo (que ya es position:relative por .section),
+   así que se mueven junto con la página en vez de quedar flotando sobre otras secciones */
+.rail{display:none;position:absolute;top:230px;width:clamp(280px, calc(50% - 654px), 380px);max-height:640px;overflow-y:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;z-index:5}
+.rail-izq{left:24px}
+.rail-der{right:24px}
+.rail-tit{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 12px}
+.rail-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.rail-item:last-child{border-bottom:0}
+.rail-item:hover b{color:var(--gold)}
+.rail-item .n{font-family:var(--display);font-size:14px;color:var(--muted);width:18px;flex:none;text-align:center}
+.rail-item .art{width:34px;height:34px;border-radius:6px;background-size:cover;background-position:center;flex:none}
+.rail-item .tx{min-width:0}
+.rail-item .tx b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:.2s}
+.rail-item .tx small{color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+@media (min-width:1900px){ .rail{display:block} }
+
+/* ============ POPUP DE COMUNICADO ============ */
+.cpop{position:fixed;z-index:65;right:20px;bottom:104px;width:min(340px,calc(100vw - 40px));
+  background:var(--panel);border:1px solid var(--line-g);border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.55);opacity:0;transform:translateY(16px) scale(.98);
+  transition:opacity .35s ease,transform .35s ease;pointer-events:none}
+.cpop.in{opacity:1;transform:none;pointer-events:auto}
+.cpop-x{position:absolute;top:6px;right:8px;font-size:20px;line-height:1;color:var(--muted);padding:6px}
+.cpop-x:hover{color:var(--txt)}
+.cpop-in{display:flex;gap:12px;padding:16px 34px 16px 18px}
+.cpop-img{width:52px;height:52px;border-radius:9px;background-size:cover;background-position:center;flex:none}
+.cpop-txt{min-width:0}
+.cpop-txt b{display:block;font-size:14.5px;margin-top:4px;line-height:1.25}
+.cpop-txt p{margin:6px 0 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.cpop-txt a{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--gold)}
+.cpop-txt a:hover{text-decoration:underline}
+@media (max-width:640px){ .cpop{right:12px;left:12px;bottom:168px;width:auto} }
+.spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.25);border-top-color:var(--gold);border-radius:50%;
+  display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:1000px){
+  .dos{grid-template-columns:1fr;gap:32px}
+  .nav-links{position:fixed;inset:70px 0 auto 0;flex-direction:column;gap:0;background:var(--bg2);
+    border-bottom:1px solid var(--line-g);padding:8px 22px 20px;display:none}
+  .nav-links.on{display:flex}
+  .nav-links a{padding:15px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .burger{display:grid}
+  .nav-act{margin-left:auto}
+  .tr{grid-template-columns:52px 1fr 84px 60px;gap:12px}
+  .tr .c-ton,.tr .c-dur,.tr .c-dj{display:none}
+  .tr-cab{display:none}
+}
+@media (max-width:640px){
+  .section{padding:58px 0}
+  .wrap{padding:0 16px}
+  body{padding-bottom:148px}
+  .player{height:auto;flex-wrap:wrap;padding:12px 14px 14px;gap:10px}
+  .p-info{width:auto;flex:1;order:1}.p-ctrl{order:2}.p-bar{order:3;flex-basis:100%}
+  canvas#viz,.p-vol,.p-badge{display:none}
+  .tr{grid-template-columns:46px 1fr 56px;gap:11px;padding:11px 13px}
+  .tr .c-bpm{display:none}
+  .art{width:46px;height:46px}
+  .dosc{grid-template-columns:1fr}
+  .hero-meta{gap:18px}
+  .brand .txt{font-size:21px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- ================= NAV ================= -->
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="#top" class="brand" id="brand">
+      <span class="txt" id="brandTxt">VIP PAITA <span>MIX</span><small id="brandSub">Desde 2016 · Paita</small></span>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#membresias">Membresías</a>
+      <a href="#comunicados" id="navComunicados" class="hide">Comunicados</a>
+      <a href="#crew">El crew</a>
+      <a href="#historia">Historia</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <div class="nav-act">
+      <a href="#" id="navWa" class="btn-wa" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp" title="Escríbenos por WhatsApp">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.19 0 4.25.85 5.8 2.4a8.2 8.2 0 0 1 2.41 5.84c0 4.55-3.7 8.25-8.25 8.25h-.01c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.14.82.84-3.06-.2-.32a8.18 8.18 0 0 1-1.26-4.4c0-4.55 3.7-8.25 8.26-8.25l.15.06Zm4.53 11.02c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.79.97-.14.16-.29.18-.54.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.13-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.42.06-.65.31-.22.24-.85.83-.85 2.02 0 1.19.87 2.34.99 2.5.12.16 1.71 2.6 4.14 3.65.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+      </a>
+      <button class="btn btn-sm btn-g hide" id="btnCarrito" aria-label="Carrito">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21.5 8H6"/></svg>
+        <span id="carritoN">0</span></button>
+      <button class="btn btn-sm btn-g hide" id="btnCuenta"><span class="dot" id="dotEstado"></span> <span id="txtCuenta">Mi cuenta</span></button>
+      <button class="btn btn-sm btn-p" id="btnIngresar">Ingresar</button>
+      <button class="burger" id="burger" aria-label="Menú"><i></i></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="hero-img" id="heroImg"></div>
+  <div class="hero-glow"></div>
+  <div class="wrap hero-in">
+    <p class="eyebrow" id="heroEyebrow">Desde 2016 · Paita, Piura · Perú</p>
+    <h1 id="heroH1">EDITS QUE<br><em>LLENAN</em><br>LA PISTA</h1>
+    <p class="hero-claim" id="heroClaim"></p>
+    <div class="hero-cta">
+      <a href="#catalogo" class="btn btn-p">Ver el catálogo</a>
+      <a href="#membresias" class="btn btn-g">Hazte miembro</a>
+    </div>
+    <div class="hero-meta" id="heroMeta"></div>
+  </div>
+</section>
+
+<div class="ticker"><div class="tk-track" id="ticker"></div></div>
+
+<!-- ================= CATÁLOGO ================= -->
+<section class="section" id="catalogo">
+  <aside class="rail rail-izq" id="railNuevo">
+    <p class="rail-tit">Recién agregado</p>
+    <div id="railNuevoLista"></div>
+  </aside>
+  <aside class="rail rail-der" id="railTop">
+    <p class="rail-tit">Top 10 · Más descargados</p>
+    <div id="railTopLista"></div>
+  </aside>
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Catálogo</p>
+      <h2 class="title">Busca, escucha y <em>descarga</em></h2>
+      <p class="lead">Todo el pool está a la vista: escucha la muestra de cualquier track sin registrarte.
+        Para descargar el archivo completo necesitas una membresía activa.</p>
+    </div>
+
+    <div class="catalogo-djs reveal" id="catalogoDjs" aria-label="Tracks por DJ"></div>
+
+    <div class="tools reveal">
+      <div class="tools-row">
+        <div class="buscador">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="q" placeholder="Buscar por título, artista, género o DJ...">
+        </div>
+        <select id="fGenero"><option value="">Todos los géneros</option></select>
+        <input type="number" id="bpmMin" placeholder="BPM min" min="60" max="200" style="width:110px">
+        <input type="number" id="bpmMax" placeholder="BPM max" min="60" max="200" style="width:110px">
+        <select id="orden">
+          <option value="nuevo">Más recientes</option>
+          <option value="descargas">Más descargados</option>
+          <option value="titulo">Título A-Z</option>
+          <option value="bpm">BPM</option>
+        </select>
+      </div>
+      <div class="chips" id="chipsTipo"></div>
+    </div>
+
+    <div class="res-info reveal"><span id="resInfo">Cargando catálogo…</span>
+      <button class="btn btn-sm btn-g hide" id="limpiar" style="margin-left:auto">Limpiar filtros</button></div>
+
+    <div class="lista reveal" id="lista"></div>
+    <button class="btn btn-g mas hide" id="verMas">Cargar más</button>
+  </div>
+</section>
+
+<!-- ================= MEMBRESÍAS ================= -->
+<section class="section" id="membresias" style="background:var(--bg2);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Membresías</p>
+      <h2 class="title">Un pago, <em>todo el pool</em></h2>
+      <p class="lead" id="pagoNota"></p>
+    </div>
+    <div class="planes reveal" id="planes"></div>
+  </div>
+</section>
+
+<!-- ================= COMUNICADOS ================= -->
+<section class="section hide" id="comunicados">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Comunicados</p>
+      <h2 class="title">Novedades <em>del pool</em></h2>
+      <p class="lead">Avisos y dinámicas nuevas, publicados por el equipo.</p>
+    </div>
+    <div class="comunicados reveal" id="comunicadosGrid"></div>
+  </div>
+</section>
+
+<!-- ================= CREW ================= -->
+<section class="section" id="crew">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">El crew</p>
+      <h2 class="title">Quiénes <em>editan</em></h2>
+      <p class="lead">El pool lo alimenta un equipo de DJs. Cada uno sube su material y responde por su calidad.</p>
+    </div>
+    <div class="crew reveal" id="crewGrid"></div>
+  </div>
+</section>
+
+<!-- ================= HISTORIA ================= -->
+<section class="section" id="historia" style="background:var(--bg2);border-block:1px solid var(--line)">
+  <div class="wrap dos">
+    <div class="reveal">
+      <p class="eyebrow">Historia</p>
+      <h2 class="title">De un grupo de DJs a <em>una plataforma</em></h2>
+      <p class="lead" id="historiaTxt"></p>
+    </div>
+    <div class="linea reveal" id="hitos"></div>
+  </div>
+</section>
+
+<!-- ================= CONTACTO ================= -->
+<section class="section" id="contacto">
+  <div class="wrap dos">
+    <div class="reveal">
+      <p class="eyebrow">Contacto</p>
+      <h2 class="title">Contrata o <em>escríbenos</em></h2>
+      <p class="lead">Para tocar en tu evento, pedir un edit a medida o sumarte como editor del pool.</p>
+      <ul class="info-l">
+        <li><small>WhatsApp</small><a href="#" id="waLink">—</a></li>
+        <li><small>Correo</small><a href="#" id="mailLink">—</a></li>
+        <li><small>Base</small><span id="ciudadTxt">—</span></li>
+      </ul>
+      <div class="redes" id="redes"></div>
+    </div>
+    <form class="reveal" id="formContacto" novalidate>
+      <div class="dosc">
+        <div class="field"><label for="k-nom">Nombre</label><input id="k-nom" name="nombre" placeholder="Tu nombre"></div>
+        <div class="field"><label for="k-mail">Correo</label><input id="k-mail" name="email" type="email" placeholder="tu@correo.com"></div>
+      </div>
+      <div class="dosc">
+        <div class="field"><label for="k-tipo">Motivo</label>
+          <select id="k-tipo" name="tipo">
+            <option>Contratar para un evento</option><option>Pedir un edit a medida</option>
+            <option>Quiero ser editor del pool</option><option>Consulta sobre mi membresía</option><option>Otro</option>
+          </select></div>
+        <div class="field"><label for="k-fecha">Fecha (si aplica)</label><input id="k-fecha" name="fecha" type="date"></div>
+      </div>
+      <div class="field"><label for="k-lugar">Lugar / distrito</label><input id="k-lugar" name="lugar" placeholder="Paita, Piura"></div>
+      <div class="field"><label for="k-msg">Mensaje</label><textarea id="k-msg" name="mensaje" placeholder="Cuéntanos qué necesitas..."></textarea></div>
+      <button type="submit" class="btn btn-p" style="width:100%">Enviar mensaje</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px">Se guarda en el sistema y además se abre WhatsApp con el mensaje listo.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap foot">
+  <span id="footTxt">© VIP PAITA MIX</span>
+  <span><a href="admin.html" style="color:var(--muted)">Panel de administración</a></span>
+</div></footer>
+
+<!-- ================= REPRODUCTOR ================= -->
+<div class="player" id="player">
+  <div class="p-ctrl" style="display:flex;align-items:center;gap:8px">
+    <button class="p-btn" id="prev" aria-label="Anterior"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg></button>
+    <button class="p-main" id="toggle" aria-label="Reproducir"><svg id="icoPlay" width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+    <button class="p-btn" id="next" aria-label="Siguiente"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg></button>
+  </div>
+  <div class="p-info"><b id="pTitle">Elige un track</b><small id="pMeta">—</small></div>
+  <div class="p-bar">
+    <span class="p-time" id="tNow">0:00</span>
+    <div class="seek" id="seek"><div class="seek-t"><div class="seek-f" id="seekF"></div></div></div>
+    <span class="p-time" id="tEnd">0:00</span>
+  </div>
+  <canvas id="viz" width="280" height="76"></canvas>
+  <span class="p-badge" id="demoBadge" hidden>Muestra demo</span>
+  <div class="p-vol">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="opacity:.6"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2-3.7v7.4a4.5 4.5 0 0 0 2-3.7z"/></svg>
+    <input type="range" id="vol" min="0" max="1" step="0.01" value="0.85" aria-label="Volumen">
+  </div>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="ov" id="ov"></div>
+<div class="modal" id="modal">
+  <div class="mbox" id="mbox">
+    <div class="mhead"><h3 id="mTitle">—</h3><button id="mX" aria-label="Cerrar">&times;</button></div>
+    <div class="mbody" id="mBody"></div>
+    <div class="mfoot" id="mFoot"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="cpop" id="cpop" hidden></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ==========================================================================
+   VIP PAITA MIX — web pública
+   El contenido y las membresías viven en Supabase; se administran en admin.html
+   ========================================================================== */
+
+/* ---------- utilidades ---------- */
+const $  = (s,c=document)=>c.querySelector(s);
+const $$ = (s,c=document)=>[...c.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tituloCase = s => String(s ?? "").toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase());
+const mmss = s => { s=Math.max(0,s|0); return (s/60|0)+":"+String(s%60).padStart(2,"0"); };
+const toSec = t => { const p=String(t||"3:30").split(":").map(Number); return (p[0]*60+(p[1]||0))||210; };
+const fecha = d => d ? new Date(d+"T00:00:00").toLocaleDateString("es-PE",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+const fechaH = d => d ? new Date(d).toLocaleDateString("es-PE",{day:"2-digit",month:"short"}) : "—";
+
+const TIPOS = {
+  edit:      {l:"Edit",       c:["#e8b23c","#5d3703"]},
+  remix:     {l:"Remix",      c:["#e0761f","#4a1f02"]},
+  mashup:    {l:"Mashup",     c:["#c04ad0","#33063a"]},
+  intro:     {l:"Intro",      c:["#3ba7e8","#052b47"]},
+  acapella:  {l:"Acapella",   c:["#4ad07f","#04351d"]},
+  transicion:{l:"Transición", c:["#d0454a","#3a0508"]}
+};
+const NOTAS = { lento:[41,41,48,44], medio:[40,47,45,43], rapido:[38,45,43,41] };
+
+/* ---------- datos de respaldo (si aún no hay conexión) ---------- */
+const DEF = {
+  settings:{ marca:"VIP PAITA MIX", creador:"Ronald Moscol", desde:2016, ciudad:"Paita, Piura · Perú", tema:"normal",
+    claim:"El pool de edits, remixes y mashups que suena en las pistas del norte.",
+    hero_l1:"EDITS QUE", hero_l2:"LLENAN", hero_l3:"LA PISTA", logo_url:"", hero_img:"",
+    whatsapp:"51999999999", email:"contacto@vippaitamix.com", moneda:"S/",
+    yape_nombre:"Ronald Moscol", yape_numero:"999 999 999",
+    pago_nota:"Elige tu plan, yapea al número y sube la captura. Activamos tu acceso el mismo día.",
+    frases:["Edits","Remixes","Mashups","Intros","Acapellas","Cumbia","Reggaetón","Salsa","Tecnocumbia"],
+    hitos:[{anio:"2016",texto:"Nace VIP PAITA MIX en Paita como grupo de intercambio entre DJs de la zona."},
+           {anio:"2019",texto:"El pool crece y se abre a todo Piura."},
+           {anio:"2022",texto:"Primer catálogo organizado por género y BPM."},
+           {anio:"2026",texto:"Plataforma propia con membresías y descargas directas."}],
+    redes:{} },
+  plans:[
+    {id:"d1",nombre:"Semanal",dias:7,precio:15,descripcion:"Para probar el pool una semana.",beneficios:["Todo el catálogo","Descargas ilimitadas"],destacado:false},
+    {id:"d2",nombre:"Mensual",dias:30,precio:40,descripcion:"El plan que usa la mayoría del crew.",beneficios:["Todo el catálogo","Descargas ilimitadas","Lanzamientos semanales","Soporte por WhatsApp"],destacado:true},
+    {id:"d3",nombre:"Trimestral",dias:90,precio:100,descripcion:"Tres meses al precio de dos y medio.",beneficios:["Todo lo del Mensual","Ahorro de S/ 20","Pedidos a medida"],destacado:false},
+    {id:"d4",nombre:"Anual",dias:365,precio:320,descripcion:"Para el DJ que trabaja todas las semanas.",beneficios:["Todo lo del Trimestral","Dos meses gratis","Estrenos anticipados"],destacado:false}],
+  crew:[{alias:"DJ Ronald",nombre:"Ronald Moscol",cargo:"Fundador · Director",bio:"Creador de VIP PAITA MIX en 2016.",foto:""},
+        {alias:"DJ 2",cargo:"DJ / Editor",bio:"",foto:""},{alias:"DJ 3",cargo:"DJ / Editor",bio:"",foto:""},
+        {alias:"DJ 4",cargo:"DJ / Editor",bio:"",foto:""},{alias:"DJ 5",cargo:"DJ / Editor",bio:"",foto:""}],
+  tracks:[
+    {id:"x1",titulo:"Ojitos Hechiceros (VIP Edit)",artista:"Sensación",tipo:"edit",genero:"Cumbia",bpm:98,tonalidad:"Am",duracion:"3:40",editor:"DJ Ronald",gratis:true,descargas:0},
+    {id:"x2",titulo:"Cariñito (Tribal Remix)",artista:"Los Hijos del Sol",tipo:"remix",genero:"Tecnocumbia",bpm:128,tonalidad:"Gm",duracion:"4:05",editor:"DJ Ronald",descargas:0},
+    {id:"x3",titulo:"Mix Salsa Brava · Mashup",artista:"Varios",tipo:"mashup",genero:"Salsa",bpm:95,tonalidad:"Dm",duracion:"5:12",editor:"DJ Ronald",descargas:0},
+    {id:"x4",titulo:"Intro Perreo 2026",artista:"Varios",tipo:"intro",genero:"Reggaetón",bpm:96,tonalidad:"F#m",duracion:"1:20",editor:"DJ Ronald",descargas:0},
+    {id:"x5",titulo:"Acapella · Que Bonito",artista:"Rocío Dúrcal",tipo:"acapella",genero:"Cumbia",bpm:92,tonalidad:"C",duracion:"2:10",editor:"DJ Ronald",descargas:0},
+    {id:"x6",titulo:"Transición Cumbia → Reggaetón",artista:"Varios",tipo:"transicion",genero:"Cumbia",bpm:98,tonalidad:"Am",duracion:"1:45",editor:"DJ Ronald",descargas:0}],
+  comunicados:[{id:"c1",titulo:"Bienvenido a VIP PAITA MIX",
+    cuerpo:"Aquí publicamos las novedades del pool: nuevas dinámicas, lanzamientos y avisos del equipo.",
+    imagen:"",autor:"DJ Ronald",fijado:false,creado:new Date().toISOString()}]
+};
+
+/* ---------- estado ---------- */
+let S={}, PLANES=[], CREW=[], TRACKS=[], COMUNICADOS=[], sb=null, sesion=null, perfil=null, MEMB={estado:"ninguna"};
+let modoRespaldo=false, PAGE=24, mostrados=PAGE, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
+let COMPRADOS=new Set(); // ids de tracks que el usuario ya compró y le aprobaron (acceso para siempre)
+let CARRITO=[]; try{ CARRITO=JSON.parse(localStorage.getItem("vpm_carrito")||"[]"); }catch(e){}
+const money = n => (S.moneda||"S/")+" "+(+n||0).toFixed(2).replace(/\.00$/,"");
+const puedeDescargar = () => MEMB.estado==="activa" || ["admin","editor"].includes(perfil?.rol);
+function guardarCarrito(){ try{ localStorage.setItem("vpm_carrito",JSON.stringify(CARRITO)); }catch(e){} }
+
+let tt; function toast(msg,ms=3000){ const t=$("#toast"); t.innerHTML=msg; t.classList.add("on");
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),ms); }
+
+/* ---------- conexión ---------- */
+function credenciales(){
+  const c=window.SUPA||{}; if(c.url&&c.anon) return c;
+  try{ const l=JSON.parse(localStorage.getItem("supa_cfg")||"null"); if(l&&l.url&&l.anon) return l; }catch(e){}
+  return null;
+}
+// evita el "parpadeo" de la plantilla por defecto: pinta de inmediato lo último
+// que se cargó bien, mientras en paralelo se pide lo más reciente a Supabase
+function leerCache(){ try{ return JSON.parse(localStorage.getItem("vpm_cache")||"null"); }catch(e){ return null; } }
+function guardarCache(d){ try{ localStorage.setItem("vpm_cache",JSON.stringify(d)); }catch(e){} }
+async function cargarDatos(){
+  const cred=credenciales(); let d=null;
+  if(cred && typeof window.supabase!=="undefined"){
+    try{
+      sb=window.supabase.createClient(cred.url,cred.anon);
+      const [st,pl,cr,tk,co]=await Promise.all([
+        sb.from("settings").select("*").eq("id",1).maybeSingle(),
+        sb.from("plans").select("*").order("orden"),
+        sb.from("crew").select("*").order("orden"),
+        sb.from("tracks").select("*").order("creado",{ascending:false}),
+        sb.from("comunicados").select("*").order("fijado",{ascending:false}).order("creado",{ascending:false})
+      ]);
+      if(!tk.error){
+        d={ settings:st.data||DEF.settings, plans:pl.data||[], crew:cr.data||[], tracks:tk.data||[], comunicados:co.data||[] };
+        guardarCache(d);
+      }
+    }catch(e){}
+  }
+  if(!d){ d=DEF; sb=null; modoRespaldo=true;
+    console.warn("[vpm] Contenido de demostración. Revisa config.js o publica el sitio en un hosting.");
+  }
+  S=d.settings||DEF.settings; PLANES=d.plans||[]; CREW=d.crew||[]; TRACKS=d.tracks||[]; COMUNICADOS=d.comunicados||[];
+  if(sb){
+    const {data:{session}}=await sb.auth.getSession();
+    if(session) await entrarSesion(session,false);
+    sb.auth.onAuthStateChange((_e,s)=>{ if(!s){ sesion=null; perfil=null; MEMB={estado:"ninguna"}; COMPRADOS=new Set(); pintarSesion(); pintarLista(); } });
+  }
+}
+async function entrarSesion(session,repintar=true){
+  sesion=session;
+  const [{data:p},{data:m},{data:compras}]=await Promise.all([
+    sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle(),
+    sb.rpc("mi_membresia"),
+    sb.rpc("mis_compras")
+  ]);
+  perfil=p||{rol:"member",nombre:session.user.email};
+  MEMB=m||{estado:"ninguna"};
+  COMPRADOS=new Set((compras||[]).map(r=>String(r.track_id)));
+  pintarSesion(); if(repintar) pintarLista();
+}
+
+/* ==========================================================================
+   PINTADO
+   ========================================================================== */
+function pintarMarca(){
+  document.title = `${S.marca} — Pool de edits, remixes y mashups`;
+  document.documentElement.dataset.tema = S.tema||"normal";
+  const partes = (S.marca||"").trim().split(/\s+/);
+  const ultima = partes.length>1 ? partes.pop() : "";
+  $("#brandTxt").innerHTML = (S.logo_url
+      ? `<img src="${esc(S.logo_url)}" alt="${esc(S.marca)}">`
+      : `${esc(tituloCase(partes.join(" ")))} <span>${esc(tituloCase(ultima))}</span>`)
+    + `<small>Desde ${esc(S.desde)} · ${esc((S.ciudad||"").split(",")[0])}</small>`;
+  if(S.logo_url) $("#brand").classList.add("con-logo");
+
+  $("#heroEyebrow").textContent = `Desde ${S.desde} · ${S.ciudad}`;
+  $("#heroH1").innerHTML = `${esc(S.hero_l1)}<br><em>${esc(S.hero_l2)}</em><br>${esc(S.hero_l3)}`;
+  $("#heroClaim").textContent = S.claim||"";
+  if(S.hero_img) $("#heroImg").style.backgroundImage = `url('${esc(S.hero_img)}')`;
+
+  const generos = [...new Set(TRACKS.map(t=>t.genero).filter(Boolean))];
+  const djs = [...new Set(TRACKS.map(t=>t.editor).filter(Boolean))];
+  const wsp=(S.whatsapp||"").replace(/\D/g,"");
+  $("#heroMeta").innerHTML = [
+    [TRACKS.length, "Tracks en el pool"],
+    [generos.length, "Géneros"],
+    [Math.max(djs.length, CREW.length), "DJs editores"],
+    [(new Date().getFullYear() - (+S.desde||2016))+" años", "En la escena"]
+  ].map(([v,l])=>`<div><span>${esc(v)}</span><small>${esc(l)}</small></div>`).join("")
+  + `<a href="https://wa.me/${wsp}" target="_blank" rel="noopener" class="hero-wa" title="Escríbenos por WhatsApp">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.19 0 4.25.85 5.8 2.4a8.2 8.2 0 0 1 2.41 5.84c0 4.55-3.7 8.25-8.25 8.25h-.01c-1.5 0-2.97-.4-4.25-1.16l-.3-.18-3.14.82.84-3.06-.2-.32a8.18 8.18 0 0 1-1.26-4.4c0-4.55 3.7-8.25 8.26-8.25l.15.06Zm4.53 11.02c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.24-.64.8-.79.97-.14.16-.29.18-.54.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.13-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.42.06-.65.31-.22.24-.85.83-.85 2.02 0 1.19.87 2.34.99 2.5.12.16 1.71 2.6 4.14 3.65.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+      <span>Escríbenos<br><small>por WhatsApp</small></span>
+    </a>`;
+
+  const fr = S.frases?.length ? S.frases : DEF.settings.frases;
+  $("#ticker").innerHTML = [...fr,...fr].map(f=>`<span>${esc(f)} <b>✦</b></span>`).join("");
+
+  $("#pagoNota").textContent = S.pago_nota||"";
+  $("#historiaTxt").textContent = `${S.marca} nació en ${S.desde} de la mano de ${S.creador}, `
+    + `en ${(S.ciudad||"").split("·")[0].trim()}. Lo que empezó como intercambio entre amigos hoy es un pool `
+    + `con catálogo propio, lanzamientos constantes y DJs editando cada semana.`;
+  $("#hitos").innerHTML = (S.hitos||[]).map(h=>
+    `<div class="hito"><b>${esc(h.anio)}</b><p>${esc(h.texto)}</p></div>`).join("");
+
+  $("#waLink").href="https://wa.me/"+wsp;
+  $("#waLink").textContent="+"+wsp.replace(/^(\d{2})(\d{3})(\d{3})(\d{3})$/,"$1 $2 $3 $4");
+  $("#navWa").href="https://wa.me/"+wsp;
+  $("#mailLink").href="mailto:"+S.email; $("#mailLink").textContent=S.email||"—";
+  $("#ciudadTxt").textContent=S.ciudad||"—";
+  const nombres={instagram:"Instagram",facebook:"Facebook",tiktok:"TikTok",youtube:"YouTube"};
+  $("#redes").innerHTML = Object.entries(nombres).filter(([k])=>(S.redes||{})[k])
+    .map(([k,n])=>`<a href="${esc(S.redes[k])}" target="_blank" rel="noopener">${n}</a>`).join("")
+    || Object.values(nombres).map(n=>`<span class="tag">${n}</span>`).join("");
+  $("#footTxt").innerHTML = `© ${new Date().getFullYear()} ${esc(S.marca)} · ${esc(S.creador)} · ${esc(S.ciudad)}`;
+}
+
+function pintarSesion(){
+  const hay=!!sesion;
+  $("#btnIngresar").classList.toggle("hide",hay);
+  $("#btnCuenta").classList.toggle("hide",!hay);
+  if(hay){
+    const activa = MEMB.estado==="activa";
+    $("#dotEstado").classList.toggle("on",activa || ["admin","editor"].includes(perfil?.rol));
+    const bruto=(perfil?.alias||perfil?.nombre||sesion.user.email);
+    const nom=/^dj\b/i.test(bruto) ? bruto.split(" ").slice(0,2).join(" ") : bruto.split(" ")[0];
+    $("#txtCuenta").textContent = activa ? `${nom} · ${MEMB.dias_restantes}d` : nom;
+  }
+}
+
+function pintarPlanes(){
+  $("#planes").innerHTML = PLANES.map(p=>`
+    <div class="plan ${p.destacado?"top":""}">
+      <h3>${esc(p.nombre)}</h3>
+      <div class="precio">${money(p.precio)}<br><small>${p.dias} días de acceso</small></div>
+      <p>${esc(p.descripcion||"")}</p>
+      <ul>${(p.beneficios||[]).map(b=>`<li>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 13 4 4L19 7"/></svg>
+        ${esc(b)}</li>`).join("")}</ul>
+      ${p.limite_diario>0?`<span class="tag">Hasta ${p.limite_diario} descargas/día</span>`:""}
+      <button class="btn ${p.destacado?"btn-p":"btn-g"}" data-plan="${esc(p.id)}">Elegir este plan</button>
+    </div>`).join("");
+}
+
+function pintarCrew(){
+  $("#crewGrid").innerHTML = CREW.map(d=>`
+    <div class="dj">
+      <div class="foto" style="${d.foto?`background-image:url('${esc(d.foto)}')`:`background:linear-gradient(135deg,#1d1826,#0d0b11)`}">
+        ${d.foto?"":esc((d.alias||"?").replace(/^DJ\s*/i,"").slice(0,2).toUpperCase())}</div>
+      <div class="info"><b>${esc(d.alias)}</b><small>${esc(d.cargo||"DJ")}</small>
+        ${d.bio?`<p>${esc(d.bio)}</p>`:""}</div>
+    </div>`).join("");
+}
+
+function pintarCatalogoDjs(){
+  const djs=CREW.filter(d=>d.visible!==false).map(d=>({
+    nombre:d.alias||d.nombre||"DJ", foto:d.foto||"", email:String(d.email||"").trim()
+  }));
+  $("#catalogoDjs").innerHTML=`<button class="catalogo-dj todos on" data-dj="">
+    <span class="foto">★</span><span class="nombre">Todos</span></button>`
+    + djs.map(d=>{
+      const nombre=d.nombre;
+      const iniciales=nombre.replace(/^DJ\s*/i,"").slice(0,2).toUpperCase();
+      return `<button class="catalogo-dj" data-dj="${esc(d.email||nombre)}" data-alias="${esc(nombre)}" title="Ver tracks de ${esc(nombre)}">
+        <span class="foto" style="${d.foto?`background-image:url('${esc(d.foto)}')`:""}">${d.foto?"":esc(iniciales)}</span>
+        <span class="nombre">${esc(nombre)}</span></button>`;
+    }).join("");
+}
+
+function pintarComunicados(){
+  const hay = COMUNICADOS.length>0;
+  $("#comunicados").classList.toggle("hide",!hay);
+  $("#navComunicados").classList.toggle("hide",!hay);
+  if(!hay) return;
+  $("#comunicadosGrid").innerHTML = COMUNICADOS.map(c=>`
+    <div class="comunicado ${c.fijado?"fijado":""}">
+      ${c.imagen?`<div class="foto" style="background-image:url('${esc(c.imagen)}')"></div>`:""}
+      <div class="info">
+        ${c.fijado?`<span class="tag g" style="align-self:flex-start">Fijado</span>`:""}
+        <h3>${esc(c.titulo)}</h3>
+        ${c.cuerpo?`<p>${esc(c.cuerpo)}</p>`:""}
+        <small>${esc(c.autor||"")}${c.autor?" · ":""}${fechaH(c.creado)}</small>
+      </div>
+    </div>`).join("");
+}
+
+// rieles laterales: solo aparecen en pantallas muy anchas (ver CSS), aprovechando
+// datos que la web ya carga (descargas y fecha de creación de cada track)
+function pintarRieles(){
+  const item=(t,n,metaTxt)=>{
+    const ti=TIPOS[t.tipo]||TIPOS.edit;
+    return `<div class="rail-item" data-play="${esc(t.id)}" title="Escuchar">
+      <span class="n">${n}</span>
+      <div class="art" style="${t.portada?`background-image:url('${esc(t.portada)}')`:`background:linear-gradient(135deg,${ti.c[0]},${ti.c[1]})`}"></div>
+      <div class="tx"><b>${esc(t.titulo)}</b><small>${esc(metaTxt)}</small></div>
+    </div>`;
+  };
+  const nuevos = TRACKS.slice(0,10); // TRACKS ya viene ordenado por fecha de creación
+  // solo cuenta si ya tiene descargas reales; si no, se vería idéntico a "Recién agregado"
+  const top = TRACKS.filter(t=>(t.descargas||0)>0).sort((a,b)=>b.descargas-a.descargas).slice(0,10);
+  $("#railNuevo").classList.toggle("hide",!nuevos.length);
+  $("#railTop").classList.toggle("hide",!top.length);
+  $("#railNuevoLista").innerHTML = nuevos.map((t,i)=>item(t,i+1,t.editor||t.genero||"")).join("");
+  $("#railTopLista").innerHTML = top.map((t,i)=>item(t,i+1,`${t.descargas||0} descarga${t.descargas===1?"":"s"}`)).join("");
+}
+
+// tarjeta pequeña que avisa del comunicado más reciente (o fijado); no molesta si
+// ya no hay ninguno, y no repite el mismo aviso en cada visita
+function avisarComunicado(){
+  if(!COMUNICADOS.length) return;
+  const c = COMUNICADOS[0]; // ya viene ordenado: fijado primero, luego el más nuevo
+
+  const el = $("#cpop");
+  el.innerHTML = `
+    <button class="cpop-x" aria-label="Cerrar">&times;</button>
+    <div class="cpop-in">
+      ${c.imagen?`<div class="cpop-img" style="background-image:url('${esc(c.imagen)}')"></div>`:""}
+      <div class="cpop-txt">
+        <span class="tag g">Comunicado</span>
+        <b>${esc(c.titulo)}</b>
+        ${c.cuerpo?`<p>${esc(c.cuerpo.length>110?c.cuerpo.slice(0,110)+"…":c.cuerpo)}</p>`:""}
+        <a href="#comunicados">Ver más →</a>
+      </div>
+    </div>`;
+  const cerrar=()=>{ el.classList.remove("in"); setTimeout(()=>{ el.hidden=true; },350); };
+  el.querySelector(".cpop-x").addEventListener("click",cerrar);
+  el.querySelector("a").addEventListener("click",cerrar);
+  setTimeout(()=>{
+    el.hidden=false;
+    requestAnimationFrame(()=>el.classList.add("in"));
+  },1200);
+}
+
+/* ---------- catálogo: filtros y lista ---------- */
+function pintarFiltros(){
+  $("#chipsTipo").innerHTML = `<button class="chip on" data-tipo="">Todos</button>` +
+    Object.entries(TIPOS).filter(([k])=>TRACKS.some(t=>t.tipo===k))
+      .map(([k,v])=>`<button class="chip" data-tipo="${k}">${v.l}</button>`).join("");
+  const gs=[...new Set(TRACKS.map(t=>t.genero).filter(Boolean))].sort();
+  $("#fGenero").innerHTML = `<option value="">Todos los géneros</option>`+
+    gs.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");
+}
+function filtrar(){
+  const q=filtro.q.toLowerCase().trim();
+  let r=TRACKS.filter(t=>{
+    if(filtro.tipo && t.tipo!==filtro.tipo) return false;
+    if(filtro.genero && t.genero!==filtro.genero) return false;
+    if(filtro.bpmMin && (t.bpm||0)<filtro.bpmMin) return false;
+    if(filtro.bpmMax && (t.bpm||999)>filtro.bpmMax) return false;
+    if(filtro.dj){
+      const clave=filtro.dj.trim().toLowerCase();
+      const dj=CREW.find(d=>[d.email,d.alias,d.nombre].some(v=>String(v||"").trim().toLowerCase()===clave));
+      const porCorreo=String(t.editor_email||"").trim().toLowerCase()===clave;
+      const usuarioCorreo=clave.includes("@")?clave.split("@",1)[0]:clave;
+      const editor=String(t.editor||"").trim().toLowerCase();
+      const porUsuarioCorreo=editor===usuarioCorreo;
+      const porAlias=dj && editor===String(dj.alias||dj.nombre||"").trim().toLowerCase();
+      if(!porCorreo&&!porUsuarioCorreo&&!porAlias) return false;
+    }
+    if(q){ const s=`${t.titulo} ${t.artista} ${t.genero} ${t.editor} ${TIPOS[t.tipo]?.l||""}`.toLowerCase();
+           if(!s.includes(q)) return false; }
+    return true;
+  });
+  const ord={ nuevo:(a,b)=>String(b.creado||"").localeCompare(String(a.creado||"")),
+              descargas:(a,b)=>(b.descargas||0)-(a.descargas||0),
+              titulo:(a,b)=>a.titulo.localeCompare(b.titulo,"es"),
+              bpm:(a,b)=>(a.bpm||0)-(b.bpm||0) };
+  return r.sort(ord[filtro.orden]||ord.nuevo);
+}
+let VISTA=[];
+function pintarLista(){
+  VISTA=filtrar();
+  const hayFiltro = filtro.q||filtro.tipo||filtro.genero||filtro.bpmMin||filtro.bpmMax||filtro.dj;
+  $("#limpiar").classList.toggle("hide",!hayFiltro);
+  $("#resInfo").innerHTML = VISTA.length
+    ? `<b>${VISTA.length}</b> track${VISTA.length===1?"":"s"}${hayFiltro?" con estos filtros":" en el catálogo"}`
+    : "Sin resultados";
+  if(!VISTA.length){
+    $("#lista").innerHTML = `<div class="vacio">No encontramos tracks con esos filtros.<br>
+      <button class="btn btn-g btn-sm" style="margin-top:14px" onclick="limpiarFiltros()">Ver todo el catálogo</button></div>`;
+    $("#verMas").classList.add("hide"); return;
+  }
+  const lote=VISTA.slice(0,mostrados);
+  $("#lista").innerHTML = `<div class="tr tr-cab" style="border-bottom:1px solid var(--line)">
+      <span></span><span>Track</span><span class="c-dj">DJ</span><span>Género · Tipo</span><span>BPM</span><span>Tono</span><span style="text-align:right">Descargar</span>
+    </div>` + lote.map(t=>{
+    const ti=TIPOS[t.tipo]||TIPOS.edit;
+    const libre = t.gratis;
+    const comprado = COMPRADOS.has(String(t.id));
+    const puedeComprar = (+t.precio||0) > 0;
+    const abierto = puedeDescargar() || (libre && sesion) || comprado;
+    const enCarrito = CARRITO.includes(String(t.id));
+    const claseBoton = abierto ? "" : puedeComprar ? (enCarrito?"en-carrito":"buy") : "lock";
+    return `<div class="tr" data-id="${esc(t.id)}">
+      <div class="art" data-play="${esc(t.id)}" style="${t.portada?`background-image:url('${esc(t.portada)}')`:`background:linear-gradient(135deg,${ti.c[0]},${ti.c[1]})`}">
+        <div class="pl"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
+      </div>
+      <div class="tt">
+        <b>${esc(t.titulo)}</b>
+        <small>${esc(t.artista||"—")}${t.editor?` · <span style="color:var(--gold)">${esc(t.editor)}</span>`:""}</small>
+        <div class="eq"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="meta-c c-dj">${esc(t.editor||"—")}</div>
+      <div class="meta-c"><span class="tag g">${ti.l}</span><br>${esc(t.genero||"")}</div>
+      <div class="meta-c c-bpm">${t.bpm||"—"}</div>
+      <div class="meta-c c-ton">${esc(t.tonalidad||"—")}</div>
+      <button class="dl ${claseBoton}" data-dl="${abierto?esc(t.id):""}"
+        data-comprar="${!abierto&&puedeComprar?esc(t.id):""}"
+        title="${abierto?"Descargar"
+          :puedeComprar?(enCarrito?"Ya está en tu carrito — ver carrito":`Comprar por ${money(t.precio)}`)
+          :(libre?"Gratis: solo necesitas una cuenta":"Requiere membresía activa")}">
+        ${abierto
+          ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14"/></svg>`
+          : puedeComprar
+            ? (enCarrito
+                ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 13 5 5L19 7"/></svg>`
+                : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21.5 8H6"/></svg>`)
+            : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`}
+      </button>
+    </div>`;
+  }).join("");
+  $("#verMas").classList.toggle("hide", VISTA.length<=mostrados);
+  pintarEstadoPlayer();
+}
+function limpiarFiltros(){
+  filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:filtro.orden};
+  $("#q").value=""; $("#fGenero").value=""; $("#bpmMin").value=""; $("#bpmMax").value="";
+  $$("#chipsTipo .chip").forEach((c,i)=>c.classList.toggle("on",i===0));
+  $$("#catalogoDjs .catalogo-dj").forEach((c,i)=>c.classList.toggle("on",i===0));
+  mostrados=PAGE; pintarLista();
+}
+window.limpiarFiltros=limpiarFiltros;
+
+/* ==========================================================================
+   REPRODUCTOR (muestra pública; si el track no tiene preview, suena una demo)
+   ========================================================================== */
+const audio=new Audio(); audio.preload="metadata"; audio.crossOrigin="anonymous";
+let actual=null, suena=false, ctx=null, master=null, analyser=null, srcNode=null;
+let demo=false, dT0=0, dOff=0, dTimer=null, dStep=0, dNext=0, noiseBuf=null, playLog=null;
+
+function initAudio(){
+  if(ctx) return;
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  master=ctx.createGain(); master.gain.value=+$("#vol").value;
+  analyser=ctx.createAnalyser(); analyser.fftSize=128;
+  master.connect(analyser); analyser.connect(ctx.destination);
+  noiseBuf=ctx.createBuffer(1,ctx.sampleRate*0.5,ctx.sampleRate);
+  const b=noiseBuf.getChannelData(0); for(let i=0;i<b.length;i++) b[i]=Math.random()*2-1;
+  viz();
+}
+const midi=n=>440*Math.pow(2,(n-69)/12);
+function kick(t){ const o=ctx.createOscillator(),g=ctx.createGain();
+  o.frequency.setValueAtTime(160,t); o.frequency.exponentialRampToValueAtTime(45,t+.14);
+  g.gain.setValueAtTime(.9,t); g.gain.exponentialRampToValueAtTime(.001,t+.26);
+  o.connect(g).connect(master); o.start(t); o.stop(t+.3); }
+function ruido(t,f,q,d,v){ const s=ctx.createBufferSource(); s.buffer=noiseBuf;
+  const fl=ctx.createBiquadFilter(); fl.type="bandpass"; fl.frequency.value=f; fl.Q.value=q;
+  const g=ctx.createGain(); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.001,t+d);
+  s.connect(fl).connect(g).connect(master); s.start(t); s.stop(t+d+.02); }
+function bajo(t,n,d){ const o=ctx.createOscillator(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+  o.type="sawtooth"; o.frequency.value=midi(n); f.type="lowpass";
+  f.frequency.setValueAtTime(900,t); f.frequency.exponentialRampToValueAtTime(180,t+d);
+  g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(.22,t+.02);
+  g.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(f).connect(g).connect(master); o.start(t); o.stop(t+d+.05); }
+function acorde(t,n){ const g=ctx.createGain(),f=ctx.createBiquadFilter();
+  f.type="lowpass"; f.frequency.value=2400;
+  g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(.075,t+.03);
+  g.gain.exponentialRampToValueAtTime(.001,t+.45);
+  [0,7,12].forEach((iv,k)=>{ const o=ctx.createOscillator(); o.type="sawtooth"; o.detune.value=k*6;
+    o.frequency.value=midi(n+12+iv); o.connect(f); o.start(t); o.stop(t+.5); });
+  f.connect(g).connect(master); }
+function demoStart(){
+  const bpm=actual.bpm||110, paso=60/bpm/4;
+  const notas = bpm<100?NOTAS.lento : bpm<120?NOTAS.medio : NOTAS.rapido;
+  const cumbia = /cumbia|salsa|tecno/i.test(actual.genero||"");
+  dNext=ctx.currentTime+.06;
+  dTimer=setInterval(()=>{
+    while(dNext<ctx.currentTime+.1){
+      const s=dStep%16, c=(dStep/16|0);
+      if(cumbia){ if([0,6,8,14].includes(s)) kick(dNext);
+                  if(s%4===2) ruido(dNext,6500,1.6,.06,.11);
+                  if([4,12].includes(s)) ruido(dNext,1700,1.2,.13,.18); }
+      else { if(s%4===0) kick(dNext);
+             if(s%2===1) ruido(dNext,8500,1.4,.045,.1);
+             if(s===8) ruido(dNext,1600,1.1,.12,.16); }
+      if(s%2===0) bajo(dNext,notas[(s/2)%notas.length],paso*1.6);
+      if(s===0&&c%2===1) acorde(dNext,notas[c%notas.length]);
+      dNext+=paso; dStep++;
+    }
+  },25);
+}
+function demoStop(){ clearInterval(dTimer); dTimer=null; }
+
+function cargar(id){
+  initAudio();
+  const t=TRACKS.find(x=>String(x.id)===String(id)); if(!t) return;
+  actual=t; demo=!t.preview;
+  $("#pTitle").textContent=t.titulo;
+  $("#pMeta").textContent=`${t.artista||""} · ${TIPOS[t.tipo]?.l||""} · ${t.bpm||"?"} BPM`;
+  $("#tEnd").textContent=t.duracion||"—";
+  $("#demoBadge").hidden=!demo;
+  $("#player").classList.add("up");
+  dOff=0; dStep=0;
+  if(!demo){ audio.src=t.preview;
+    if(!srcNode){ try{ srcNode=ctx.createMediaElementSource(audio); srcNode.connect(master); }catch(e){} } }
+}
+function registrarPlay(){
+  if(!sb||!actual?.id||playLog===actual.id) return;
+  playLog=actual.id;
+  sb.from("plays").insert({track_id:actual.id, user_id:sesion?.user?.id||null}).then(()=>{},()=>{});
+}
+function play(){
+  initAudio(); if(ctx.state==="suspended") ctx.resume();
+  if(!actual) return;
+  if(demo){ dT0=ctx.currentTime; demoStart(); }
+  else audio.play().catch(()=>{ demo=true; $("#demoBadge").hidden=false; dT0=ctx.currentTime; demoStart(); });
+  suena=true; pintarEstadoPlayer(); registrarPlay();
+}
+function pause(){ if(demo){ dOff+=ctx.currentTime-dT0; demoStop(); } else audio.pause();
+  suena=false; pintarEstadoPlayer(); }
+function toggle(){ if(!actual) return; suena?pause():play(); }
+function reproducirTrack(id){
+  if(String(actual?.id)===String(id)){ toggle(); return; }
+  if(suena) pause(); playLog=null; cargar(id); play();
+}
+function saltar(d){
+  if(!VISTA.length) return;
+  const i=VISTA.findIndex(t=>String(t.id)===String(actual?.id));
+  const n=VISTA[(i+d+VISTA.length)%VISTA.length]; if(!n) return;
+  const seguia=suena; if(suena) pause();
+  playLog=null; cargar(n.id); if(seguia) play(); else pintarEstadoPlayer();
+}
+function pintarEstadoPlayer(){
+  $("#icoPlay").innerHTML = suena?'<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
+  $$(".tr").forEach(el=>el.classList.toggle("playing", suena && el.dataset.id===String(actual?.id)));
+}
+function transcurrido(){
+  if(!actual) return 0;
+  if(!demo) return audio.currentTime||0;
+  const base=dOff+(suena?ctx.currentTime-dT0:0);
+  return base % toSec(actual.duracion);
+}
+setInterval(()=>{
+  if(!actual) return;
+  const total = demo?toSec(actual.duracion):(audio.duration||toSec(actual.duracion));
+  const p=Math.min(100,transcurrido()/total*100);
+  $("#seekF").style.width=p+"%"; $("#seek").style.setProperty("--pos",p+"%");
+  $("#tNow").textContent=mmss(transcurrido());
+  if(!demo&&audio.duration) $("#tEnd").textContent=mmss(audio.duration);
+},250);
+audio.addEventListener("ended",()=>saltar(1));
+function viz(){
+  const c=$("#viz"),g=c.getContext("2d"),d=new Uint8Array(analyser.frequencyBinCount);
+  (function f(){ requestAnimationFrame(f); analyser.getByteFrequencyData(d);
+    g.clearRect(0,0,c.width,c.height); const n=22,w=c.width/n;
+    for(let i=0;i<n;i++){ const h=Math.max(2,d[i*2]/255*c.height);
+      const lg=g.createLinearGradient(0,c.height,0,c.height-h);
+      lg.addColorStop(0,"#e8b23c"); lg.addColorStop(1,"#f6d68c");
+      g.fillStyle=lg; g.fillRect(i*w+1,c.height-h,w-3,h); } })();
+}
+
+/* ==========================================================================
+   MODALES: sesión, cuenta, membresía
+   ========================================================================== */
+let cerrar=()=>{};
+function modal(titulo,cuerpo,botones=[],ancho=false){
+  $("#mTitle").textContent=titulo; $("#mBody").innerHTML=cuerpo;
+  $("#mbox").classList.toggle("ancho",ancho);
+  $("#mFoot").innerHTML="";
+  botones.forEach(b=>{ const el=document.createElement("button");
+    el.className="btn "+(b.clase||"btn-g"); el.textContent=b.texto;
+    el.addEventListener("click",()=>b.accion(el)); $("#mFoot").appendChild(el); });
+  $("#mFoot").classList.toggle("hide",!botones.length);
+  $("#ov").classList.add("on"); $("#modal").classList.add("on");
+  cerrar=()=>{ $("#ov").classList.remove("on"); $("#modal").classList.remove("on"); };
+}
+$("#mX").addEventListener("click",()=>cerrar());
+$("#ov").addEventListener("click",()=>cerrar());
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") cerrar(); });
+
+function modalSesion(pestana="entrar"){
+  if(!sb) return toast("El sitio todavía no está conectado a la base de datos.");
+  modal("Tu cuenta", `
+    <div class="tabs">
+      <button data-tab="entrar" class="${pestana==="entrar"?"on":""}">Ingresar</button>
+      <button data-tab="crear"  class="${pestana==="crear"?"on":""}">Crear cuenta</button>
+    </div>
+    <div id="paneEntrar" class="${pestana==="entrar"?"":"hide"}">
+      <div class="field"><label>Correo</label><input type="email" id="sMail" autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="sPass" autocomplete="current-password"></div>
+      <button class="btn btn-p" id="bEntrar" style="width:100%">Ingresar</button>
+      <p style="margin-top:14px;font-size:13px"><a href="#" id="bOlvide" style="color:var(--gold)">Olvidé mi contraseña</a></p>
+    </div>
+    <div id="paneCrear" class="${pestana==="crear"?"":"hide"}">
+      <div class="field"><label>Nombre o alias de DJ</label><input type="text" id="cNom" placeholder="DJ Ronald"></div>
+      <div class="field"><label>Correo</label><input type="email" id="cMail" autocomplete="username"></div>
+      <div class="field"><label>WhatsApp</label><input type="tel" id="cTel" placeholder="999 999 999" autocomplete="tel"></div>
+      <div class="field"><label>Contraseña (mínimo 6)</label><input type="password" id="cPass" autocomplete="new-password"></div>
+      <button class="btn btn-p" id="bCrear" style="width:100%">Crear mi cuenta</button>
+      <p style="margin-top:12px;font-size:12.5px;color:var(--muted)">Crear la cuenta es gratis. La membresía se
+        activa después, cuando elijas tu plan. Usamos tu WhatsApp solo para avisarte cuando se active.</p>
+    </div>
+    <p id="sMsg" style="margin-top:14px;font-size:13px"></p>`);
+
+  $$("#mBody .tabs button").forEach(b=>b.addEventListener("click",()=>{
+    $$("#mBody .tabs button").forEach(x=>x.classList.toggle("on",x===b));
+    $("#paneEntrar").classList.toggle("hide",b.dataset.tab!=="entrar");
+    $("#paneCrear").classList.toggle("hide",b.dataset.tab!=="crear");
+  }));
+
+  $("#bEntrar").addEventListener("click",async e=>{
+    const btn=e.target; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Entrando…';
+    const {data,error}=await sb.auth.signInWithPassword({email:$("#sMail").value.trim(),password:$("#sPass").value});
+    btn.disabled=false; btn.textContent="Ingresar";
+    if(error) return $("#sMsg").innerHTML=`<span style="color:var(--bad)">${
+      error.message==="Invalid login credentials"?"Correo o contraseña incorrectos.":esc(error.message)}</span>`;
+    await entrarSesion(data.session); cerrar(); toast(`Bienvenido, ${perfil.nombre||""}.`);
+  });
+  $("#bCrear").addEventListener("click",async e=>{
+    const nom=$("#cNom").value.trim(), mail=$("#cMail").value.trim(), pass=$("#cPass").value;
+    const tel=$("#cTel").value.replace(/\D/g,"");
+    if(nom.length<2) return $("#sMsg").innerHTML=`<span style="color:var(--bad)">Escribe tu nombre o alias.</span>`;
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) return $("#sMsg").innerHTML=`<span style="color:var(--bad)">Revisa el correo.</span>`;
+    if(tel.length<8) return $("#sMsg").innerHTML=`<span style="color:var(--bad)">Escribe un WhatsApp válido.</span>`;
+    if(pass.length<6) return $("#sMsg").innerHTML=`<span style="color:var(--bad)">La contraseña necesita 6 caracteres.</span>`;
+    const btn=e.target; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Creando…';
+    const {data,error}=await sb.auth.signUp({email:mail,password:pass,
+      options:{data:{nombre:nom, telefono:tel}, emailRedirectTo:location.origin+location.pathname}});
+    btn.disabled=false; btn.textContent="Crear mi cuenta";
+    if(error) return $("#sMsg").innerHTML=`<span style="color:var(--bad)">${esc(error.message)}</span>`;
+    if(data.session){ await entrarSesion(data.session); cerrar(); toast("Cuenta creada. Ya puedes elegir tu plan."); modalPlanes(); }
+    else $("#sMsg").innerHTML=`<span style="color:var(--ok)">Cuenta creada. Revisa tu correo para confirmarla y luego ingresa.</span>`;
+  });
+  $("#bOlvide").addEventListener("click",async ev=>{
+    ev.preventDefault();
+    const mail=$("#sMail").value.trim();
+    if(!mail) return $("#sMsg").textContent="Escribe tu correo arriba y vuelve a tocar el enlace.";
+    const {error}=await sb.auth.resetPasswordForEmail(mail,{redirectTo:location.href});
+    $("#sMsg").innerHTML = error?`<span style="color:var(--bad)">${esc(error.message)}</span>`
+      :`<span style="color:var(--ok)">Te enviamos un correo para restablecer la contraseña.</span>`;
+  });
+}
+
+async function modalCuenta(){
+  const activa=MEMB.estado==="activa";
+  const staff=["admin","editor"].includes(perfil?.rol);
+  const {data:hist}=sb ? await sb.from("downloads").select("creado,track_id").order("creado",{ascending:false}).limit(20)
+                       : {data:[]};
+  const nombreTrack=id=>TRACKS.find(t=>String(t.id)===String(id))?.titulo||"Track";
+  const lim=MEMB.limite_diario||0, hoy=MEMB.descargas_hoy||0;
+
+  modal("Mi cuenta", `
+    <div class="estado-caja">
+      <div class="fila"><span>Cuenta</span><b>${esc(perfil?.nombre||sesion.user.email)}</b></div>
+      <div class="fila"><span>Rol</span><b>${esc({admin:"Administrador",editor:"DJ editor",member:"Miembro"}[perfil?.rol]||"Miembro")}</b></div>
+      <div class="fila"><span>Membresía</span>
+        <b style="color:${activa?"var(--ok)":staff?"var(--gold)":"var(--muted)"}">${
+          staff&&!activa?"Acceso de staff":
+          {activa:"Activa",pendiente:"Pendiente de aprobación",vencida:"Vencida",rechazada:"Rechazada",ninguna:"Sin membresía"}[MEMB.estado]}</b></div>
+      ${activa?`
+        <div class="fila"><span>Plan</span><b>${esc(MEMB.plan||"—")}</b></div>
+        <div class="fila"><span>Vence</span><b>${fecha(MEMB.fin)} · ${MEMB.dias_restantes} días</b></div>
+        ${lim>0?`<div class="fila"><span>Descargas hoy</span><b>${hoy} de ${lim}</b></div>
+          <div class="barra"><i style="width:${Math.min(100,hoy/lim*100)}%"></i></div>`:
+          `<div class="fila"><span>Descargas</span><b>Ilimitadas</b></div>`}`:""}
+      ${MEMB.estado==="pendiente"?`<p style="margin:10px 0 0;font-size:13px;color:var(--muted)">
+        Ya recibimos tu comprobante. En cuanto lo revisemos se activa tu acceso.</p>`:""}
+    </div>
+    <h4 style="margin:0 0 10px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Últimas descargas</h4>
+    <div class="hist">${(hist||[]).length
+      ? hist.map(h=>`<div><b>${esc(nombreTrack(h.track_id))}</b><span>${fechaH(h.creado)}</span></div>`).join("")
+      : `<div><span>Todavía no descargaste nada.</span></div>`}</div>`,
+    [ {texto:"Cerrar sesión",accion:async()=>{ await sb.auth.signOut(); location.reload(); }},
+      {texto:activa?"Renovar membresía":"Activar membresía",clase:"btn-p",accion:()=>modalPlanes()} ]);
+}
+
+function modalPlanes(){
+  const hayCompraSuelta = TRACKS.some(t=>(+t.precio||0)>0);
+  modal("Elige tu plan",
+    `<p style="margin:0 0 18px;color:var(--muted);font-size:14px">${esc(S.pago_nota||"")}</p>
+     <div style="display:grid;gap:12px">${PLANES.map(p=>`
+      <button data-elegir="${esc(p.id)}" style="display:flex;align-items:center;gap:14px;text-align:left;
+        padding:16px;border:1px solid ${p.destacado?"var(--gold)":"var(--line)"};border-radius:12px;background:var(--bg2)">
+        <div style="flex:1"><b style="font-size:16px">${esc(p.nombre)}</b>
+          <div style="font-size:12.5px;color:var(--muted)">${p.dias} días · ${esc(p.descripcion||"")}</div></div>
+        <b style="font-family:var(--display);font-size:26px;color:var(--gold)">${money(p.precio)}</b>
+      </button>`).join("")}</div>
+     <p style="text-align:center;margin:18px 0 0">
+       <a href="#" id="sinPlan" style="color:var(--muted);font-size:13px;text-decoration:underline">
+         ${hayCompraSuelta?"Prefiero comprar canciones sueltas, sin plan":"Ahora no, gracias — solo quiero ver el catálogo"}
+       </a>
+     </p>`, [], true);
+  $$("#mBody [data-elegir]").forEach(b=>b.addEventListener("click",()=>{
+    const p=PLANES.find(x=>String(x.id)===b.dataset.elegir); if(p) modalPago(p);
+  }));
+  $("#sinPlan").addEventListener("click",e=>{
+    e.preventDefault(); cerrar();
+    $("#catalogo")?.scrollIntoView({behavior:"smooth"});
+  });
+}
+
+function modalPago(plan){
+  if(!sesion) return modalSesion("crear");
+  modal(`Pagar el plan ${plan.nombre}`, `
+    <div class="yape">
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
+      <b>${esc(S.yape_numero||"—")}</b>
+      <div style="font-size:13.5px;margin-top:4px">A nombre de ${esc(S.yape_nombre||S.creador)}</div>
+      <div style="margin-top:12px;font-size:14px">Monto a pagar: <b style="color:var(--gold)">${money(plan.precio)}</b>
+        · ${plan.dias} días de acceso</div>
+    </div>
+    <div class="field"><label>Sube la captura del pago</label>
+      <input type="file" id="cmp" accept="image/*,application/pdf"></div>
+    <div class="field"><label>Nombre con el que yapeaste (opcional)</label>
+      <input type="text" id="cmpNom" placeholder="Si es distinto al de tu cuenta"></div>
+    <p id="pMsg" style="font-size:13px;color:var(--muted)">Al enviar queda como <b>pendiente</b>.
+      ${esc(S.creador)} lo revisa y tu acceso se activa el mismo día.</p>`,
+    [ {texto:"Cancelar",accion:()=>cerrar()},
+      {texto:"Enviar comprobante",clase:"btn-p",accion:async btn=>{
+        const f=$("#cmp").files[0];
+        if(!f) return toast("Adjunta la captura del pago.");
+        if(f.size>8*1024*1024) return toast("La imagen pasa de 8 MB.");
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Enviando…';
+        const ruta=`${sesion.user.id}/${Date.now()}-${f.name.toLowerCase().replace(/[^a-z0-9.]+/g,"-")}`;
+        const up=await sb.storage.from("comprobantes").upload(ruta,f);
+        if(up.error){ btn.disabled=false; btn.textContent="Enviar comprobante"; return toast("No pude subir la captura: "+up.error.message,5000); }
+        const {error}=await sb.from("memberships").insert({
+          user_id:sesion.user.id, plan_id:plan.id, plan_nombre:plan.nombre, monto:plan.precio,
+          metodo:"yape", comprobante:ruta, notas:$("#cmpNom").value.trim()
+        });
+        btn.disabled=false; btn.textContent="Enviar comprobante";
+        if(error) return toast("No se pudo registrar: "+error.message,5000);
+        MEMB={estado:"pendiente"}; pintarSesion(); cerrar();
+        modal("¡Listo!", `<p style="margin:0">Recibimos tu comprobante del plan <b>${esc(plan.nombre)}</b>.
+          Te avisamos por WhatsApp en cuanto se active — normalmente el mismo día.</p>`,
+          [{texto:"Entendido",clase:"btn-p",accion:()=>cerrar()}]);
+      }} ]);
+}
+
+/* ---------- carrito: comprar canciones sueltas, sin necesitar membresía ---------- */
+function pintarCarrito(){
+  const n=CARRITO.length;
+  $("#btnCarrito").classList.toggle("hide",!n);
+  $("#carritoN").textContent=n;
+}
+function agregarAlCarrito(id){
+  id=String(id);
+  if(!sesion) return modalSesion("crear");
+  if(CARRITO.includes(id)) return modalCarrito();
+  CARRITO.push(id); guardarCarrito(); pintarCarrito(); pintarLista();
+  toast("Agregado al carrito.");
+}
+function quitarDelCarrito(id){
+  CARRITO=CARRITO.filter(x=>x!==String(id)); guardarCarrito(); pintarCarrito(); pintarLista();
+}
+function modalCarrito(){
+  const items=CARRITO.map(id=>TRACKS.find(t=>String(t.id)===id)).filter(Boolean);
+  if(!items.length){ CARRITO=[]; guardarCarrito(); pintarCarrito(); return toast("Tu carrito está vacío."); }
+  const total=items.reduce((a,t)=>a+(+t.precio||0),0);
+  modal("Tu carrito", `
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${items.map(t=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)">
+          <div style="flex:1;min-width:0"><b style="display:block;font-size:14.5px">${esc(t.titulo)}</b>
+            <small style="color:var(--muted)">${esc(t.artista||"—")}</small></div>
+          <b style="color:var(--gold);white-space:nowrap">${money(t.precio)}</b>
+          <button type="button" data-quitar="${esc(t.id)}" style="color:var(--muted);font-size:20px;line-height:1;padding:0 4px" aria-label="Quitar">&times;</button>
+        </div>`).join("")}
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:16px">
+      <span>Total</span><b style="color:var(--gold);font-family:var(--display);font-size:22px">${money(total)}</b>
+    </div>`, [
+      {texto:"Seguir viendo el catálogo",accion:()=>cerrar()},
+      {texto:"Pagar",clase:"btn-p",accion:()=>modalPagoCompra(items,total)}
+    ], true);
+  $$("#mBody [data-quitar]").forEach(b=>b.addEventListener("click",()=>{ quitarDelCarrito(b.dataset.quitar); modalCarrito(); }));
+}
+function modalPagoCompra(items,total){
+  if(!sesion) return modalSesion("crear");
+  modal(`Pagar ${items.length} canción${items.length===1?"":"es"}`, `
+    <div class="yape">
+      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
+      <b>${esc(S.yape_numero||"—")}</b>
+      <div style="font-size:13.5px;margin-top:4px">A nombre de ${esc(S.yape_nombre||S.creador)}</div>
+      <div style="margin-top:12px;font-size:14px">Monto a pagar: <b style="color:var(--gold)">${money(total)}</b></div>
+    </div>
+    <div class="field"><label>Sube la captura del pago</label>
+      <input type="file" id="cmpC" accept="image/*,application/pdf"></div>
+    <p id="pMsgC" style="font-size:13px;color:var(--muted)">Al enviar queda como <b>pendiente</b>.
+      ${esc(S.creador)} lo revisa y tus canciones quedan disponibles el mismo día.</p>`,
+    [ {texto:"Cancelar",accion:()=>cerrar()},
+      {texto:"Enviar comprobante",clase:"btn-p",accion:async btn=>{
+        const f=$("#cmpC").files[0];
+        if(!f) return toast("Adjunta la captura del pago.");
+        if(f.size>8*1024*1024) return toast("La imagen pasa de 8 MB.");
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Enviando…';
+        const ruta=`${sesion.user.id}/${Date.now()}-${f.name.toLowerCase().replace(/[^a-z0-9.]+/g,"-")}`;
+        const up=await sb.storage.from("comprobantes").upload(ruta,f);
+        if(up.error){ btn.disabled=false; btn.textContent="Enviar comprobante"; return toast("No pude subir la captura: "+up.error.message,5000); }
+        const {data:compra,error}=await sb.from("compras").insert({
+          user_id:sesion.user.id, monto:total, metodo:"yape", comprobante:ruta
+        }).select("id").single();
+        if(error){ btn.disabled=false; btn.textContent="Enviar comprobante"; return toast("No se pudo registrar: "+error.message,5000); }
+        const lineas=items.map(t=>({compra_id:compra.id, track_id:t.id, precio:t.precio||0}));
+        const {error:e2}=await sb.from("compra_tracks").insert(lineas);
+        btn.disabled=false; btn.textContent="Enviar comprobante";
+        if(e2) return toast("No se pudo registrar el detalle: "+e2.message,5000);
+        CARRITO=[]; guardarCarrito(); pintarCarrito(); cerrar();
+        modal("¡Listo!", `<p style="margin:0">Recibimos tu comprobante. Te avisamos por WhatsApp en
+          cuanto se apruebe — normalmente el mismo día.</p>`,
+          [{texto:"Entendido",clase:"btn-p",accion:()=>cerrar()}]);
+      }} ]);
+}
+
+/* ---------- descargas ---------- */
+async function descargar(id, boton){
+  const t=TRACKS.find(x=>String(x.id)===String(id)); if(!t) return;
+  if(!sb) return toast("El sitio todavía no está conectado.");
+  if(!sesion){ toast("Crea tu cuenta para descargar."); return modalSesion("crear"); }
+  if(!t.gratis && !COMPRADOS.has(String(t.id)) && !puedeDescargar()){
+    const conPrecio=(+t.precio||0)>0;
+    return modal("Necesitas una membresía", `<p style="margin:0 0 16px">
+      El track <b>${esc(t.titulo)}</b> es parte del catálogo para miembros. Con cualquier plan activo
+      descargas este y todo el resto del pool.${conPrecio?` También puedes comprar solo esta canción,
+      sin suscribirte a nada.`:""}</p>
+      <p style="margin:0;color:var(--muted);font-size:13.5px">${esc(S.pago_nota||"")}</p>`,
+      conPrecio
+        ? [{texto:`Comprar por ${money(t.precio)}`,clase:"btn-g",accion:()=>{ cerrar(); agregarAlCarrito(t.id); }},
+           {texto:"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]
+        : [{texto:"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]);
+  }
+  const original=boton.innerHTML; boton.innerHTML='<span class="spin"></span>'; boton.disabled=true;
+  try{
+    const {data:ruta,error}=await sb.rpc("solicitar_descarga",{p_track:t.id});
+    if(error) throw error;
+    const {data,error:e2}=await sb.storage.from("descargas").createSignedUrl(ruta,300,{download:true});
+    if(e2) throw e2;
+    // enlace temporal: el archivo baja con nombre limpio y sin salir de la página
+    const ext=(String(ruta).split(".").pop()||"mp3").toLowerCase();
+    const nombre=(t.titulo.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/gi,"").trim()||"track")+"."+ext;
+    const a=document.createElement("a");
+    a.href=data.signedUrl; a.download=nombre; a.rel="noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+    t.descargas=(t.descargas||0)+1;
+    if(MEMB.descargas_hoy!=null) MEMB.descargas_hoy++;
+    pintarRieles();
+    toast("Descarga iniciada. ¡Buen show!");
+  }catch(err){
+    const m=(err.message||"").replace(/^.*?:\s*/,"");
+    toast(/membres/i.test(m)?"Tu membresía no está activa.":/límite/i.test(m)?m:"No se pudo descargar: "+m,5000);
+  }
+  boton.innerHTML=original; boton.disabled=false;
+}
+
+/* ==========================================================================
+   EVENTOS
+   ========================================================================== */
+function conectar(){
+  // catálogo
+  $("#catalogoDjs").addEventListener("click",e=>{ const c=e.target.closest(".catalogo-dj"); if(!c) return;
+    $$("#catalogoDjs .catalogo-dj").forEach(x=>x.classList.toggle("on",x===c));
+    filtro.dj=c.dataset.dj; mostrados=PAGE; pintarLista(); });
+  let deb; $("#q").addEventListener("input",e=>{ clearTimeout(deb);
+    deb=setTimeout(()=>{ filtro.q=e.target.value; mostrados=PAGE; pintarLista(); },220); });
+  $("#fGenero").addEventListener("change",e=>{ filtro.genero=e.target.value; mostrados=PAGE; pintarLista(); });
+  $("#orden").addEventListener("change",e=>{ filtro.orden=e.target.value; pintarLista(); });
+  $("#bpmMin").addEventListener("input",e=>{ filtro.bpmMin=+e.target.value||null; mostrados=PAGE; pintarLista(); });
+  $("#bpmMax").addEventListener("input",e=>{ filtro.bpmMax=+e.target.value||null; mostrados=PAGE; pintarLista(); });
+  $("#chipsTipo").addEventListener("click",e=>{ const c=e.target.closest(".chip"); if(!c) return;
+    $$("#chipsTipo .chip").forEach(x=>x.classList.toggle("on",x===c));
+    filtro.tipo=c.dataset.tipo; mostrados=PAGE; pintarLista(); });
+  $("#limpiar").addEventListener("click",limpiarFiltros);
+  $("#verMas").addEventListener("click",()=>{ mostrados+=PAGE; pintarLista(); });
+
+  $("#lista").addEventListener("click",e=>{
+    const pl=e.target.closest("[data-play]"), dl=e.target.closest("[data-dl]"),
+          comprar=e.target.closest("[data-comprar]");
+    if(pl){ reproducirTrack(pl.dataset.play); return; }
+    if(dl && dl.dataset.dl) return descargar(dl.dataset.dl,dl);
+    if(comprar && comprar.dataset.comprar) agregarAlCarrito(comprar.dataset.comprar);
+  });
+  $$(".rail").forEach(rail=>rail.addEventListener("click",e=>{
+    const pl=e.target.closest("[data-play]"); if(pl) reproducirTrack(pl.dataset.play);
+  }));
+
+  // reproductor
+  $("#toggle").addEventListener("click",toggle);
+  $("#prev").addEventListener("click",()=>saltar(-1));
+  $("#next").addEventListener("click",()=>saltar(1));
+  $("#vol").addEventListener("input",e=>{ if(master) master.gain.value=+e.target.value; });
+  $("#seek").addEventListener("click",e=>{
+    if(!actual) return;
+    const r=e.currentTarget.getBoundingClientRect();
+    const pct=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
+    const total=demo?toSec(actual.duracion):(audio.duration||0);
+    if(demo){ dOff=pct*total; dT0=ctx.currentTime; } else if(total) audio.currentTime=pct*total;
+  });
+  document.addEventListener("keydown",e=>{
+    if(e.code==="Space"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){ e.preventDefault(); toggle(); }
+  });
+
+  // sesión y membresías
+  $("#btnIngresar").addEventListener("click",()=>modalSesion("entrar"));
+  $("#btnCuenta").addEventListener("click",()=>modalCuenta());
+  $("#btnCarrito").addEventListener("click",()=>modalCarrito());
+  $("#planes").addEventListener("click",e=>{
+    const b=e.target.closest("[data-plan]"); if(!b) return;
+    const p=PLANES.find(x=>String(x.id)===b.dataset.plan);
+    if(!sesion) return modalSesion("crear");
+    if(p) modalPago(p);
+  });
+
+  // contacto
+  $("#formContacto").addEventListener("submit",async e=>{
+    e.preventDefault(); const f=e.target;
+    const req=[["nombre",v=>v.trim().length>1],["email",v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())],
+               ["mensaje",v=>v.trim().length>9]];
+    let ok=true;
+    req.forEach(([n,test])=>{ const c=f[n].closest(".field"), bien=test(f[n].value);
+      c.classList.toggle("bad",!bien); if(!bien&&ok){ f[n].focus(); ok=false; } });
+    if(!ok) return toast("Revisa los campos marcados.");
+    const sol={nombre:f.nombre.value.trim(),email:f.email.value.trim(),tipo:f.tipo.value,
+               fecha:f.fecha.value||null,lugar:f.lugar.value.trim(),mensaje:f.mensaje.value.trim()};
+    if(sb) await sb.from("bookings").insert(sol);
+    const msg=`Hola ${S.marca}, escribo desde la web.\n\nNombre: ${sol.nombre}\nCorreo: ${sol.email}\n`
+      +`Motivo: ${sol.tipo}\n${sol.fecha?`Fecha: ${sol.fecha}\n`:""}${sol.lugar?`Lugar: ${sol.lugar}\n`:""}\n${sol.mensaje}`;
+    window.open(`https://wa.me/${(S.whatsapp||"").replace(/\D/g,"")}?text=${encodeURIComponent(msg)}`,"_blank");
+    toast("Mensaje enviado. Te respondemos hoy mismo."); f.reset();
+  });
+
+  // navegación
+  $("#burger").addEventListener("click",()=>$("#navLinks").classList.toggle("on"));
+  $$("#navLinks a").forEach(a=>a.addEventListener("click",()=>$("#navLinks").classList.remove("on")));
+  const io=new IntersectionObserver(es=>es.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add("in"); io.unobserve(x.target); } }),{threshold:.1});
+  $$(".reveal").forEach(el=>io.observe(el));
+}
+
+function avisoRespaldo(){
+  const cfg=window.SUPA||{};
+  const motivo=(!cfg.url||!cfg.anon)
+    ? `El archivo <b>config.js</b> está vacío: le faltan tu <b>Project URL</b> y tu <b>clave publishable</b>.`
+    : location.protocol==="file:"
+      ? `La página se abrió como archivo local. Publícala en un hosting para que consulte la base de datos.`
+      : `No pude leer la base de datos. Revisa que el SQL se haya ejecutado en Supabase.`;
+  const bar=document.createElement("div");
+  bar.id="avisoDemo";
+  bar.style.cssText="position:relative;z-index:100;background:#e8b23c;color:#181200;padding:12px 46px 12px 18px;font-size:13.5px;line-height:1.5;text-align:center";
+  bar.innerHTML=`<b>Catálogo de demostración.</b> ${motivo}
+    <button aria-label="Cerrar" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:22px;line-height:1;color:#181200;background:none;border:0;cursor:pointer">&times;</button>`;
+  bar.querySelector("button").addEventListener("click",()=>bar.remove());
+  document.body.prepend(bar);
+}
+
+/* ---------- arranque ---------- */
+(async function(){
+  // pre-pintado: si ya cargamos bien alguna vez, se ve de inmediato sin esperar
+  // a la red (evita el parpadeo "plantilla por defecto → contenido real")
+  const cache=leerCache();
+  if(cache){
+    S=cache.settings||DEF.settings; PLANES=cache.plans||[]; CREW=cache.crew||[];
+    TRACKS=cache.tracks||[]; COMUNICADOS=cache.comunicados||[];
+    pintarMarca(); pintarPlanes(); pintarCrew(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles();
+  }
+  await cargarDatos();
+  pintarMarca(); pintarPlanes(); pintarCrew(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles(); conectar();
+  avisarComunicado();
+  if(modoRespaldo) avisoRespaldo();
+})();
+</script>
+</body>
+</html>

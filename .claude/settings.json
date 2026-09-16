@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"puerto 8080: %{http_code}\\\\n\" http://127.0.0.1:8080/index.html --max-time 2)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 25252 //F)",
+      "Bash(curl -s -o /dev/null -w \"servidor: %{http_code}\\\\n\" http://127.0.0.1:8080/admin.html)",
+      "Bash(taskkill //PID 38108 //F)",
+      "Bash(curl -s -o /dev/null -w \"puerto 8080: %{http_code}\\\\n\" http://127.0.0.1:8080 --max-time 2)",
+      "Bash(awk 'NR==715' /c/Users/jande/Downloads/vip-paita-mix/admin.html)",
+      "Bash(python3 -c ' *)",
+      "Bash(python -c ' *)",
+      "Bash(curl -s -o /dev/null -w \"wa.me: %{http_code} \\(tiempo: %{time_total}s\\)\\\\n\" --max-time 5 https://wa.me/51999999999)",
+      "Bash(curl -s --max-time 8 \"https://api.whatsapp.com/send/?phone=51999999999&text=prueba%20%E2%9C%85%20fin\" -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(taskkill //PID 7972 //F)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\jande\\AppData\\Local\\Temp\\vpm-test-harness",
+      "C:\\Users\\jande\\AppData\\Local\\Temp\\vpm-test-harness2",
+      "C:\\Users\\jande\\AppData\\Local\\Temp\\vpm-test-harness3"
+    ]
+  }
+}
