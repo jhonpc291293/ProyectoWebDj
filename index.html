@@ -717,20 +717,22 @@ async function cargarDatos(){
   if(cred && typeof window.supabase!=="undefined"){
     try{
       sb=window.supabase.createClient(cred.url,cred.anon);
-      const [st,pl,cr,tk,co]=await Promise.all([
+      const [st,pl,cr,tk,co,arch]=await Promise.all([
         sb.from("settings").select("*").eq("id",1).maybeSingle(),
         sb.from("plans").select("*").order("orden"),
         sb.from("crew").select("*").order("orden"),
         sb.from("tracks").select("*").order("creado",{ascending:false}),
-        sb.from("comunicados").select("*").order("fijado",{ascending:false}).order("creado",{ascending:false})
+        sb.from("comunicados").select("*").order("fijado",{ascending:false}).order("creado",{ascending:false}),
+        sb.from("track_files").select("track_id,ruta")
       ]);
       if(!tk.error){
         d={ settings:st.data||DEF.settings, plans:pl.data||[], crew:cr.data||[], tracks:tk.data||[], comunicados:co.data||[] };
+        ARCHIVOS_TRACK = new Map((arch.data||[]).map(f => [String(f.track_id), f.ruta]));
         guardarCache(d);
       }
     }catch(e){}
   }
-  if(!d){ d=DEF; sb=null; modoRespaldo=true;
+  if(!d){ d=DEF; sb=null; modoRespaldo=true; ARCHIVOS_TRACK = new Map();
     console.warn("[vpm] Contenido de demostración. Revisa config.js o publica el sitio en un hosting.");
   }
   S=d.settings||DEF.settings; PLANES=d.plans||[]; CREW=d.crew||[]; TRACKS=d.tracks||[]; COMUNICADOS=d.comunicados||[];
@@ -979,10 +981,11 @@ function pintarLista(){
     const ti=TIPOS[t.tipo]||TIPOS.edit;
     const libre = t.gratis;
     const comprado = COMPRADOS.has(String(t.id));
+    const archivoDisponible = trackTieneArchivo(t.id);
     const puedeComprar = (+t.precio||0) > 0;
-    const abierto = puedeDescargar() || (libre && sesion) || comprado;
+    const abierto = archivoDisponible && (puedeDescargar() || (libre && sesion) || comprado);
     const enCarrito = CARRITO.includes(String(t.id));
-    const claseBoton = abierto ? "" : puedeComprar ? (enCarrito?"en-carrito":"buy") : "lock";
+    const claseBoton = !archivoDisponible ? "lock" : (abierto ? "" : puedeComprar ? (enCarrito?"en-carrito":"buy") : "lock");
     return `<div class="tr" data-id="${esc(t.id)}">
       <div class="art" data-play="${esc(t.id)}" style="${t.portada?`background-image:url('${esc(t.portada)}')`:`background:linear-gradient(135deg,${ti.c[0]},${ti.c[1]})`}">
         <div class="pl"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
@@ -996,18 +999,18 @@ function pintarLista(){
       <div class="meta-c"><span class="tag g">${ti.l}</span><br>${esc(t.genero||"")}</div>
       <div class="meta-c c-bpm">${t.bpm||"—"}</div>
       <div class="meta-c c-ton">${esc(t.tonalidad||"—")}</div>
-      <button class="dl ${claseBoton}" data-dl="${abierto?esc(t.id):""}"
-        data-comprar="${!abierto&&puedeComprar?esc(t.id):""}"
-        title="${abierto?"Descargar"
-          :puedeComprar?(enCarrito?"Ya está en tu carrito — ver carrito":`Comprar por ${money(t.precio)}`)
-          :(libre?"Gratis: solo necesitas una cuenta":"Requiere membresía activa")}">
-        ${abierto
-          ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14"/></svg>`
-          : puedeComprar
-            ? (enCarrito
-                ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 13 5 5L19 7"/></svg>`
-                : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21.5 8H6"/></svg>`)
-            : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`}
+      <button class="dl ${claseBoton}" data-dl="${archivoDisponible && abierto ? esc(t.id):""}"
+        data-comprar="${archivoDisponible && !abierto && puedeComprar ? esc(t.id):""}"
+        title="${!archivoDisponible ? "Este track todavía no tiene archivo disponible" : abierto ? "Descargar" : puedeComprar ? (enCarrito ? "Ya está en tu carrito — ver carrito" : `Comprar por ${money(t.precio)}`) : (libre ? "Gratis: solo necesitas una cuenta" : "Requiere membresía activa")}">
+        ${!archivoDisponible
+          ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`
+          : abierto
+            ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14"/></svg>`
+            : puedeComprar
+              ? (enCarrito
+                  ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 13 5 5L19 7"/></svg>`
+                  : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21.5 8H6"/></svg>`)
+              : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`}
       </button>
     </div>`;
   }).join("");
@@ -1408,6 +1411,7 @@ function modalPagoCompra(items,total){
 /* ---------- descargas ---------- */
 async function descargar(id, boton){
   const t=TRACKS.find(x=>String(x.id)===String(id)); if(!t) return;
+  if(!trackTieneArchivo(t.id)) return toast("Este track todavía no tiene archivo disponible.",5000);
   if(!sb) return toast("El sitio todavía no está conectado.");
   if(!sesion){ toast("Crea tu cuenta para descargar."); return modalSesion("crear"); }
   if(!t.gratis && !COMPRADOS.has(String(t.id)) && !puedeDescargar()){
