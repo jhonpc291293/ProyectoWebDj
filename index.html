@@ -695,6 +695,8 @@ let S={}, PLANES=[], CREW=[], TRACKS=[], COMUNICADOS=[], sb=null, sesion=null, p
 let modoRespaldo=false, PAGE=24, mostrados=PAGE, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
 let COMPRADOS=new Set(); // ids de tracks que el usuario ya compró y le aprobaron (acceso para siempre)
 let CARRITO=[]; try{ CARRITO=JSON.parse(localStorage.getItem("vpm_carrito")||"[]"); }catch(e){}
+let ARCHIVOS_TRACK=new Map(); // track_id -> ruta; solo para saber si el track ya tiene archivo subido
+const trackTieneArchivo = id => ARCHIVOS_TRACK.has(String(id));
 const money = n => (S.moneda||"S/")+" "+(+n||0).toFixed(2).replace(/\.00$/,"");
 const puedeDescargar = () => MEMB.estado==="activa" || ["admin","editor"].includes(perfil?.rol);
 function guardarCarrito(){ try{ localStorage.setItem("vpm_carrito",JSON.stringify(CARRITO)); }catch(e){} }
