@@ -719,6 +719,10 @@ async function cargarDatos(){
   if(cred && typeof window.supabase!=="undefined"){
     try{
       sb=window.supabase.createClient(cred.url,cred.anon);
+      // espera a que la sesión guardada termine de restaurarse antes de pedir
+      // track_files: esa tabla exige estar autenticado (RLS), y si la pedimos
+      // antes de tiempo la consulta sale como anónima y siempre vuelve vacía
+      var sesionInicial=(await sb.auth.getSession()).data.session;
       const [st,pl,cr,tk,co,arch]=await Promise.all([
         sb.from("settings").select("*").eq("id",1).maybeSingle(),
         sb.from("plans").select("*").order("orden"),
@@ -739,7 +743,7 @@ async function cargarDatos(){
   }
   S=d.settings||DEF.settings; PLANES=d.plans||[]; CREW=d.crew||[]; TRACKS=d.tracks||[]; COMUNICADOS=d.comunicados||[];
   if(sb){
-    const {data:{session}}=await sb.auth.getSession();
+    const session=sesionInicial;
     if(session) await entrarSesion(session,false);
     sb.auth.onAuthStateChange((_e,s)=>{ if(!s){ sesion=null; perfil=null; MEMB={estado:"ninguna"}; COMPRADOS=new Set(); pintarSesion(); pintarLista(); } });
   }

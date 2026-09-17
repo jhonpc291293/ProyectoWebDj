@@ -437,7 +437,12 @@ create or replace function public.mi_membresia() returns jsonb
 language sql stable security definer set search_path = public as $$
   select coalesce(
     (select jsonb_build_object(
-        'estado', m.estado, 'plan', coalesce(p.nombre, m.plan_nombre),
+        -- si quedó marcada "activa" pero ya venció (todavía no pasa el barrido de
+        -- vencer_membresias, que solo corre cuando el admin abre su panel), se
+        -- reporta como vencida: así coincide con membresia_activa(), que es lo
+        -- que de verdad decide el acceso a los archivos por RLS
+        'estado', case when m.estado='activa' and m.fin < current_date then 'vencida' else m.estado end,
+        'plan', coalesce(p.nombre, m.plan_nombre),
         'inicio', m.inicio, 'fin', m.fin,
         'dias_restantes', greatest(0, m.fin - current_date),
         'limite_diario', coalesce(p.limite_diario, 0),
@@ -445,7 +450,8 @@ language sql stable security definer set search_path = public as $$
                            where d.user_id = auth.uid() and d.creado >= public.inicio_dia_local()))
        from public.memberships m left join public.plans p on p.id = m.plan_id
       where m.user_id = auth.uid()
-      order by case m.estado when 'activa' then 0 when 'pendiente' then 1 else 2 end,
+      order by case when m.estado='activa' and m.fin>=current_date then 0
+                     when m.estado='pendiente' then 1 else 2 end,
                m.fin desc nulls last
       limit 1),
     jsonb_build_object('estado','ninguna'));
