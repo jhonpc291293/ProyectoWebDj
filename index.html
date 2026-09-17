@@ -987,11 +987,16 @@ function pintarLista(){
     const ti=TIPOS[t.tipo]||TIPOS.edit;
     const libre = t.gratis;
     const comprado = COMPRADOS.has(String(t.id));
-    const archivoDisponible = trackTieneArchivo(t.id);
     const puedeComprar = (+t.precio||0) > 0;
-    const abierto = archivoDisponible && (puedeDescargar() || (libre && sesion) || comprado);
+    // el derecho a descargar (sesión/membresía/compra) es independiente de si el
+    // archivo ya está subido: track_files solo es visible por RLS para quien ya
+    // califica, así que a quien todavía no tiene derecho jamás le llega "true" acá
+    const tieneAcceso = puedeDescargar() || (libre && sesion) || comprado;
+    const archivoDisponible = trackTieneArchivo(t.id);
+    const abierto = tieneAcceso && archivoDisponible;
+    const sinArchivo = tieneAcceso && !archivoDisponible;
     const enCarrito = CARRITO.includes(String(t.id));
-    const claseBoton = !archivoDisponible ? "lock" : (abierto ? "" : puedeComprar ? (enCarrito?"en-carrito":"buy") : "lock");
+    const claseBoton = sinArchivo ? "lock" : (abierto ? "" : puedeComprar ? (enCarrito?"en-carrito":"buy") : "lock");
     return `<div class="tr" data-id="${esc(t.id)}">
       <div class="art" data-play="${esc(t.id)}" style="${t.portada?`background-image:url('${esc(t.portada)}')`:`background:linear-gradient(135deg,${ti.c[0]},${ti.c[1]})`}">
         <div class="pl"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
@@ -1005,10 +1010,10 @@ function pintarLista(){
       <div class="meta-c"><span class="tag g">${ti.l}</span><br>${esc(t.genero||"")}</div>
       <div class="meta-c c-bpm">${t.bpm||"—"}</div>
       <div class="meta-c c-ton">${esc(t.tonalidad||"—")}</div>
-      <button class="dl ${claseBoton}" data-dl="${archivoDisponible && abierto ? esc(t.id):""}"
-        data-comprar="${archivoDisponible && !abierto && puedeComprar ? esc(t.id):""}"
-        title="${!archivoDisponible ? "Este track todavía no tiene archivo disponible" : abierto ? "Descargar" : puedeComprar ? (enCarrito ? "Ya está en tu carrito — ver carrito" : `Comprar por ${money(t.precio)}`) : (libre ? "Gratis: solo necesitas una cuenta" : "Requiere membresía activa")}">
-        ${!archivoDisponible
+      <button class="dl ${claseBoton}" data-dl="${!sinArchivo && (abierto || !puedeComprar) ? esc(t.id):""}"
+        data-comprar="${!tieneAcceso && puedeComprar ? esc(t.id):""}"
+        title="${sinArchivo ? "Este track todavía no tiene archivo disponible" : abierto ? "Descargar" : puedeComprar ? (enCarrito ? "Ya está en tu carrito — ver carrito" : `Comprar por ${money(t.precio)}`) : (libre ? "Gratis: solo necesitas una cuenta" : "Requiere membresía activa")}">
+        ${sinArchivo
           ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`
           : abierto
             ? `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14"/></svg>`
@@ -1417,7 +1422,6 @@ function modalPagoCompra(items,total){
 /* ---------- descargas ---------- */
 async function descargar(id, boton){
   const t=TRACKS.find(x=>String(x.id)===String(id)); if(!t) return;
-  if(!trackTieneArchivo(t.id)) return toast("Este track todavía no tiene archivo disponible.",5000);
   if(!sb) return toast("El sitio todavía no está conectado.");
   if(!sesion){ toast("Crea tu cuenta para descargar."); return modalSesion("crear"); }
   if(!t.gratis && !COMPRADOS.has(String(t.id)) && !puedeDescargar()){
@@ -1432,6 +1436,7 @@ async function descargar(id, boton){
            {texto:"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]
         : [{texto:"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]);
   }
+  if(!trackTieneArchivo(t.id)) return toast("Este track todavía no tiene archivo disponible.",5000);
   const original=boton.innerHTML; boton.innerHTML='<span class="spin"></span>'; boton.disabled=true;
   try{
     const {data:ruta,error}=await sb.rpc("solicitar_descarga",{p_track:t.id});
