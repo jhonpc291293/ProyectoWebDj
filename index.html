@@ -447,7 +447,6 @@ canvas#viz{width:140px;height:38px;opacity:.9}
   <div class="hero-img" id="heroImg"></div>
   <div class="hero-glow"></div>
   <div class="wrap hero-in">
-    <p class="eyebrow" id="heroEyebrow">Desde 2016 · Paita, Piura · Perú</p>
     <h1 id="heroH1">EDITS QUE<br><em>LLENAN</em><br>LA PISTA</h1>
     <p class="hero-claim" id="heroClaim"></p>
     <div class="hero-cta">
@@ -768,7 +767,6 @@ function pintarMarca(){
     + `<small>Desde ${esc(S.desde)} · ${esc((S.ciudad||"").split(",")[0])}</small>`;
   if(S.logo_url) $("#brand").classList.add("con-logo");
 
-  $("#heroEyebrow").textContent = `Desde ${S.desde} · ${S.ciudad}`;
   $("#heroH1").innerHTML = `${esc(S.hero_l1)}<br><em>${esc(S.hero_l2)}</em><br>${esc(S.hero_l3)}`;
   $("#heroClaim").textContent = S.claim||"";
   if(S.hero_img) $("#heroImg").style.backgroundImage = `url('${esc(S.hero_img)}')`;
