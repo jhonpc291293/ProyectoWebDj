@@ -882,6 +882,7 @@ async function vistaMiembros(){
           ${esAdmin()?`<td class="acc"><div class="acciones-cuenta"><select data-miembro-rol="${m.id}" class="chip" style="background:var(--panel2);padding:6px 9px">
               <option value="member" selected>Miembro</option><option value="editor">Editor</option><option value="admin">Administrador</option>
             </select><span class="acciones-botones"><button class="btn btn-sm" data-edit-miembro="${m.id}">Editar</button>
+            <button class="btn btn-sm" data-clave-miembro="${m.id}">Restablecer clave</button>
             <button class="btn btn-sm btn-d" data-del-miembro="${m.id}">Borrar</button></span></div></td>`:""}
         </tr>`).join("")}</tbody></table></div>`
       :`<div class="vacio">Todavía no hay miembros registrados.</div>`}
@@ -889,9 +890,11 @@ async function vistaMiembros(){
   if(esAdmin()){
     const perfiles=data.reduce((map,m)=>{ map[m.id]=m; return map; },{});
     $("#view").addEventListener("click",e=>{
-      const editar=e.target.closest("[data-edit-miembro]"), borrar=e.target.closest("[data-del-miembro]");
+      const editar=e.target.closest("[data-edit-miembro]"), borrar=e.target.closest("[data-del-miembro]"),
+            clave=e.target.closest("[data-clave-miembro]");
       if(editar) editarMiembro(perfiles[editar.dataset.editMiembro]);
       if(borrar) borrarMiembro(perfiles[borrar.dataset.delMiembro]);
+      if(clave) resetearClave(perfiles[clave.dataset.claveMiembro]);
     });
     $("#view").addEventListener("change",async e=>{
       const selector=e.target.closest("[data-miembro-rol]"); if(!selector) return;
@@ -955,6 +958,36 @@ function borrarMiembro(miembro, vista="miembros"){
       }
     }}
   ]);
+}
+
+function resetearClave(miembro){
+  const generar=()=>Math.random().toString(36).slice(-4)+Math.random().toString(36).slice(-4);
+  abrirModal("Restablecer contraseña",`
+    <p style="margin:0 0 14px">Se le asignará esta contraseña nueva a <b>${esc(miembro.nombre||miembro.email||"este miembro")}</b>.
+      Avísale para que ingrese con ella y la cambie cuando quiera desde su cuenta.</p>
+    <div class="f"><label>Contraseña nueva</label><input type="text" name="clave" value="${generar()}" minlength="6"></div>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:"Restablecer",clase:"btn-p",accion:async btn=>{
+        const clave=$('[name="clave"]',$("#mBody")).value.trim();
+        if(clave.length<6) return aviso("La contraseña necesita 6 caracteres o más.",true);
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Restableciendo…';
+        try{
+          const {data:j,error}=await sb.functions.invoke("crear-usuario",{
+            body:{accion:"resetear_password",id:miembro.id,password:clave}});
+          if(error) throw error;
+          if(j?.error) throw new Error(j.error);
+          cerrarModal();
+          abrirAvisoWhatsApp(miembro,"Contraseña restablecida",
+            `Hola ${miembro?.nombre||""}! Te restablecimos el acceso. Tu nueva contraseña temporal es: ${clave}\n`
+            +`Ingresa con tu correo (${miembro.email||""}) y esa clave. Puedes cambiarla cuando quieras desde tu cuenta.`);
+        }catch(e){
+          btn.disabled=false; btn.textContent="Restablecer";
+          const detalle=/networkerror|failed to fetch|fetch resource/i.test(e.message||"")
+            ? "No se pudo conectar con la función de Supabase. Despliega 'crear-usuario' y vuelve a intentarlo."
+            : "No se pudo restablecer la contraseña: "+(e.message||"Error desconocido");
+          aviso(detalle,true);
+        }
+      }} ]);
 }
 
 /* =========================================================================
@@ -1233,6 +1266,7 @@ async function vistaEditores(){
             {admin:"administrador",editor:"editor",member:"miembro"}[r]}</option>`).join("")}
         </select>
         ${esAdmin()?`<span class="acciones-botones"><button class="btn btn-sm" data-edit-editor="${p.id}">Editar</button>
+          <button class="btn btn-sm" data-clave-editor="${p.id}">Restablecer clave</button>
           <button class="btn btn-sm btn-d" data-del-editor="${p.id}" ${p.id===usuario.id?'disabled title="No puedes borrar tu propia cuenta"':""}>Borrar</button>`:""}
         ${esAdmin()?`</span>`:""}</div></td></tr>`;
   $("#view").innerHTML=`
@@ -1253,9 +1287,11 @@ async function vistaEditores(){
         <p style="margin:0">2. Desde ese momento entra a este panel y gestiona solo sus propios tracks.</p></div></div>`;
   $("#nuevaCuenta").addEventListener("click",()=>formNuevaCuenta());
   $("#view").addEventListener("click",e=>{
-    const editar=e.target.closest("[data-edit-editor]"), borrar=e.target.closest("[data-del-editor]");
+    const editar=e.target.closest("[data-edit-editor]"), borrar=e.target.closest("[data-del-editor]"),
+          clave=e.target.closest("[data-clave-editor]");
     if(editar) editarMiembro(data.find(p=>p.id===editar.dataset.editEditor),"editores");
     if(borrar) borrarMiembro(data.find(p=>p.id===borrar.dataset.delEditor),"editores");
+    if(clave) resetearClave(data.find(p=>p.id===clave.dataset.claveEditor));
   });
   $("#view").addEventListener("change",async e=>{
     const s=e.target.closest("[data-rol]"); if(!s) return;

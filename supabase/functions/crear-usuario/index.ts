@@ -48,6 +48,15 @@ Deno.serve(async (req) => {
       return json({ id });
     }
 
+    if (accion === "resetear_password") {
+      if (!id || !password || String(password).length < 6) {
+        return json({ error: "Elige una contraseña de 6 caracteres o más." }, 400);
+      }
+      const { error: errPass } = await admin.auth.admin.updateUserById(id, { password });
+      if (errPass) return json({ error: errPass.message }, 400);
+      return json({ id });
+    }
+
     if (accion === "borrar") {
       if (!id || id === (await comoQuienLlama.auth.getUser()).data.user?.id) {
         return json({ error: "No puedes borrar tu propia cuenta desde aquí." }, 400);
