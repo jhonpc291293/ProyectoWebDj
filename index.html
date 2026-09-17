@@ -745,19 +745,27 @@ async function cargarDatos(){
   if(sb){
     const session=sesionInicial;
     if(session) await entrarSesion(session,false);
-    sb.auth.onAuthStateChange((_e,s)=>{ if(!s){ sesion=null; perfil=null; MEMB={estado:"ninguna"}; COMPRADOS=new Set(); pintarSesion(); pintarLista(); } });
+    sb.auth.onAuthStateChange(async(_e,s)=>{ if(!s){ sesion=null; perfil=null; MEMB={estado:"ninguna"}; COMPRADOS=new Set();
+      const {data:arch}=await sb.from("track_files").select("track_id,ruta");
+      ARCHIVOS_TRACK=new Map((arch||[]).map(f=>[String(f.track_id),f.ruta]));
+      pintarSesion(); pintarLista(); } });
   }
 }
 async function entrarSesion(session,repintar=true){
   sesion=session;
-  const [{data:p},{data:m},{data:compras}]=await Promise.all([
+  // track_files depende de quién pregunta (RLS): al iniciar sesión sin recargar
+  // la página hay que volver a pedirla, si no se queda con el mapa vacío que se
+  // cargó de anónimo y todo se ve bloqueado hasta refrescar a mano
+  const [{data:p},{data:m},{data:compras},{data:arch}]=await Promise.all([
     sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle(),
     sb.rpc("mi_membresia"),
-    sb.rpc("mis_compras")
+    sb.rpc("mis_compras"),
+    sb.from("track_files").select("track_id,ruta")
   ]);
   perfil=p||{rol:"member",nombre:session.user.email};
   MEMB=m||{estado:"ninguna"};
   COMPRADOS=new Set((compras||[]).map(r=>String(r.track_id)));
+  ARCHIVOS_TRACK=new Map((arch||[]).map(f=>[String(f.track_id),f.ruta]));
   pintarSesion(); if(repintar) pintarLista();
 }
 
