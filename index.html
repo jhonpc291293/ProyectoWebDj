@@ -718,7 +718,10 @@ async function cargarDatos(){
   const cred=credenciales(); let d=null;
   if(cred && typeof window.supabase!=="undefined"){
     try{
-      sb=window.supabase.createClient(cred.url,cred.anon);
+      // storageKey propio: sin esto, la web pública comparte la sesión con el panel
+      // de administración (misma URL y clave => mismo localStorage por defecto) y
+      // cerrar sesión en una cierra la otra también
+      sb=window.supabase.createClient(cred.url,cred.anon,{auth:{storageKey:"vpm-web-auth"}});
       // espera a que la sesión guardada termine de restaurarse antes de pedir
       // track_files: esa tabla exige estar autenticado (RLS), y si la pedimos
       // antes de tiempo la consulta sale como anónima y siempre vuelve vacía

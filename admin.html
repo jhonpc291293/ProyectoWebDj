@@ -284,7 +284,10 @@ function credenciales(){
   }
   const cred=credenciales();
   if(!cred){ $("#gateSetup").classList.remove("hide"); return; }
-  sb=window.supabase.createClient(cred.url,cred.anon);
+  // storageKey propio: sin esto, el panel comparte la sesión con la web pública
+  // (misma URL y clave => mismo localStorage por defecto) y cerrar sesión en una
+  // cierra la otra también
+  sb=window.supabase.createClient(cred.url,cred.anon,{auth:{storageKey:"vpm-admin-auth"}});
   const {data:{session}}=await sb.auth.getSession();
   session ? entrar(session.user) : $("#gateLogin").classList.remove("hide");
 })();
