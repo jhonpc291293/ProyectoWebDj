@@ -115,6 +115,9 @@ create table if not exists public.settings (
   color_piepagina  text default '',
   color_texto      text default '',
   color_acento     text default '',
+  -- tipografía personalizada (nombre exacto de Google Fonts): vacío = la de siempre
+  fuente_titulos   text default '',
+  fuente_texto     text default '',
   actualizado timestamptz default now(),
   constraint settings_una_fila check (id = 1)
 );
@@ -134,6 +137,8 @@ alter table public.settings add column if not exists color_encabezado text not n
 alter table public.settings add column if not exists color_piepagina  text not null default '';
 alter table public.settings add column if not exists color_texto      text not null default '';
 alter table public.settings add column if not exists color_acento     text not null default '';
+alter table public.settings add column if not exists fuente_titulos   text not null default '';
+alter table public.settings add column if not exists fuente_texto     text not null default '';
 
 -- el crew que se muestra en la web (independiente de las cuentas de acceso)
 create table if not exists public.crew (

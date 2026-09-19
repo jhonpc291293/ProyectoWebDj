@@ -709,6 +709,21 @@ const hexRgb = hex => { let h=(hex||"").replace("#",""); if(h.length===3) h=h.sp
 const aHex = n => Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,"0");
 const aclarar = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c+(255-c)*pct; return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
 const oscurecer = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c*(1-pct); return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
+function cargarFuente(nombre,pesos){
+  if(!nombre) return;
+  const id="gf-"+nombre.replace(/\s+/g,"-").toLowerCase();
+  if(document.getElementById(id)) return;
+  const link=document.createElement("link"); link.id=id; link.rel="stylesheet";
+  link.href=`https://fonts.googleapis.com/css2?family=${nombre.replace(/ /g,"+")}:wght@${pesos}&display=swap`;
+  document.head.appendChild(link);
+}
+function aplicarTipografia(){
+  const raiz=document.documentElement.style;
+  if(S.fuente_titulos){ cargarFuente(S.fuente_titulos,"400;700"); raiz.setProperty("--display",`"${S.fuente_titulos}","Arial Black",Impact,sans-serif`); }
+  else raiz.removeProperty("--display");
+  if(S.fuente_texto){ cargarFuente(S.fuente_texto,"400;500;600;700"); raiz.setProperty("--body",`"${S.fuente_texto}",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`); }
+  else raiz.removeProperty("--body");
+}
 function aplicarColores(){
   const raiz=document.documentElement.style;
   const set=(prop,val)=> val ? raiz.setProperty(prop,val) : raiz.removeProperty(prop);
@@ -809,6 +824,7 @@ function pintarMarca(){
   document.title = `${S.marca} — Pool de edits, remixes y mashups`;
   document.documentElement.dataset.tema = S.tema||"normal";
   aplicarColores();
+  aplicarTipografia();
   const partes = (S.marca||"").trim().split(/\s+/);
   const ultima = partes.length>1 ? partes.pop() : "";
   $("#brandTxt").innerHTML = (S.logo_url
