@@ -258,6 +258,11 @@ const money = n => MONEDA+" "+(+n||0).toFixed(2).replace(/\.00$/,"");
 const fecha = d => d ? new Date(String(d).length>10?d:d+"T00:00:00").toLocaleDateString("es-PE",{day:"2-digit",month:"short",year:"numeric"}) : "—";
 const fechaH = d => d ? new Date(d).toLocaleString("es-PE",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
 const esAdmin = () => perfil?.rol==="admin";
+const hexRgb = hex => { let h=(hex||"").replace("#",""); if(h.length===3) h=h.split("").map(c=>c+c).join("");
+  const n=parseInt(h,16)||0; return [(n>>16)&255,(n>>8)&255,n&255]; };
+const aHex = n => Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,"0");
+const aclarar = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c+(255-c)*pct; return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
+const oscurecer = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c*(1-pct); return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
 const MESES_TRACK = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 function periodoTrack(d){
@@ -1203,6 +1208,14 @@ const CAMPOS_MARCA=[
   {k:"tema",l:"Tema de temporada",t:"select",def:"normal",
    opts:{normal:"Normal (colores de siempre)", halloween:"🎃 Halloween", navidad:"🎄 Navidad", "ano-nuevo":"🎆 Año Nuevo"},
    help:"Cambia los colores de acento en toda la web pública al instante. El panel no cambia."},
+  {g:"Colores personalizados"},
+  {k:"color_fondo",l:"Fondo general",t:"color",def:"#08070b",mitad:true},
+  {k:"color_tarjetas",l:"Tarjetas y secciones",t:"color",def:"#14111a",mitad:true},
+  {k:"color_encabezado",l:"Encabezado (menú superior)",t:"color",def:"#08070b",mitad:true},
+  {k:"color_piepagina",l:"Pie de página",t:"color",def:"#0d0b11",mitad:true},
+  {k:"color_texto",l:"Texto",t:"color",def:"#f4f1ea",mitad:true},
+  {k:"color_acento",l:"Acento (el dorado)",t:"color",def:"#e8b23c",mitad:true,
+   help:"Estos colores personalizados mandan por encima del tema de temporada. Quítalos todos para volver a los de siempre."},
   {g:"Portada"},
   {k:"hero_l1",l:"Título línea 1",t:"text",mitad:true},
   {k:"hero_l2",l:"Título línea 2 (contorneada)",t:"text",mitad:true},
@@ -1222,6 +1235,37 @@ const CAMPOS_MARCA=[
   {k:"redes.tiktok",l:"TikTok",t:"text",mitad:true},
   {k:"redes.youtube",l:"YouTube",t:"text",mitad:true}
 ];
+function previewColoresHTML(){
+  return `<div id="colorPreview" style="border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:2px 0 20px">
+      <div data-prev="encabezado" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+        <b data-prev-texto style="font-family:var(--display);letter-spacing:.02em;font-size:15px">VIP PAITA MIX</b>
+        <span data-prev-acento style="padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700">MEMBRESÍAS</span>
+      </div>
+      <div data-prev="fondo" style="padding:22px 16px">
+        <div data-prev="tarjetas" style="padding:16px;border-radius:10px">
+          <b data-prev-texto style="display:block">Vista previa de una tarjeta</b>
+          <p data-prev-texto style="margin:6px 0 0;font-size:12.5px;opacity:.65">Así se vería un texto dentro del catálogo.</p>
+          <span data-prev-acento-txt style="font-size:12.5px;font-weight:700">Un precio o enlace destacado</span>
+        </div>
+      </div>
+      <div data-prev="piepagina" style="padding:12px 16px">
+        <span data-prev-texto style="font-size:12px;opacity:.6">© Vip Paita Mix — vista previa</span>
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm" id="restaurarColores" style="margin:-8px 0 22px">Restaurar colores originales</button>`;
+}
+const CLAVES_COLOR=["color_fondo","color_tarjetas","color_encabezado","color_piepagina","color_texto","color_acento"];
+function actualizarPreviewColores(){
+  const cont=$("#formM"), prev=$("#colorPreview"); if(!cont||!prev) return;
+  const val=k=>{ const el=$(`[name="${k}"]`,cont); return (el&&el.value)||CAMPOS_MARCA.find(c=>c.k===k)?.def; };
+  $('[data-prev="encabezado"]',prev).style.background=val("color_encabezado");
+  $('[data-prev="fondo"]',prev).style.background=val("color_fondo");
+  $('[data-prev="tarjetas"]',prev).style.background=val("color_tarjetas");
+  $('[data-prev="piepagina"]',prev).style.background=val("color_piepagina");
+  $$('[data-prev-texto]',prev).forEach(el=>el.style.color=val("color_texto"));
+  $$('[data-prev-acento]',prev).forEach(el=>{ el.style.background=val("color_acento"); el.style.color="#120c02"; });
+  $$('[data-prev-acento-txt]',prev).forEach(el=>el.style.color=val("color_acento"));
+}
 async function vistaMarca(){
   const {data,error}=await sb.from("settings").select("*").eq("id",1).maybeSingle();
   if(error) return errorVista(error);
@@ -1231,9 +1275,16 @@ async function vistaMarca(){
     <div class="card"><div class="card-h"><h3>Contenido de la marca</h3>
       <div class="right"><button class="btn btn-p btn-sm" id="save">Guardar cambios</button></div></div>
       <div style="padding:22px" id="formM">${CAMPOS_MARCA.map(c=>c.g
-        ? `<div class="grupo">${c.g}</div>` : campoHTML(c,val(c.k))).join("")}</div></div>`;
+        ? `<div class="grupo">${c.g}</div>${c.g==="Colores personalizados"?previewColoresHTML():""}`
+        : campoHTML(c,val(c.k))).join("")}</div></div>`;
   agruparMitades($("#formM"));
   activarArchivos();
+  activarColores(actualizarPreviewColores);
+  actualizarPreviewColores();
+  $("#restaurarColores").addEventListener("click",()=>{
+    CLAVES_COLOR.forEach(k=>{ const wrap=$(`[data-color="${k}"]`,$("#formM")); if(wrap) limpiarColor(k,$("#formM"),wrap,actualizarPreviewColores); });
+    aviso("Colores restaurados. No olvides Guardar cambios.");
+  });
   $("#save").addEventListener("click",async e=>{
     const btn=e.target; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Guardando…';
     const obj={actualizado:new Date().toISOString(),redes:{}}; let ok=true;
@@ -1443,6 +1494,13 @@ function campoHTML(c,valor){
     case "number": ctrl=`<input type="number" name="${c.k}" step="${c.step||1}" value="${esc(v)}">`; break;
     case "lineas": ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).join("\n"))}</textarea>`; break;
     case "pares":  ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).map(x=>`${x.anio} | ${x.texto}`).join("\n"))}</textarea>`; break;
+    case "color": { const defColor=c.def||"#000000";
+      ctrl=`<div class="drop" data-color="${c.k}" data-def="${defColor}" style="align-items:center">
+        <input type="color" value="${v||defColor}">
+        <span class="mini" data-color-estado style="flex:1">${v
+          ?`Personalizado: <b style="color:var(--ok)">${esc(v)}</b>`:"Usando el color del tema actual"}</span>
+        ${v?`<button type="button" class="btn btn-sm" data-clear-color="${c.k}">Quitar</button>`:""}
+      </div><input type="hidden" name="${c.k}" value="${esc(v)}">`; break; }
     case "file": ctrl=`<div class="drop" data-bucket="${c.bucket}">
         <div style="width:100%;font-size:12px"><span class="mini">Archivo actual:</span>
           <b class="url" data-url="${c.k}" style="color:${v?"var(--ok)":"var(--muted)"}">${v?esc(String(v).split("/").pop()):"ninguno todavía"}</b></div>
@@ -1501,6 +1559,31 @@ function activarArchivos(){
     const k=b.dataset.clear, cont=b.closest("#mBody")||b.closest("#view");
     $(`[name="${k}"]`,cont).value=""; $(`[data-url="${k}"]`,cont).textContent="ninguno todavía"; b.remove();
   }));
+}
+function activarColores(onCambio){
+  $$("#mBody [data-color], #view [data-color]").forEach(wrap=>{
+    const clave=wrap.dataset.color, cont=wrap.closest("#mBody")||wrap.closest("#view");
+    wrap.querySelector('input[type="color"]').addEventListener("input",e=>{
+      $(`[name="${clave}"]`,cont).value=e.target.value;
+      $("[data-color-estado]",wrap).innerHTML=`Personalizado: <b style="color:var(--ok)">${e.target.value}</b>`;
+      if(!wrap.querySelector("[data-clear-color]")){
+        const btn=document.createElement("button"); btn.type="button"; btn.className="btn btn-sm";
+        btn.dataset.clearColor=clave; btn.textContent="Quitar";
+        btn.addEventListener("click",()=>limpiarColor(clave,cont,wrap,onCambio));
+        wrap.appendChild(btn);
+      }
+      onCambio?.();
+    });
+  });
+  $$("#mBody [data-clear-color], #view [data-clear-color]").forEach(b=>
+    b.addEventListener("click",()=>limpiarColor(b.dataset.clearColor,b.closest("#mBody")||b.closest("#view"),b.closest("[data-color]"),onCambio)));
+}
+function limpiarColor(clave,cont,wrap,onCambio){
+  $(`[name="${clave}"]`,cont).value="";
+  $("[data-color-estado]",wrap).textContent="Usando el color del tema actual";
+  wrap.querySelector('input[type="color"]').value=wrap.dataset.def||"#000000";
+  wrap.querySelector("[data-clear-color]")?.remove();
+  onCambio?.();
 }
 
 /* =========================================================================

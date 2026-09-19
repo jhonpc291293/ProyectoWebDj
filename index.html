@@ -13,7 +13,7 @@
 <style>
 /* ============ TOKENS DE MARCA ============ */
 :root{
-  --bg:#08070b; --bg2:#0d0b11; --panel:#14111a; --panel2:#1b1724;
+  --bg:#08070b; --bg2:#0d0b11; --panel:#14111a; --panel2:#1b1724; --bg-rgb:8,7,11;
   --line:rgba(255,255,255,.08); --line-g:rgba(var(--gold-rgb),.3);
   --gold:#e8b23c; --gold-soft:#f6d68c; --gold-deep:#8a5a12;
   --gold-rgb:232,178,60; --gold-deep-rgb:138,90,18;
@@ -28,17 +28,17 @@
    Marca y contacto → Tema de temporada). Solo cambian colores; nunca
    tipografía ni layout, así que no hay riesgo de romper nada. */
 :root[data-tema="halloween"]{
-  --bg:#0a0510; --bg2:#0f0916; --panel:#160f22; --panel2:#1e152e;
+  --bg:#0a0510; --bg2:#0f0916; --panel:#160f22; --panel2:#1e152e; --bg-rgb:10,5,16;
   --gold:#ff7a1a; --gold-soft:#ffcf8a; --gold-deep:#4a1f6b;
   --gold-rgb:255,122,26; --gold-deep-rgb:74,31,107;
 }
 :root[data-tema="navidad"]{
-  --bg:#070a08; --bg2:#0b100c; --panel:#101a13; --panel2:#16241a;
+  --bg:#070a08; --bg2:#0b100c; --panel:#101a13; --panel2:#16241a; --bg-rgb:7,10,8;
   --gold:#c23b3b; --gold-soft:#e8a5a0; --gold-deep:#0b5c33;
   --gold-rgb:194,59,59; --gold-deep-rgb:11,92,51;
 }
 :root[data-tema="ano-nuevo"]{
-  --bg:#050609; --bg2:#090b12; --panel:#0e111c; --panel2:#151a29;
+  --bg:#050609; --bg2:#090b12; --panel:#0e111c; --panel2:#151a29; --bg-rgb:5,6,9;
   --gold:#f2c14e; --gold-soft:#ffffff; --gold-deep:#17224a;
   --gold-rgb:242,193,78; --gold-deep-rgb:23,34,74;
 }
@@ -82,7 +82,7 @@ h2.title em{font-style:normal;color:var(--gold)}
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='.3'/></svg>")}
 
 /* ============ NAV ============ */
-.nav{position:sticky;top:0;z-index:50;background:rgba(8,7,11,.82);backdrop-filter:blur(16px);
+.nav{position:sticky;top:0;z-index:50;background:rgba(var(--nav-rgb,var(--bg-rgb)),.82);backdrop-filter:blur(16px);
   border-bottom:1px solid var(--line)}
 .nav-in{display:flex;align-items:center;gap:24px;height:70px}
 .brand{display:flex;align-items:center;gap:11px;white-space:nowrap}
@@ -117,7 +117,7 @@ h2.title em{font-style:normal;color:var(--gold)}
 .hero-glow::after{width:44vw;height:44vw;right:-10vw;bottom:-18vw;background:radial-gradient(circle,rgba(var(--gold-deep-rgb),.55),transparent 64%);animation:f2 22s ease-in-out infinite}
 @keyframes f1{50%{transform:translate(7vw,5vh) scale(1.1)}}
 @keyframes f2{50%{transform:translate(-6vw,-7vh) scale(1.08)}}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,7,11,.55),rgba(8,7,11,.2) 40%,var(--bg))}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(var(--bg-rgb),.55),rgba(var(--bg-rgb),.2) 40%,var(--bg))}
 .hero-in{position:relative;z-index:2;padding:96px 0 82px}
 .hero h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(48px,11vw,140px);
   line-height:.85;margin:16px 0 0;letter-spacing:-.005em;text-shadow:0 10px 60px rgba(0,0,0,.6)}
@@ -276,7 +276,7 @@ h2.title em{font-style:normal;color:var(--gold)}
   letter-spacing:.1em;text-transform:uppercase;transition:.2s}
 .redes a:hover{border-color:var(--gold);color:var(--gold)}
 
-footer{border-top:1px solid var(--line);padding:38px 0;background:var(--bg2)}
+footer{border-top:1px solid var(--line);padding:38px 0;background:var(--footer-bg,var(--bg2))}
 .foot{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
 
 /* ============ REPRODUCTOR ============ */
@@ -703,6 +703,31 @@ let ARCHIVOS_TRACK=new Map(); // track_id -> ruta; solo para saber si el track y
 const trackTieneArchivo = id => ARCHIVOS_TRACK.has(String(id));
 const money = n => (S.moneda||"S/")+" "+(+n||0).toFixed(2).replace(/\.00$/,"");
 const puedeDescargar = () => MEMB.estado==="activa" || ["admin","editor"].includes(perfil?.rol);
+/* ---------- colores personalizados (panel → Marca y contacto → Colores) ---------- */
+const hexRgb = hex => { let h=(hex||"").replace("#",""); if(h.length===3) h=h.split("").map(c=>c+c).join("");
+  const n=parseInt(h,16)||0; return [(n>>16)&255,(n>>8)&255,n&255]; };
+const aHex = n => Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,"0");
+const aclarar = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c+(255-c)*pct; return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
+const oscurecer = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c*(1-pct); return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
+function aplicarColores(){
+  const raiz=document.documentElement.style;
+  const set=(prop,val)=> val ? raiz.setProperty(prop,val) : raiz.removeProperty(prop);
+  const fondo=S.color_fondo, tarjetas=S.color_tarjetas, encabezado=S.color_encabezado,
+        pie=S.color_piepagina, texto=S.color_texto, acento=S.color_acento;
+  set("--bg",fondo); set("--bg-rgb",fondo?hexRgb(fondo).join(","):"");
+  set("--panel",tarjetas); set("--panel2",tarjetas?aclarar(tarjetas,.06):"");
+  set("--bg2",tarjetas?oscurecer(tarjetas,.12):"");
+  set("--nav-rgb",encabezado?hexRgb(encabezado).join(","):"");
+  set("--footer-bg",pie);
+  set("--txt",texto);
+  set("--gold",acento);
+  if(acento){
+    set("--gold-rgb",hexRgb(acento).join(","));
+    set("--gold-soft",aclarar(acento,.3));
+    const deep=oscurecer(acento,.55);
+    set("--gold-deep",deep); set("--gold-deep-rgb",hexRgb(deep).join(","));
+  }else{ set("--gold-rgb",""); set("--gold-soft",""); set("--gold-deep",""); set("--gold-deep-rgb",""); }
+}
 function guardarCarrito(){ try{ localStorage.setItem("vpm_carrito",JSON.stringify(CARRITO)); }catch(e){} }
 
 let tt; function toast(msg,ms=3000){ const t=$("#toast"); t.innerHTML=msg; t.classList.add("on");
@@ -783,6 +808,7 @@ async function entrarSesion(session,repintar=true){
 function pintarMarca(){
   document.title = `${S.marca} — Pool de edits, remixes y mashups`;
   document.documentElement.dataset.tema = S.tema||"normal";
+  aplicarColores();
   const partes = (S.marca||"").trim().split(/\s+/);
   const ultima = partes.length>1 ? partes.pop() : "";
   $("#brandTxt").innerHTML = (S.logo_url

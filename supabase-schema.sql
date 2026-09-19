@@ -108,6 +108,13 @@ create table if not exists public.settings (
   hitos       jsonb default '[{"anio":"2016","texto":"Nace VIP PAITA MIX en Paita como grupo de intercambio entre DJs de la zona."},{"anio":"2019","texto":"El pool pasa de 5 a más de 40 DJs y se abre a todo Piura."},{"anio":"2022","texto":"Primer catálogo organizado por género y BPM, con lanzamientos semanales."},{"anio":"2026","texto":"Plataforma propia con membresías y descargas directas."}]'::jsonb,
   redes       jsonb default '{"instagram":"","facebook":"","tiktok":"","youtube":""}'::jsonb,
   tema        text default 'normal' check (tema in ('normal','halloween','navidad','ano-nuevo')),
+  -- colores personalizados (hex, ej. "#08070b"): vacío = usa los del tema de temporada
+  color_fondo      text default '',
+  color_tarjetas   text default '',
+  color_encabezado text default '',
+  color_piepagina  text default '',
+  color_texto      text default '',
+  color_acento     text default '',
   actualizado timestamptz default now(),
   constraint settings_una_fila check (id = 1)
 );
@@ -121,6 +128,12 @@ do $$ begin
       check (tema in ('normal','halloween','navidad','ano-nuevo'));
   end if;
 end $$;
+alter table public.settings add column if not exists color_fondo      text not null default '';
+alter table public.settings add column if not exists color_tarjetas   text not null default '';
+alter table public.settings add column if not exists color_encabezado text not null default '';
+alter table public.settings add column if not exists color_piepagina  text not null default '';
+alter table public.settings add column if not exists color_texto      text not null default '';
+alter table public.settings add column if not exists color_acento     text not null default '';
 
 -- el crew que se muestra en la web (independiente de las cuentas de acceso)
 create table if not exists public.crew (
