@@ -1441,8 +1441,10 @@ function campoHTML(c,valor){
     case "lineas": ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).join("\n"))}</textarea>`; break;
     case "pares":  ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).map(x=>`${x.anio} | ${x.texto}`).join("\n"))}</textarea>`; break;
     case "file": ctrl=`<div class="drop" data-bucket="${c.bucket}">
+        <div style="width:100%;font-size:12px"><span class="mini">Archivo actual:</span>
+          <b class="url" data-url="${c.k}" style="color:${v?"var(--ok)":"var(--muted)"}">${v?esc(String(v).split("/").pop()):"ninguno todavía"}</b></div>
+        <span class="mini" style="width:100%;color:var(--muted)">${v?"Elige un archivo solo si quieres reemplazarlo:":"Elige un archivo para subirlo:"}</span>
         <input type="file" data-for="${c.k}" ${c.bucket==="portadas"?'accept="image/*"':c.bucket==="previews"?'accept="audio/*"':'accept="audio/*,.zip"'}>
-        <span class="url" data-url="${c.k}">${v?esc(String(v).split("/").pop()):"sin archivo"}</span>
         ${v?`<button type="button" class="btn btn-sm" data-clear="${c.k}">Quitar</button>`:""}
       </div><input type="hidden" name="${c.k}" value="${esc(v)}">`; break;
     default: ctrl=`<input type="text" name="${c.k}" value="${esc(v)}" placeholder="${c.ph||""}">`;
@@ -1494,7 +1496,7 @@ function activarArchivos(){
   });
   $$("#mBody [data-clear], #view [data-clear]").forEach(b=>b.addEventListener("click",()=>{
     const k=b.dataset.clear, cont=b.closest("#mBody")||b.closest("#view");
-    $(`[name="${k}"]`,cont).value=""; $(`[data-url="${k}"]`,cont).textContent="sin archivo"; b.remove();
+    $(`[name="${k}"]`,cont).value=""; $(`[data-url="${k}"]`,cont).textContent="ninguno todavía"; b.remove();
   }));
 }
 
