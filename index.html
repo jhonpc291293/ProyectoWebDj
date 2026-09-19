@@ -184,7 +184,7 @@ h2.title em{font-style:normal;color:var(--gold)}
 .res-info b{color:var(--txt)}
 
 .lista{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
-.tr{display:grid;grid-template-columns:58px 1fr 130px 118px 74px 62px 96px;gap:16px;align-items:center;
+.tr{display:grid;grid-template-columns:58px 1fr 130px 118px 74px 62px 92px 96px;gap:16px;align-items:center;
   padding:13px 18px;border-bottom:1px solid var(--line);transition:background .2s}
 .tr:last-child{border-bottom:0}
 .tr:hover{background:var(--panel2)}
@@ -404,7 +404,7 @@ canvas#viz{width:140px;height:38px;opacity:.9}
   .burger{display:grid}
   .nav-act{margin-left:auto}
   .tr{grid-template-columns:52px 1fr 84px 60px;gap:12px}
-  .tr .c-ton,.tr .c-dur,.tr .c-dj{display:none}
+  .tr .c-ton,.tr .c-dur,.tr .c-dj,.tr .c-precio{display:none}
   .tr-cab{display:none}
 }
 @media (max-width:640px){
@@ -1089,7 +1089,7 @@ function pintarLista(){
   }
   const lote=VISTA.slice(0,mostrados);
   $("#lista").innerHTML = `<div class="tr tr-cab" style="border-bottom:1px solid var(--line)">
-      <span></span><span>Track</span><span class="c-dj">DJ</span><span>Género · Tipo</span><span>BPM</span><span>Tono</span><span style="text-align:right">Descargar</span>
+      <span></span><span>Track</span><span class="c-dj">DJ</span><span>Género · Tipo</span><span>BPM</span><span>Tono</span><span class="c-precio">Precio</span><span style="text-align:right">Descargar</span>
     </div>` + lote.map(t=>{
     const ti=TIPOS[t.tipo]||TIPOS.edit;
     const libre = t.gratis;
@@ -1118,6 +1118,8 @@ function pintarLista(){
       <div class="meta-c"><span class="tag g">${ti.l}</span><br>${esc(t.genero||"")}</div>
       <div class="meta-c c-bpm">${t.bpm||"—"}</div>
       <div class="meta-c c-ton">${esc(t.tonalidad||"—")}</div>
+      <div class="meta-c c-precio" style="color:${libre?"var(--ok)":(puedeComprar||reqPlan)?"var(--gold)":"var(--muted)"};font-weight:${libre||puedeComprar||reqPlan?"700":"400"}">${
+        libre ? "Gratis" : puedeComprar ? esc(money(t.precio)) : reqPlan ? `Plan ${esc(reqPlan.nombre)}+` : "Con membresía"}</div>
       <button class="dl ${claseBoton}" data-dl="${!sinArchivo && (abierto || !puedeComprar) ? esc(t.id):""}"
         data-comprar="${!tieneAcceso && puedeComprar ? esc(t.id):""}"
         title="${sinArchivo ? "Este track todavía no tiene archivo disponible" : abierto ? "Descargar" : puedeComprar ? (enCarrito ? "Ya está en tu carrito — ver carrito" : `Comprar por ${money(t.precio)}`) : reqPlan ? `Disponible desde el plan ${esc(reqPlan.nombre)}` : (libre ? "Gratis: solo necesitas una cuenta" : "Requiere membresía activa")}">
