@@ -745,10 +745,11 @@ async function cargarDatos(){
   if(sb){
     const session=sesionInicial;
     if(session) await entrarSesion(session,false);
-    sb.auth.onAuthStateChange(async(_e,s)=>{ if(!s){ sesion=null; perfil=null; MEMB={estado:"ninguna"}; COMPRADOS=new Set();
-      const {data:arch}=await sb.from("track_files").select("track_id,ruta");
-      ARCHIVOS_TRACK=new Map((arch||[]).map(f=>[String(f.track_id),f.ruta]));
-      pintarSesion(); pintarLista(); } });
+    // sin petición de red aquí: signOut() espera a que este oyente termine antes
+    // de resolver su propia promesa, y el botón "Cerrar sesión" hace location.reload()
+    // justo después — un fetch en este punto solo demora (o llega a trabar) el cierre
+    sb.auth.onAuthStateChange((_e,s)=>{ if(!s){ sesion=null; perfil=null; MEMB={estado:"ninguna"}; COMPRADOS=new Set();
+      ARCHIVOS_TRACK=new Map(); pintarSesion(); pintarLista(); } });
   }
 }
 async function entrarSesion(session,repintar=true){
