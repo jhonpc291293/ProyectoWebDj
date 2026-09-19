@@ -160,7 +160,7 @@ h2.title em{font-style:normal;color:var(--gold)}
 .tools select,.tools input[type=number]{padding:11px 12px;border-radius:10px;background:var(--bg2);
   border:1px solid var(--line);color:var(--txt)}
 .tools input:focus,.tools select:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(var(--gold-rgb),.13)}
-.catalogo-djs{display:flex;gap:14px;overflow-x:auto;width:100vw;margin:0 0 18px;margin-left:calc(50% - 50vw);padding:8px max(24px,calc((100vw - 1180px)/2)) 14px;
+.catalogo-djs{display:flex;gap:14px;overflow-x:auto;margin:0 0 18px;padding:8px max(24px,calc((100vw - 1180px)/2)) 14px;
   scrollbar-color:var(--gold) var(--panel)}
 .catalogo-dj{width:auto;flex:1 1 0;min-width:104px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);
   color:var(--txt);overflow:hidden;cursor:pointer;transition:.2s;text-align:center}
@@ -234,7 +234,22 @@ h2.title em{font-style:normal;color:var(--gold)}
 .plan li svg{flex:none;margin-top:3px;color:var(--gold)}
 
 /* ============ CREW ============ */
-.crew{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:18px}
+.crew{display:flex;gap:18px;overflow-x:auto;scroll-behavior:smooth;scrollbar-color:var(--gold) var(--panel);padding:2px 2px 10px}
+.crew .dj{flex:0 0 232px;min-width:232px}
+.carrusel-wrap{position:relative}
+.carrusel-wrap .flecha{position:absolute;top:40%;transform:translateY(-50%);z-index:5;width:40px;height:40px;
+  border-radius:50%;background:rgba(8,7,11,.72);border:1px solid var(--line-g);color:var(--txt);
+  display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(4px);transition:.2s;font-size:20px;line-height:1;padding:0}
+.carrusel-wrap .flecha:hover{background:var(--gold);color:#120c02;border-color:var(--gold)}
+.carrusel-wrap .flecha.izq{left:6px}
+.carrusel-wrap .flecha.der{right:6px}
+.carrusel-wrap .flecha.oculta{display:none}
+.dj-carrusel{width:100vw;margin-left:calc(50% - 50vw)}
+.dj-carrusel .flecha.izq{left:10px}
+.dj-carrusel .flecha.der{right:10px}
+@media (max-width:700px){
+  .carrusel-wrap .flecha{width:34px;height:34px;font-size:17px}
+}
 .dj{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel);transition:.3s}
 .dj:hover{transform:translateY(-5px);border-color:var(--line-g)}
 .dj .foto{aspect-ratio:1;background-size:cover;background-position:center;display:grid;place-items:center;
@@ -496,7 +511,11 @@ canvas#viz{width:140px;height:38px;opacity:.9}
         Para descargar el archivo completo necesitas una membresía activa.</p>
     </div>
 
-    <div class="catalogo-djs reveal" id="catalogoDjs" aria-label="Tracks por DJ"></div>
+    <div class="carrusel-wrap dj-carrusel reveal">
+      <button type="button" class="flecha izq oculta" data-target="catalogoDjs" aria-label="Ver DJs anteriores">‹</button>
+      <div class="catalogo-djs" id="catalogoDjs" aria-label="Tracks por DJ"></div>
+      <button type="button" class="flecha der oculta" data-target="catalogoDjs" aria-label="Ver más DJs">›</button>
+    </div>
 
     <div class="tools reveal">
       <div class="tools-row">
@@ -557,7 +576,11 @@ canvas#viz{width:140px;height:38px;opacity:.9}
       <h2 class="title">Quiénes <em>editan</em></h2>
       <p class="lead">El pool lo alimenta un equipo de DJs. Cada uno sube su material y responde por su calidad.</p>
     </div>
-    <div class="crew reveal" id="crewGrid"></div>
+    <div class="carrusel-wrap reveal">
+      <button type="button" class="flecha izq oculta" data-target="crewGrid" aria-label="Ver DJs anteriores">‹</button>
+      <div class="crew" id="crewGrid"></div>
+      <button type="button" class="flecha der oculta" data-target="crewGrid" aria-label="Ver más DJs">›</button>
+    </div>
   </div>
 </section>
 
@@ -959,6 +982,19 @@ function pintarCrew(){
       <div class="info"><b>${esc(d.alias)}</b><small>${esc(d.cargo||"DJ")}</small>
         ${d.bio?`<p>${esc(d.bio)}</p>`:""}</div>
     </div>`).join("");
+  flechasCarrusel($("#crewGrid"));
+}
+// muestra las flechas de un carrusel horizontal solo si de verdad hay más
+// contenido para desplazar de ese lado; se llama cada vez que se repinta y
+// también al hacer scroll (conectar() la engancha una sola vez)
+function flechasCarrusel(cont){
+  if(!cont) return;
+  const wrap=cont.closest(".carrusel-wrap"); if(!wrap) return;
+  const izq=wrap.querySelector(".flecha.izq"), der=wrap.querySelector(".flecha.der");
+  if(!izq||!der) return;
+  const hayOverflow=cont.scrollWidth>cont.clientWidth+4;
+  izq.classList.toggle("oculta",!hayOverflow||cont.scrollLeft<=4);
+  der.classList.toggle("oculta",!hayOverflow||cont.scrollLeft>=cont.scrollWidth-cont.clientWidth-4);
 }
 
 function pintarCatalogoDjs(){
@@ -974,6 +1010,7 @@ function pintarCatalogoDjs(){
         <span class="foto" style="${d.foto?`background-image:url('${esc(d.foto)}')`:""}">${d.foto?"":esc(iniciales)}</span>
         <span class="nombre">${esc(nombre)}</span></button>`;
     }).join("");
+  flechasCarrusel($("#catalogoDjs"));
 }
 
 function pintarComunicados(){
@@ -1585,6 +1622,14 @@ function conectar(){
   $("#catalogoDjs").addEventListener("click",e=>{ const c=e.target.closest(".catalogo-dj"); if(!c) return;
     $$("#catalogoDjs .catalogo-dj").forEach(x=>x.classList.toggle("on",x===c));
     filtro.dj=c.dataset.dj; mostrados=PAGE; pintarLista(); });
+  // flechas de los carruseles horizontales (DJs del catálogo y el crew): los
+  // botones viven en el HTML fijo, así que se enganchan una sola vez acá
+  $$(".carrusel-wrap .flecha").forEach(btn=>{
+    const cont=$("#"+btn.dataset.target); if(!cont) return;
+    btn.addEventListener("click",()=>cont.scrollBy({left:btn.classList.contains("izq")?-cont.clientWidth*0.85:cont.clientWidth*0.85,behavior:"smooth"}));
+    cont.addEventListener("scroll",()=>flechasCarrusel(cont));
+    window.addEventListener("resize",()=>flechasCarrusel(cont));
+  });
   let deb; $("#q").addEventListener("input",e=>{ clearTimeout(deb);
     deb=setTimeout(()=>{ filtro.q=e.target.value; mostrados=PAGE; pintarLista(); },220); });
   $("#fGenero").addEventListener("change",e=>{ filtro.genero=e.target.value; mostrados=PAGE; pintarLista(); });
