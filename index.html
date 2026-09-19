@@ -1422,7 +1422,7 @@ function quitarDelCarrito(id){
 }
 function modalCarrito(){
   const items=CARRITO.map(id=>TRACKS.find(t=>String(t.id)===id)).filter(Boolean);
-  if(!items.length){ CARRITO=[]; guardarCarrito(); pintarCarrito(); return toast("Tu carrito está vacío."); }
+  if(!items.length){ CARRITO=[]; guardarCarrito(); pintarCarrito(); cerrar(); return toast("Tu carrito está vacío."); }
   const total=items.reduce((a,t)=>a+(+t.precio||0),0);
   modal("Tu carrito", `
     <div style="display:flex;flex-direction:column;gap:10px">
