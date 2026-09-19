@@ -289,6 +289,10 @@ footer{border-top:1px solid var(--line);padding:38px 0;background:var(--bg2)}
 .p-main{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--gold-soft),var(--gold));
   color:#120c02;display:grid;place-items:center}
 .p-main:hover{box-shadow:0 0 26px rgba(var(--gold-rgb),.5)}
+.sin-plan{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:18px;
+  padding:14px 18px;border:1.5px dashed var(--gold);border-radius:12px;background:rgba(var(--gold-rgb),.06);
+  color:var(--gold);font-size:14px;font-weight:600;cursor:pointer;transition:background .15s,transform .15s}
+.sin-plan:hover{background:rgba(var(--gold-rgb),.14);transform:translateY(-1px)}
 .p-info{min-width:0;width:210px}
 .p-info b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .p-info small{color:var(--muted);font-size:12px}
@@ -1304,11 +1308,13 @@ function modalPlanes(){
           <div style="font-size:12.5px;color:var(--muted)">${p.dias} días · ${esc(p.descripcion||"")}</div></div>
         <b style="font-family:var(--display);font-size:26px;color:var(--gold)">${money(p.precio)}</b>
       </button>`).join("")}</div>
-     <p style="text-align:center;margin:18px 0 0">
-       <a href="#" id="sinPlan" style="color:var(--muted);font-size:13px;text-decoration:underline">
-         ${hayCompraSuelta?"Prefiero comprar canciones sueltas, sin plan":"Ahora no, gracias — solo quiero ver el catálogo"}
-       </a>
-     </p>`, [], true);
+     <button type="button" id="sinPlan" class="sin-plan">
+       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+         <circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+         <path d="M2.5 3h2l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L21.5 8H6"/>
+       </svg>
+       ${hayCompraSuelta?"Prefiero comprar canciones sueltas, sin plan":"Ahora no, gracias — solo quiero ver el catálogo"}
+     </button>`, [], true);
   $$("#mBody [data-elegir]").forEach(b=>b.addEventListener("click",()=>{
     const p=PLANES.find(x=>String(x.id)===b.dataset.elegir); if(p) modalPago(p);
   }));
