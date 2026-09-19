@@ -717,13 +717,15 @@ let CARRITO=[]; try{ CARRITO=JSON.parse(localStorage.getItem("vpm_carrito")||"[]
 let ARCHIVOS_TRACK=new Map(); // track_id -> ruta; solo para saber si el track ya tiene archivo subido
 const trackTieneArchivo = id => ARCHIVOS_TRACK.has(String(id));
 const money = n => (S.moneda||"S/")+" "+(+n||0).toFixed(2).replace(/\.00$/,"");
-const puedeDescargar = () => MEMB.estado==="activa" || ["admin","editor"].includes(perfil?.rol);
+// solo el admin tiene vía libre; un editor/DJ necesita su propia membresía,
+// igual que cualquier miembro (no descarga gratis por subir tracks al pool)
+const puedeDescargar = () => MEMB.estado==="activa" || perfil?.rol==="admin";
 // plan mínimo por track: si el track no pide ninguno, cualquier membresía activa
 // alcanza (comportamiento de siempre); si pide uno, hace falta un plan de ese
-// precio o uno mayor (además de staff, gratis o comprado suelto, que siempre valen)
+// precio o uno mayor (además del admin, gratis o comprado suelto, que siempre valen)
 const planRequerido = t => t.plan_minimo_id ? PLANES.find(p=>String(p.id)===String(t.plan_minimo_id)) : null;
 function puedeDescargarTrack(t){
-  if(["admin","editor"].includes(perfil?.rol)) return true;
+  if(perfil?.rol==="admin") return true;
   if(COMPRADOS.has(String(t.id))) return true;
   if(t.gratis) return !!sesion;
   if(MEMB.estado!=="activa") return false;
@@ -928,7 +930,7 @@ function pintarSesion(){
   $("#btnCuenta").classList.toggle("hide",!hay);
   if(hay){
     const activa = MEMB.estado==="activa";
-    $("#dotEstado").classList.toggle("on",activa || ["admin","editor"].includes(perfil?.rol));
+    $("#dotEstado").classList.toggle("on",activa || perfil?.rol==="admin");
     const bruto=(perfil?.alias||perfil?.nombre||sesion.user.email);
     const nom=/^dj\b/i.test(bruto) ? bruto.split(" ").slice(0,2).join(" ") : bruto.split(" ")[0];
     $("#txtCuenta").textContent = activa ? `${nom} · ${MEMB.dias_restantes}d` : nom;
@@ -1360,7 +1362,7 @@ function modalSesion(pestana="entrar"){
 
 async function modalCuenta(){
   const activa=MEMB.estado==="activa";
-  const staff=["admin","editor"].includes(perfil?.rol);
+  const staff=perfil?.rol==="admin";
   const {data:hist}=sb ? await sb.from("downloads").select("creado,track_id").order("creado",{ascending:false}).limit(20)
                        : {data:[]};
   const nombreTrack=id=>TRACKS.find(t=>String(t.id)===String(id))?.titulo||"Track";

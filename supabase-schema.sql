@@ -320,10 +320,11 @@ create table if not exists public.bookings (
 -- 6. AUTOMATISMOS
 -- ---------------------------------------------------------------------------
 
--- ¿este usuario puede descargar? (admin y editores del pool siempre pueden)
+-- ¿este usuario puede descargar? solo el admin tiene vía libre; un editor/DJ
+-- necesita su propia membresía activa, igual que cualquier miembro
 create or replace function public.membresia_activa() returns boolean
 language sql stable security definer set search_path = public as $$
-  select public.es_staff()
+  select public.es_admin()
       or exists (select 1 from public.memberships m
                  where m.user_id = auth.uid()
                    and m.estado  = 'activa'
@@ -429,10 +430,12 @@ $$;
 -- tomando en cuenta el plan mínimo exigido por el track (si tiene uno).
 -- Un track sin plan_minimo_id se comporta como siempre: cualquier membresía
 -- activa alcanza. Con plan_minimo_id, hace falta un plan de ese precio o uno
--- mayor (o haberlo comprado suelto, o ser del staff, o que el track sea gratis).
+-- mayor (o haberlo comprado suelto, o ser el admin, o que el track sea gratis).
+-- Un editor/DJ NO tiene vía libre por su rol: si quiere descargar, necesita
+-- su propia membresía (o comprar la canción) igual que cualquier miembro.
 create or replace function public.puede_descargar_track(p_track uuid) returns boolean
 language sql stable security definer set search_path = public as $$
-  select public.es_staff()
+  select public.es_admin()
       or exists (select 1 from public.tracks t where t.id = p_track and t.gratis)
       or public.compro_track(p_track)
       or exists (
