@@ -260,6 +260,12 @@ create table if not exists public.plans (
   creado        timestamptz default now()
 );
 
+-- track con contenido premium: solo lo descarga quien tenga un plan de este
+-- precio o uno mayor (o lo haya comprado suelto). Vacío = cualquier membresía
+-- activa, como hasta ahora. Se agrega aquí, después de "plans", porque la
+-- columna referencia esa tabla.
+alter table public.tracks add column if not exists plan_minimo_id uuid references public.plans(id) on delete set null;
+
 create table if not exists public.memberships (
   id            uuid primary key default gen_random_uuid(),
   user_id       uuid not null references public.profiles(id) on delete cascade,
@@ -419,6 +425,28 @@ language sql stable security definer set search_path = public as $$
    where c.user_id = auth.uid() and c.estado = 'aprobada';
 $$;
 
+-- LA PUERTA DE VERDAD: decide si el usuario actual puede bajar este track,
+-- tomando en cuenta el plan mínimo exigido por el track (si tiene uno).
+-- Un track sin plan_minimo_id se comporta como siempre: cualquier membresía
+-- activa alcanza. Con plan_minimo_id, hace falta un plan de ese precio o uno
+-- mayor (o haberlo comprado suelto, o ser del staff, o que el track sea gratis).
+create or replace function public.puede_descargar_track(p_track uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select public.es_staff()
+      or exists (select 1 from public.tracks t where t.id = p_track and t.gratis)
+      or public.compro_track(p_track)
+      or exists (
+        select 1
+          from public.tracks t
+          join public.memberships m on m.user_id = auth.uid()
+                                    and m.estado = 'activa' and m.fin >= current_date
+          left join public.plans mp on mp.id = m.plan_id
+          left join public.plans rp on rp.id = t.plan_minimo_id
+         where t.id = p_track
+           and (t.plan_minimo_id is null or coalesce(mp.precio,0) >= coalesce(rp.precio,0))
+      );
+$$;
+
 -- LA PUERTA DE LAS DESCARGAS: valida membresía, compra suelta y límite diario,
 -- registra la descarga y devuelve la ruta del archivo.
 create or replace function public.solicitar_descarga(p_track uuid) returns text
@@ -434,8 +462,8 @@ begin
 
   v_comprado := public.compro_track(p_track);
 
-  if not v_gratis and not v_comprado and not public.membresia_activa() then
-    raise exception 'Necesitas una membresía activa o haber comprado esta canción para descargar';
+  if not public.puede_descargar_track(p_track) then
+    raise exception 'Esta canción necesita un plan superior activo, o comprarla por separado';
   end if;
 
   -- límite diario del plan (0 = sin límite); una compra suelta no gasta ese límite
@@ -469,6 +497,7 @@ language sql stable security definer set search_path = public as $$
         -- que de verdad decide el acceso a los archivos por RLS
         'estado', case when m.estado='activa' and m.fin < current_date then 'vencida' else m.estado end,
         'plan', coalesce(p.nombre, m.plan_nombre),
+        'plan_precio', coalesce(p.precio, 0),
         'inicio', m.inicio, 'fin', m.fin,
         'dias_restantes', greatest(0, m.fin - current_date),
         'limite_diario', coalesce(p.limite_diario, 0),
@@ -561,14 +590,13 @@ create policy "editor edita comunicado" on public.comunicados for update to auth
 create policy "editor borra comunicado" on public.comunicados for delete to authenticated
   using (public.mi_rol() = 'editor' and autor_id = auth.uid());
 
--- rutas de archivo: membresía vigente, gratis, comprado suelto, el dueño o el admin
+-- rutas de archivo: según puede_descargar_track (respeta el plan mínimo del
+-- track), gratis, comprado suelto, el dueño o el admin
 drop policy if exists "miembros leen rutas" on public.track_files;
 drop policy if exists "staff gestiona rutas" on public.track_files;
 create policy "miembros leen rutas" on public.track_files for select to authenticated
-  using (public.membresia_activa()
-         or exists (select 1 from public.tracks t where t.id = track_id and t.gratis)
-         or exists (select 1 from public.tracks t where t.id = track_id and t.editor_id = auth.uid())
-         or public.compro_track(track_id));
+  using (public.puede_descargar_track(track_id)
+         or exists (select 1 from public.tracks t where t.id = track_id and t.editor_id = auth.uid()));
 create policy "staff gestiona rutas" on public.track_files for all to authenticated
   using (public.es_admin()
          or exists (select 1 from public.tracks t where t.id = track_id and t.editor_id = auth.uid()))
@@ -652,7 +680,7 @@ grant update (nombre, alias, telefono, avatar) on public.profiles to authenticat
 
 grant execute on function public.solicitar_descarga(uuid), public.mi_membresia(),
   public.membresia_activa(), public.mi_rol(), public.es_admin(), public.es_staff(),
-  public.compro_track(uuid), public.mis_compras() to authenticated;
+  public.compro_track(uuid), public.mis_compras(), public.puede_descargar_track(uuid) to authenticated;
 grant execute on function public.aprobar_membresia(uuid), public.vencer_membresias(),
   public.cambiar_rol(uuid, text), public.aprobar_compra(uuid) to authenticated;
 
@@ -686,14 +714,12 @@ create policy "staff borra" on storage.objects for delete to authenticated
   using (bucket_id in ('portadas','previews','descargas') and public.es_staff()
          and (public.es_admin() or owner = auth.uid()));
 
--- el archivo completo solo se firma si hay membresía vigente (o el track es gratis)
+-- el archivo completo solo se firma si puede_descargar_track lo permite
+-- (respeta el plan mínimo del track, gratis, o comprado suelto)
 create policy "descarga miembros" on storage.objects for select to authenticated
-  using (bucket_id = 'descargas' and (
-    public.membresia_activa()
-    or exists (select 1 from public.track_files tf join public.tracks t on t.id = tf.track_id
-               where tf.ruta = storage.objects.name and t.gratis)
-    or exists (select 1 from public.track_files tf
-               where tf.ruta = storage.objects.name and public.compro_track(tf.track_id))
+  using (bucket_id = 'descargas' and exists (
+    select 1 from public.track_files tf
+     where tf.ruta = storage.objects.name and public.puede_descargar_track(tf.track_id)
   ));
 
 create policy "sube comprobante" on storage.objects for insert to authenticated

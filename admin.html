@@ -353,7 +353,7 @@ async function entrar(user){
   if(esAdmin()) await sb.rpc("vencer_membresias");
   avisoArchivoLocal();
   pintarMenu();
-  await Promise.all([cargarStaff(), contadores()]);
+  await Promise.all([cargarStaff(), cargarPlanes(), contadores()]);
   ver("resumen");
 }
 
@@ -372,6 +372,10 @@ async function cargarStaff(){
   if(!esAdmin()) { cache.staff=[perfil]; return; }
   const {data}=await sb.from("profiles").select("id,nombre,alias,email,rol").in("rol",["admin","editor"]);
   cache.staff=data||[];
+}
+async function cargarPlanes(){
+  const {data}=await sb.from("plans").select("id,nombre,precio").order("precio");
+  cache.planes=data||[];
 }
 
 /* =========================================================================
@@ -545,6 +549,8 @@ const CAMPOS_TRACK = [
   {k:"gratis",l:"Gratis para usuarios registrados",t:"bool",mitad:true},
   {k:"precio",l:"Precio de venta suelta (0 = no se vende suelto)",t:"number",step:"0.01",def:0,mitad:true,
    help:"Si pones un precio, cualquiera puede comprar solo esta canción sin necesitar membresía."},
+  {k:"plan_minimo_id",l:"Plan mínimo requerido",t:"plan",mitad:true,
+   help:"Solo ese plan (o uno de precio mayor) podrá descargarla. Vacío = cualquier membresía activa alcanza, como siempre."},
   {k:"destacado",l:"Destacado",t:"bool",mitad:true},
   {k:"visible",l:"Publicado en la web",t:"bool",def:true}
 ];
@@ -602,7 +608,8 @@ async function vistaTracks(){
           <tbody>${lista.map(t=>`<tr>
             <td><div class="fila-track">
               <div class="mini-art" style="${t.portada?`background-image:url('${esc(t.portada)}')`:"background:linear-gradient(135deg,#2a2136,#12101a)"}"></div>
-              <div><b>${esc(t.titulo)}</b><div class="mini">${esc(t.artista||"—")}${t.gratis?' · <span style="color:var(--ok)">gratis</span>':""}</div></div>
+              <div><b>${esc(t.titulo)}</b><div class="mini">${esc(t.artista||"—")}${t.gratis?' · <span style="color:var(--ok)">gratis</span>':""}${
+                t.plan_minimo_id?` · <span style="color:var(--gold)">desde ${esc(cache.planes.find(p=>p.id===t.plan_minimo_id)?.nombre||"plan")}</span>`:""}</div></div>
             </div></td>
             <td><span class="chip g">${esc(t.tipo)}</span></td>
             <td class="mini">${esc(t.genero||"—")}${t.bpm?` · ${t.bpm}`:""}</td>
@@ -1522,6 +1529,9 @@ function campoHTML(c,valor){
     }
     case "staff": ctrl=`<select name="${c.k}">${cache.staff.map(s=>
       `<option value="${s.id}" ${s.id===v?"selected":""}>${esc(s.alias||s.nombre)}</option>`).join("")}</select>`; break;
+    case "plan": ctrl=`<select name="${c.k}"><option value="">Cualquier membresía activa</option>
+      ${cache.planes.map(p=>`<option value="${p.id}" ${p.id===v?"selected":""}>${esc(p.nombre)} (${money(p.precio)}) o superior</option>`).join("")}
+      </select>`; break;
     case "number": ctrl=`<input type="number" name="${c.k}" step="${c.step||1}" value="${esc(v)}">`; break;
     case "lineas": ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).join("\n"))}</textarea>`; break;
     case "pares":  ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).map(x=>`${x.anio} | ${x.texto}`).join("\n"))}</textarea>`; break;
@@ -1549,6 +1559,7 @@ function leerCampo(c,el){
     case "bool":   return el.checked;
     case "number": return el.value===""?null:+el.value;
     case "staff":  return el.value||null;
+    case "plan":   return el.value||null;
     case "lineas": return el.value.split("\n").map(s=>s.trim()).filter(Boolean);
     case "pares":  return el.value.split("\n").map(s=>s.trim()).filter(Boolean).map(l=>{
                      const [anio,texto]=l.split("|").map(x=>(x||"").trim());

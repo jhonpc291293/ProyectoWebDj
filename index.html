@@ -718,6 +718,18 @@ let ARCHIVOS_TRACK=new Map(); // track_id -> ruta; solo para saber si el track y
 const trackTieneArchivo = id => ARCHIVOS_TRACK.has(String(id));
 const money = n => (S.moneda||"S/")+" "+(+n||0).toFixed(2).replace(/\.00$/,"");
 const puedeDescargar = () => MEMB.estado==="activa" || ["admin","editor"].includes(perfil?.rol);
+// plan mínimo por track: si el track no pide ninguno, cualquier membresía activa
+// alcanza (comportamiento de siempre); si pide uno, hace falta un plan de ese
+// precio o uno mayor (además de staff, gratis o comprado suelto, que siempre valen)
+const planRequerido = t => t.plan_minimo_id ? PLANES.find(p=>String(p.id)===String(t.plan_minimo_id)) : null;
+function puedeDescargarTrack(t){
+  if(["admin","editor"].includes(perfil?.rol)) return true;
+  if(COMPRADOS.has(String(t.id))) return true;
+  if(t.gratis) return !!sesion;
+  if(MEMB.estado!=="activa") return false;
+  const req=planRequerido(t);
+  return !req || (+MEMB.plan_precio||0) >= (+req.precio||0);
+}
 /* ---------- colores personalizados (panel → Marca y contacto → Colores) ---------- */
 const hexRgb = hex => { let h=(hex||"").replace("#",""); if(h.length===3) h=h.split("").map(c=>c+c).join("");
   const n=parseInt(h,16)||0; return [(n>>16)&255,(n>>8)&255,n&255]; };
@@ -1086,7 +1098,8 @@ function pintarLista(){
     // el derecho a descargar (sesión/membresía/compra) es independiente de si el
     // archivo ya está subido: track_files solo es visible por RLS para quien ya
     // califica, así que a quien todavía no tiene derecho jamás le llega "true" acá
-    const tieneAcceso = puedeDescargar() || (libre && sesion) || comprado;
+    const tieneAcceso = puedeDescargarTrack(t);
+    const reqPlan = planRequerido(t);
     const archivoDisponible = trackTieneArchivo(t.id);
     const abierto = tieneAcceso && archivoDisponible;
     const sinArchivo = tieneAcceso && !archivoDisponible;
@@ -1098,7 +1111,7 @@ function pintarLista(){
       </div>
       <div class="tt">
         <b>${esc(t.titulo)}</b>
-        <small>${esc(t.artista||"—")}${t.editor?` · <span style="color:var(--gold)">${esc(t.editor)}</span>`:""}</small>
+        <small>${esc(t.artista||"—")}${t.editor?` · <span style="color:var(--gold)">${esc(t.editor)}</span>`:""}${reqPlan?` · <span style="color:var(--gold)">Plan ${esc(reqPlan.nombre)}+</span>`:""}</small>
         <div class="eq"><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="meta-c c-dj">${esc(t.editor||"—")}</div>
@@ -1107,7 +1120,7 @@ function pintarLista(){
       <div class="meta-c c-ton">${esc(t.tonalidad||"—")}</div>
       <button class="dl ${claseBoton}" data-dl="${!sinArchivo && (abierto || !puedeComprar) ? esc(t.id):""}"
         data-comprar="${!tieneAcceso && puedeComprar ? esc(t.id):""}"
-        title="${sinArchivo ? "Este track todavía no tiene archivo disponible" : abierto ? "Descargar" : puedeComprar ? (enCarrito ? "Ya está en tu carrito — ver carrito" : `Comprar por ${money(t.precio)}`) : (libre ? "Gratis: solo necesitas una cuenta" : "Requiere membresía activa")}">
+        title="${sinArchivo ? "Este track todavía no tiene archivo disponible" : abierto ? "Descargar" : puedeComprar ? (enCarrito ? "Ya está en tu carrito — ver carrito" : `Comprar por ${money(t.precio)}`) : reqPlan ? `Disponible desde el plan ${esc(reqPlan.nombre)}` : (libre ? "Gratis: solo necesitas una cuenta" : "Requiere membresía activa")}">
         ${sinArchivo
           ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`
           : abierto
@@ -1521,17 +1534,20 @@ async function descargar(id, boton){
   const t=TRACKS.find(x=>String(x.id)===String(id)); if(!t) return;
   if(!sb) return toast("El sitio todavía no está conectado.");
   if(!sesion){ toast("Crea tu cuenta para descargar."); return modalSesion("crear"); }
-  if(!t.gratis && !COMPRADOS.has(String(t.id)) && !puedeDescargar()){
-    const conPrecio=(+t.precio||0)>0;
+  if(!puedeDescargarTrack(t)){
+    const conPrecio=(+t.precio||0)>0, reqPlan=planRequerido(t), yaMiembroActivo=MEMB.estado==="activa";
     return modal("Necesitas una membresía", `<p style="margin:0 0 16px">
-      El track <b>${esc(t.titulo)}</b> es parte del catálogo para miembros. Con cualquier plan activo
-      descargas este y todo el resto del pool.${conPrecio?` También puedes comprar solo esta canción,
+      ${reqPlan
+        ? `El track <b>${esc(t.titulo)}</b> es parte del catálogo premium: hace falta el plan <b>${esc(reqPlan.nombre)}</b>
+           o uno superior${yaMiembroActivo?" — tu plan actual no alcanza":""}.`
+        : `El track <b>${esc(t.titulo)}</b> es parte del catálogo para miembros. Con cualquier plan activo
+           descargas este y todo el resto del pool.`}${conPrecio?` También puedes comprar solo esta canción,
       sin suscribirte a nada.`:""}</p>
       <p style="margin:0;color:var(--muted);font-size:13.5px">${esc(S.pago_nota||"")}</p>`,
       conPrecio
         ? [{texto:`Comprar por ${money(t.precio)}`,clase:"btn-g",accion:()=>{ cerrar(); agregarAlCarrito(t.id); }},
-           {texto:"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]
-        : [{texto:"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]);
+           {texto:yaMiembroActivo?"Mejorar mi plan":"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]
+        : [{texto:yaMiembroActivo?"Mejorar mi plan":"Ver los planes",clase:"btn-p",accion:()=>modalPlanes()}]);
   }
   if(!trackTieneArchivo(t.id)) return toast("Este track todavía no tiene archivo disponible.",5000);
   const original=boton.innerHTML; boton.innerHTML='<span class="spin"></span>'; boton.disabled=true;
