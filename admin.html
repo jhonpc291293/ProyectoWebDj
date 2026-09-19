@@ -1214,6 +1214,13 @@ const CAMPOS_MARCA=[
   {k:"claim",l:"Frase de la marca",t:"textarea"},
   {k:"logo_url",l:"Logo",t:"file",bucket:"portadas",help:"PNG con fondo transparente, alto de 80 px o más."},
   {k:"hero_img",l:"Imagen de portada",t:"file",bucket:"portadas",help:"Foto de fondo del inicio. Horizontal, menos de 800 KB."},
+  {g:"Video del hero (para eventos)"},
+  {k:"video_activo",l:"Mostrar video en el inicio",t:"bool",def:false,
+   help:"Actívalo solo mientras dure el evento o la promoción; desactívalo y el inicio vuelve a verse como siempre."},
+  {k:"video_url",l:"Link de YouTube",t:"text",ph:"https://www.youtube.com/watch?v=...",mitad:true,
+   help:"Puede ser un video oculto/no listado de YouTube."},
+  {k:"video_archivo",l:"O sube el video directo",t:"file",bucket:"previews",accept:"video/*",mitad:true,
+   help:"Si subes un archivo aquí, se usa este en vez del link de YouTube. Menos de 25 MB, ideal 10-20 segundos en bucle."},
   {g:"Apariencia"},
   {k:"tema",l:"Tema de temporada",t:"select",def:"normal",
    opts:{normal:"Normal (colores de siempre)", halloween:"🎃 Halloween", navidad:"🎄 Navidad", "ano-nuevo":"🎆 Año Nuevo"},
@@ -1529,7 +1536,7 @@ function campoHTML(c,valor){
         <div style="width:100%;font-size:12px"><span class="mini">Archivo actual:</span>
           <b class="url" data-url="${c.k}" style="color:${v?"var(--ok)":"var(--muted)"}">${v?esc(String(v).split("/").pop()):"ninguno todavía"}</b></div>
         <span class="mini" style="width:100%;color:var(--muted)">${v?"Elige un archivo solo si quieres reemplazarlo:":"Elige un archivo para subirlo:"}</span>
-        <input type="file" data-for="${c.k}" ${c.bucket==="portadas"?'accept="image/*"':c.bucket==="previews"?'accept="audio/*"':'accept="audio/*,.zip"'}>
+        <input type="file" data-for="${c.k}" ${c.accept?`accept="${c.accept}"`:c.bucket==="portadas"?'accept="image/*"':c.bucket==="previews"?'accept="audio/*"':'accept="audio/*,.zip"'}>
         ${v?`<button type="button" class="btn btn-sm" data-clear="${c.k}">Quitar</button>`:""}
       </div><input type="hidden" name="${c.k}" value="${esc(v)}">`; break;
     default: ctrl=`<input type="text" name="${c.k}" value="${esc(v)}" placeholder="${c.ph||""}">`;

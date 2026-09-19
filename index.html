@@ -119,6 +119,16 @@ h2.title em{font-style:normal;color:var(--gold)}
 @keyframes f2{50%{transform:translate(-6vw,-7vh) scale(1.08)}}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(var(--bg-rgb),.55),rgba(var(--bg-rgb),.2) 40%,var(--bg))}
 .hero-in{position:relative;z-index:2;padding:96px 0 82px}
+.hero-fila{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap}
+.hero-texto{flex:1 1 420px;min-width:280px}
+.hero-video{flex:0 1 480px;min-width:280px;max-width:520px;width:100%;aspect-ratio:16/10;border-radius:16px;
+  overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5);border:1px solid var(--line-g);background:#000}
+.hero-video.hide{display:none}
+.hero-video video,.hero-video iframe{width:100%;height:100%;object-fit:cover;display:block;border:0}
+.hero-video-sonido{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:20px;
+  padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;backdrop-filter:blur(4px)}
+.hero-video-sonido:hover{background:rgba(0,0,0,.8)}
 .hero h1{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(48px,11vw,140px);
   line-height:.85;margin:16px 0 0;letter-spacing:-.005em;text-shadow:0 10px 60px rgba(0,0,0,.6)}
 .hero h1 em{font-style:normal;-webkit-text-stroke:1.5px var(--gold);color:transparent}
@@ -451,11 +461,16 @@ canvas#viz{width:140px;height:38px;opacity:.9}
   <div class="hero-img" id="heroImg"></div>
   <div class="hero-glow"></div>
   <div class="wrap hero-in">
-    <h1 id="heroH1">EDITS QUE<br><em>LLENAN</em><br>LA PISTA</h1>
-    <p class="hero-claim" id="heroClaim"></p>
-    <div class="hero-cta">
-      <a href="#catalogo" class="btn btn-p">Ver el catálogo</a>
-      <a href="#membresias" class="btn btn-g">Hazte miembro</a>
+    <div class="hero-fila">
+      <div class="hero-texto">
+        <h1 id="heroH1">EDITS QUE<br><em>LLENAN</em><br>LA PISTA</h1>
+        <p class="hero-claim" id="heroClaim"></p>
+        <div class="hero-cta">
+          <a href="#catalogo" class="btn btn-p">Ver el catálogo</a>
+          <a href="#membresias" class="btn btn-g">Hazte miembro</a>
+        </div>
+      </div>
+      <div class="hero-video hide" id="heroVideo"></div>
     </div>
     <div class="hero-meta" id="heroMeta"></div>
   </div>
@@ -724,6 +739,27 @@ function aplicarTipografia(){
   if(S.fuente_texto){ cargarFuente(S.fuente_texto,"400;500;600;700"); raiz.setProperty("--body",`"${S.fuente_texto}",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`); }
   else raiz.removeProperty("--body");
 }
+function idYoutube(url){
+  const m=String(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m?m[1]:null;
+}
+function pintarVideoHero(){
+  const cont=$("#heroVideo"); if(!cont) return;
+  if(!S.video_activo || (!S.video_archivo && !S.video_url)){ cont.classList.add("hide"); cont.innerHTML=""; return; }
+  if(S.video_archivo){
+    cont.innerHTML=`<video src="${esc(S.video_archivo)}" autoplay muted loop playsinline></video>
+      <button type="button" class="hero-video-sonido" id="btnSonidoHero">🔇 Activar sonido</button>`;
+    cont.classList.remove("hide");
+    const v=cont.querySelector("video"), b=$("#btnSonidoHero");
+    b.addEventListener("click",()=>{ v.muted=!v.muted; b.textContent=v.muted?"🔇 Activar sonido":"🔊 Silenciar"; });
+  }else{
+    const id=idYoutube(S.video_url);
+    if(!id){ cont.classList.add("hide"); cont.innerHTML=""; return; }
+    cont.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1"
+      title="Video" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    cont.classList.remove("hide");
+  }
+}
 function aplicarColores(){
   const raiz=document.documentElement.style;
   const set=(prop,val)=> val ? raiz.setProperty(prop,val) : raiz.removeProperty(prop);
@@ -836,6 +872,7 @@ function pintarMarca(){
   $("#heroH1").innerHTML = `${esc(S.hero_l1)}<br><em>${esc(S.hero_l2)}</em><br>${esc(S.hero_l3)}`;
   $("#heroClaim").textContent = S.claim||"";
   if(S.hero_img) $("#heroImg").style.backgroundImage = `url('${esc(S.hero_img)}')`;
+  pintarVideoHero();
 
   const generos = [...new Set(TRACKS.map(t=>t.genero).filter(Boolean))];
   const djs = [...new Set(TRACKS.map(t=>t.editor).filter(Boolean))];

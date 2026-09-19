@@ -118,6 +118,11 @@ create table if not exists public.settings (
   -- tipografía personalizada (nombre exacto de Google Fonts): vacío = la de siempre
   fuente_titulos   text default '',
   fuente_texto     text default '',
+  -- video del hero (para eventos puntuales): solo se muestra si video_activo = true.
+  -- si hay archivo subido, ese manda; si no, se usa el link de YouTube.
+  video_activo     boolean default false,
+  video_url        text default '',
+  video_archivo    text default '',
   actualizado timestamptz default now(),
   constraint settings_una_fila check (id = 1)
 );
@@ -139,6 +144,9 @@ alter table public.settings add column if not exists color_texto      text not n
 alter table public.settings add column if not exists color_acento     text not null default '';
 alter table public.settings add column if not exists fuente_titulos   text not null default '';
 alter table public.settings add column if not exists fuente_texto     text not null default '';
+alter table public.settings add column if not exists video_activo    boolean not null default false;
+alter table public.settings add column if not exists video_url       text not null default '';
+alter table public.settings add column if not exists video_archivo   text not null default '';
 
 -- el crew que se muestra en la web (independiente de las cuentas de acceso)
 create table if not exists public.crew (
