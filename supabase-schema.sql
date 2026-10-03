@@ -703,9 +703,18 @@ drop policy if exists "staff borra"         on storage.objects;
 drop policy if exists "descarga miembros"   on storage.objects;
 drop policy if exists "sube comprobante"    on storage.objects;
 drop policy if exists "lee comprobante"     on storage.objects;
+drop policy if exists "staff ve descargas"  on storage.objects;
 
 create policy "lee publicos" on storage.objects for select to anon, authenticated
   using (bucket_id in ('portadas','previews'));
+
+-- el staff necesita poder "leer de vuelta" lo que acaba de subir al bucket
+-- privado: sin esta política, la subida fallaba con "row-level security
+-- policy" porque Storage exige poder ver la fila recién insertada, y un
+-- archivo recién subido todavía no tiene fila en track_files (eso se crea
+-- en un segundo paso), así que "descarga miembros" nunca lo dejaba pasar
+create policy "staff ve descargas" on storage.objects for select to authenticated
+  using (bucket_id = 'descargas' and public.es_staff());
 
 create policy "staff sube" on storage.objects for insert to authenticated
   with check (bucket_id in ('portadas','previews','descargas') and public.es_staff());
