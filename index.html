@@ -1223,6 +1223,7 @@ function acorde(t,n){ const g=ctx.createGain(),f=ctx.createBiquadFilter();
     o.frequency.value=midi(n+12+iv); o.connect(f); o.start(t); o.stop(t+.5); });
   f.connect(g).connect(master); }
 function demoStart(){
+  clearInterval(dTimer); // nunca apilar un segundo temporizador sobre uno ya activo
   const bpm=actual.bpm||110, paso=60/bpm/4;
   const notas = bpm<100?NOTAS.lento : bpm<120?NOTAS.medio : NOTAS.rapido;
   const cumbia = /cumbia|salsa|tecno/i.test(actual.genero||"");
@@ -1269,18 +1270,23 @@ function play(){
   else audio.play().catch(()=>{ demo=true; $("#demoBadge").hidden=false; dT0=ctx.currentTime; demoStart(); });
   suena=true; pintarEstadoPlayer(); registrarPlay();
 }
-function pause(){ if(demo){ dOff+=ctx.currentTime-dT0; demoStop(); } else audio.pause();
+// siempre detiene AMBOS motores (el <audio> real y el demo sintetizado), sin
+// importar en cuál de los dos "cree" estar actualmente la bandera demo/suena:
+// así, si esa bandera llegara a desincronizarse por lo que sea (un navegador
+// de celular que rechaza el autoplay, dos toques casi al mismo tiempo, etc.),
+// nunca puede quedar una pista vieja sonando de fondo mientras arranca otra
+function pause(){ if(demo) dOff+=ctx.currentTime-dT0; demoStop(); audio.pause();
   suena=false; pintarEstadoPlayer(); }
 function toggle(){ if(!actual) return; suena?pause():play(); }
 function reproducirTrack(id){
   if(String(actual?.id)===String(id)){ toggle(); return; }
-  if(suena) pause(); playLog=null; cargar(id); play();
+  pause(); playLog=null; cargar(id); play();
 }
 function saltar(d){
   if(!VISTA.length) return;
   const i=VISTA.findIndex(t=>String(t.id)===String(actual?.id));
   const n=VISTA[(i+d+VISTA.length)%VISTA.length]; if(!n) return;
-  const seguia=suena; if(suena) pause();
+  const seguia=suena; pause();
   playLog=null; cargar(n.id); if(seguia) play(); else pintarEstadoPlayer();
 }
 function pintarEstadoPlayer(){
