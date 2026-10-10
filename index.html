@@ -922,16 +922,19 @@ function pintarMarca(){
   const generos = [...new Set(TRACKS.map(t=>t.genero).filter(Boolean))];
   const djs = [...new Set(TRACKS.map(t=>t.editor).filter(Boolean))];
   const wsp=(S.whatsapp||"").replace(/\D/g,"");
-  // TRACKS ya viene ordenado por fecha (más nuevo primero), así que el primero
-  // es justo la última canción subida — sin necesitar configurar nada aparte
-  const ultimo = TRACKS[0];
-  const widgetUltimo = ultimo ? `<div class="hero-ultimo" id="heroUltimo" data-play="${esc(ultimo.id)}" title="Escuchar: ${esc(ultimo.titulo)}">
+  // audio destacado: un clip aparte, subido a mano en el panel (no es un
+  // track del catálogo). Aparece solo mientras tenga un archivo cargado.
+  AUDIO_DESTACADO = S.audio_destacado_archivo ? {
+    id:ID_DESTACADO, titulo:S.audio_destacado_titulo||"Audio destacado",
+    artista:"", tipo:"", bpm:null, duracion:"", genero:"", preview:S.audio_destacado_archivo
+  } : null;
+  const widgetUltimo = AUDIO_DESTACADO ? `<div class="hero-ultimo" id="heroUltimo" data-play="${ID_DESTACADO}" title="Escuchar: ${esc(AUDIO_DESTACADO.titulo)}">
       <span class="hero-ultimo-play">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </span>
       <span class="hero-ultimo-info">
-        <small>Recién subido</small>
-        <b>${esc(ultimo.titulo)}</b>
+        <small>Escucha</small>
+        <b>${esc(AUDIO_DESTACADO.titulo)}</b>
       </span>
     </div>` : "";
   $("#heroMeta").innerHTML = [
@@ -1212,6 +1215,11 @@ window.limpiarFiltros=limpiarFiltros;
    ========================================================================== */
 const audio=new Audio(); audio.preload="metadata"; audio.crossOrigin="anonymous";
 let actual=null, suena=false, ctx=null, master=null, analyser=null, srcNode=null;
+// "audio destacado" del hero: un clip suelto, administrado aparte, que NO vive
+// en la tabla tracks — se le arma un objeto con la misma forma de un track
+// para que el reproductor de siempre (cargar/play/pause) lo trate igual
+const ID_DESTACADO="__destacado__";
+let AUDIO_DESTACADO=null;
 let demo=false, dT0=0, dOff=0, dTimer=null, dStep=0, dNext=0, noiseBuf=null, playLog=null;
 
 function initAudio(){
@@ -1271,10 +1279,11 @@ function demoStop(){ clearInterval(dTimer); dTimer=null; }
 
 function cargar(id){
   initAudio();
-  const t=TRACKS.find(x=>String(x.id)===String(id)); if(!t) return;
+  const t = String(id)===ID_DESTACADO && AUDIO_DESTACADO ? AUDIO_DESTACADO : TRACKS.find(x=>String(x.id)===String(id));
+  if(!t) return;
   actual=t; demo=!t.preview;
   $("#pTitle").textContent=t.titulo;
-  $("#pMeta").textContent=`${t.artista||""} · ${TIPOS[t.tipo]?.l||""} · ${t.bpm||"?"} BPM`;
+  $("#pMeta").textContent = t.id===ID_DESTACADO ? "Audio destacado" : `${t.artista||""} · ${TIPOS[t.tipo]?.l||""} · ${t.bpm||"?"} BPM`;
   $("#tEnd").textContent=t.duracion||"—";
   $("#demoBadge").hidden=!demo;
   $("#player").classList.add("up");
@@ -1283,7 +1292,7 @@ function cargar(id){
     if(!srcNode){ try{ srcNode=ctx.createMediaElementSource(audio); srcNode.connect(master); }catch(e){} } }
 }
 function registrarPlay(){
-  if(!sb||!actual?.id||playLog===actual.id) return;
+  if(!sb||!actual?.id||actual.id===ID_DESTACADO||playLog===actual.id) return;
   playLog=actual.id;
   sb.from("plays").insert({track_id:actual.id, user_id:sesion?.user?.id||null}).then(()=>{},()=>{});
 }

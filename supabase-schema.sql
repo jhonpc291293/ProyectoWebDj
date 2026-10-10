@@ -123,6 +123,10 @@ create table if not exists public.settings (
   video_activo     boolean default false,
   video_url        text default '',
   video_archivo    text default '',
+  -- audio destacado del hero: independiente del catálogo (no es un track), se
+  -- muestra solo mientras audio_destacado_archivo tenga un archivo subido
+  audio_destacado_titulo  text default '',
+  audio_destacado_archivo text default '',
   actualizado timestamptz default now(),
   constraint settings_una_fila check (id = 1)
 );
@@ -147,6 +151,8 @@ alter table public.settings add column if not exists fuente_texto     text not n
 alter table public.settings add column if not exists video_activo    boolean not null default false;
 alter table public.settings add column if not exists video_url       text not null default '';
 alter table public.settings add column if not exists video_archivo   text not null default '';
+alter table public.settings add column if not exists audio_destacado_titulo  text not null default '';
+alter table public.settings add column if not exists audio_destacado_archivo text not null default '';
 
 -- el crew que se muestra en la web (independiente de las cuentas de acceso)
 create table if not exists public.crew (
