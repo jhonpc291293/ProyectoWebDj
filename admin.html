@@ -1242,8 +1242,8 @@ const CAMPOS_MARCA=[
   {g:"Audio destacado del hero"},
   {k:"audio_destacado_titulo",l:"Título a mostrar",t:"text",ph:"Nuevo lanzamiento exclusivo",mitad:true,
    help:"Aparece junto al botón de play, en el inicio."},
-  {k:"audio_destacado_archivo",l:"Archivo de audio",t:"file",bucket:"previews",accept:"audio/*",mitad:true,
-   help:"Es independiente del catálogo (no hace falta que sea un track). Aparece en el inicio apenas lo subas; quítalo para que deje de mostrarse."},
+  {k:"audio_destacado_archivo",l:"Archivo de audio",t:"file",bucket:"previews",accept:"audio/*",mitad:true,limite:60,
+   help:"Es independiente del catálogo (no hace falta que sea un track). Aparece en el inicio apenas lo subas; quítalo para que deje de mostrarse. Hasta 60 MB."},
   {g:"Apariencia"},
   {k:"tema",l:"Tema de temporada",t:"select",def:"normal",
    opts:{normal:"Normal (colores de siempre)", halloween:"🎃 Halloween", navidad:"🎄 Navidad", "ano-nuevo":"🎆 Año Nuevo"},
@@ -1572,7 +1572,7 @@ function campoHTML(c,valor){
             <span class="archivo-estado" data-url="${c.k}">${v?nombreArchivo:"Ningún archivo subido todavía"}</span>
           </span>
         </label>
-        <input type="file" id="${inputId}" data-for="${c.k}" hidden
+        <input type="file" id="${inputId}" data-for="${c.k}" data-limite="${c.limite||""}" hidden
           ${c.accept?`accept="${c.accept}"`:c.bucket==="portadas"?'accept="image/*"':c.bucket==="previews"?'accept="audio/*"':'accept="audio/*,.zip"'}>
         ${v?`<button type="button" class="btn btn-sm" data-clear="${c.k}">Quitar</button>`:""}
       </div><input type="hidden" name="${c.k}" value="${esc(v)}">`; break; }
@@ -1612,7 +1612,7 @@ function activarArchivos(){
       const bucket=inp.closest(".drop").dataset.bucket, clave=inp.dataset.for;
       const et=$(`[data-url="${clave}"]`,cont);
       const drop=inp.closest(".drop"), tituloBoton=$(".archivo-boton b",drop);
-      const limite = bucket==="descargas"?200:bucket==="previews"?25:8;
+      const limite = +inp.dataset.limite || (bucket==="descargas"?200:bucket==="previews"?25:8);
       if(file.size>limite*1024*1024) return aviso(`El archivo pasa de ${limite} MB.`,true);
       et.innerHTML='<span class="spin"></span> subiendo…';
       const ruta=(bucket==="descargas"?"full/":"")+Date.now()+"-"+file.name.toLowerCase().replace(/[^a-z0-9.]+/g,"-");
