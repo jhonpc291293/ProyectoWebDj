@@ -362,8 +362,11 @@ canvas#viz{width:140px;height:38px;opacity:.9}
 .tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--bg2);padding:5px;border-radius:11px}
 .tabs button{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);transition:.2s}
 .tabs button.on{background:var(--panel2);color:var(--txt)}
-.yape{background:var(--bg2);border:1px dashed var(--line-g);border-radius:11px;padding:16px;margin:16px 0}
+.yape{background:var(--bg2);border:1px dashed var(--line-g);border-radius:11px;padding:16px;margin:16px 0;
+  display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .yape b{color:var(--gold);font-size:19px;letter-spacing:.04em}
+.yape-qr{width:104px;height:104px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;flex-shrink:0}
+.yape-info{flex:1 1 180px;min-width:180px}
 .estado-caja{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:18px;margin-bottom:18px}
 .estado-caja .fila{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:14px}
 .estado-caja .fila span{color:var(--muted)}
@@ -1514,11 +1517,14 @@ function modalPago(plan){
   if(!sesion) return modalSesion("crear");
   modal(`Pagar el plan ${plan.nombre}`, `
     <div class="yape">
-      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
-      <b>${esc(S.yape_numero||"—")}</b>
-      <div style="font-size:13.5px;margin-top:4px">A nombre de ${esc(S.yape_nombre||S.creador)}</div>
-      <div style="margin-top:12px;font-size:14px">Monto a pagar: <b style="color:var(--gold)">${money(plan.precio)}</b>
-        · ${plan.dias} días de acceso</div>
+      ${S.yape_qr?`<img class="yape-qr" src="${esc(S.yape_qr)}" alt="QR Yape/Plin">`:""}
+      <div class="yape-info">
+        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
+        <b>${esc(S.yape_numero||"—")}</b>
+        <div style="font-size:13.5px;margin-top:4px">A nombre de ${esc(S.yape_nombre||S.creador)}</div>
+        <div style="margin-top:12px;font-size:14px">Monto a pagar: <b style="color:var(--gold)">${money(plan.precio)}</b>
+          · ${plan.dias} días de acceso</div>
+      </div>
     </div>
     <div class="field"><label>Sube la captura del pago</label>
       <input type="file" id="cmp" accept="image/*,application/pdf"></div>
@@ -1590,10 +1596,13 @@ function modalPagoCompra(items,total){
   if(!sesion) return modalSesion("crear");
   modal(`Pagar ${items.length} canción${items.length===1?"":"es"}`, `
     <div class="yape">
-      <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
-      <b>${esc(S.yape_numero||"—")}</b>
-      <div style="font-size:13.5px;margin-top:4px">A nombre de ${esc(S.yape_nombre||S.creador)}</div>
-      <div style="margin-top:12px;font-size:14px">Monto a pagar: <b style="color:var(--gold)">${money(total)}</b></div>
+      ${S.yape_qr?`<img class="yape-qr" src="${esc(S.yape_qr)}" alt="QR Yape/Plin">`:""}
+      <div class="yape-info">
+        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
+        <b>${esc(S.yape_numero||"—")}</b>
+        <div style="font-size:13.5px;margin-top:4px">A nombre de ${esc(S.yape_nombre||S.creador)}</div>
+        <div style="margin-top:12px;font-size:14px">Monto a pagar: <b style="color:var(--gold)">${money(total)}</b></div>
+      </div>
     </div>
     <div class="field"><label>Sube la captura del pago</label>
       <input type="file" id="cmpC" accept="image/*,application/pdf"></div>

@@ -104,6 +104,7 @@ create table if not exists public.settings (
   moneda      text default 'S/',
   yape_nombre text default 'Ronald Moscol',
   yape_numero text default '999 999 999',
+  yape_qr     text default '',
   pago_nota   text default 'Yapea o plinea al número y sube la captura. Activamos tu acceso el mismo día.',
   frases      jsonb default '["Edits","Remixes","Mashups","Intros","Acapellas","Cumbia","Reggaetón","Salsa","Tecnocumbia"]'::jsonb,
   hitos       jsonb default '[{"anio":"2016","texto":"Nace VIP PAITA MIX en Paita como grupo de intercambio entre DJs de la zona."},{"anio":"2019","texto":"El pool pasa de 5 a más de 40 DJs y se abre a todo Piura."},{"anio":"2022","texto":"Primer catálogo organizado por género y BPM, con lanzamientos semanales."},{"anio":"2026","texto":"Plataforma propia con membresías y descargas directas."}]'::jsonb,
@@ -155,6 +156,7 @@ alter table public.settings add column if not exists video_archivo   text not nu
 alter table public.settings add column if not exists audio_destacado_titulo  text not null default '';
 alter table public.settings add column if not exists audio_destacado_archivo text not null default '';
 alter table public.settings add column if not exists hero_video_fondo text not null default '';
+alter table public.settings add column if not exists yape_qr text not null default '';
 
 -- el crew que se muestra en la web (independiente de las cuentas de acceso)
 create table if not exists public.crew (
