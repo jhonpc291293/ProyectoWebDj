@@ -365,7 +365,9 @@ canvas#viz{width:140px;height:38px;opacity:.9}
 .yape{background:var(--bg2);border:1px dashed var(--line-g);border-radius:11px;padding:16px;margin:16px 0;
   display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .yape b{color:var(--gold);font-size:19px;letter-spacing:.04em}
-.yape-qr{width:104px;height:104px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;flex-shrink:0}
+.yape-qr-wrap{flex-shrink:0;text-align:center}
+.yape-qr{width:190px;height:190px;object-fit:contain;border-radius:8px;background:#fff;padding:8px;display:block}
+.yape-qr-wrap small{display:block;margin-top:6px;font-size:11px;color:var(--muted)}
 .yape-info{flex:1 1 180px;min-width:180px}
 .estado-caja{background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:18px;margin-bottom:18px}
 .estado-caja .fila{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:14px}
@@ -1517,7 +1519,10 @@ function modalPago(plan){
   if(!sesion) return modalSesion("crear");
   modal(`Pagar el plan ${plan.nombre}`, `
     <div class="yape">
-      ${S.yape_qr?`<img class="yape-qr" src="${esc(S.yape_qr)}" alt="QR Yape/Plin">`:""}
+      ${S.yape_qr?`<a class="yape-qr-wrap" href="${esc(S.yape_qr)}" target="_blank" rel="noopener">
+        <img class="yape-qr" src="${esc(S.yape_qr)}" alt="QR Yape/Plin">
+        <small>Toca para ampliar</small>
+      </a>`:""}
       <div class="yape-info">
         <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
         <b>${esc(S.yape_numero||"—")}</b>
@@ -1596,7 +1601,10 @@ function modalPagoCompra(items,total){
   if(!sesion) return modalSesion("crear");
   modal(`Pagar ${items.length} canción${items.length===1?"":"es"}`, `
     <div class="yape">
-      ${S.yape_qr?`<img class="yape-qr" src="${esc(S.yape_qr)}" alt="QR Yape/Plin">`:""}
+      ${S.yape_qr?`<a class="yape-qr-wrap" href="${esc(S.yape_qr)}" target="_blank" rel="noopener">
+        <img class="yape-qr" src="${esc(S.yape_qr)}" alt="QR Yape/Plin">
+        <small>Toca para ampliar</small>
+      </a>`:""}
       <div class="yape-info">
         <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)">Yape / Plin</div>
         <b>${esc(S.yape_numero||"—")}</b>
