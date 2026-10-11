@@ -98,6 +98,7 @@ create table if not exists public.settings (
   hero_l3     text default 'LA PISTA',
   logo_url    text default '',
   hero_img    text default '',           -- imagen de portada del hero
+  hero_video_fondo text default '',      -- si tiene archivo, reemplaza hero_img por un video de fondo en bucle
   whatsapp    text default '51999999999',
   email       text default 'contacto@vippaitamix.com',
   moneda      text default 'S/',
@@ -153,6 +154,7 @@ alter table public.settings add column if not exists video_url       text not nu
 alter table public.settings add column if not exists video_archivo   text not null default '';
 alter table public.settings add column if not exists audio_destacado_titulo  text not null default '';
 alter table public.settings add column if not exists audio_destacado_archivo text not null default '';
+alter table public.settings add column if not exists hero_video_fondo text not null default '';
 
 -- el crew que se muestra en la web (independiente de las cuentas de acceso)
 create table if not exists public.crew (
