@@ -1,23 +1,34 @@
 <?php
+/**
+ * Entrega el archivo completo de un track. Solo funciona con un enlace
+ * temporal que emite api/publica.php?accion=solicitar_descarga, que es
+ * donde se valida el permiso (membresía, plan mínimo, compra, límite
+ * diario) y se registra la descarga.
+ */
 declare(strict_types=1);
 session_start();
 require __DIR__ . '/../auth.php';
 require __DIR__ . '/../archivos.php';
-require __DIR__ . '/config.php';
 
 try {
-  $userId = requiere_sesion();
-  $trackId = $_GET['track'] ?? '';
-  if ($trackId === '') throw new InvalidArgumentException('Falta el track');
-
-  // esto valida permiso + plan mínimo + límite diario, y registra la descarga
-  $ruta = solicitar_descarga($pdo, $userId, $trackId);
-  $fisica = ruta_fisica_privada($ruta);
+  requiere_sesion();
+  $d = $_SESSION['descargas'][$_GET['t'] ?? ''] ?? null;
+  if (!$d || $d['expira'] < time()) {
+    throw new AccesoDenegado('El enlace de descarga venció. Vuelve a tocar "Descargar".');
+  }
+  $fisica = ruta_fisica_privada($d['ruta']);
   if (!is_file($fisica)) throw new RuntimeException('El archivo no está disponible en el servidor');
 
+  // libera la sesión ANTES de mandar el archivo: PHP la deja bloqueada mientras
+  // dura la petición, y con un archivo grande el resto de la web de ese
+  // usuario quedaría congelada hasta que termine la descarga
+  session_write_close();
+
+  $ascii = preg_replace('/[^A-Za-z0-9 ._-]/', '', $d['nombre']) ?: 'track';
   header('Content-Type: application/octet-stream');
-  header('Content-Disposition: attachment; filename="' . basename($fisica) . '"');
+  header("Content-Disposition: attachment; filename=\"$ascii\"; filename*=UTF-8''" . rawurlencode($d['nombre']));
   header('Content-Length: ' . filesize($fisica));
+  while (ob_get_level()) ob_end_clean();
   readfile($fisica);
   exit;
 } catch (AccesoDenegado $e) {

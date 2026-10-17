@@ -140,6 +140,34 @@ try {
       ]);
     }
 
+    case 'mis_descargas': {
+      $id = requiere_sesion();
+      $st = $pdo->prepare('SELECT creado, track_id FROM downloads WHERE user_id = ? ORDER BY creado DESC LIMIT 20');
+      $st->execute([$id]);
+      responder(['descargas' => $st->fetchAll(PDO::FETCH_ASSOC)]);
+    }
+
+    // Valida el permiso, registra la descarga y entrega un enlace temporal
+    // (5 minutos, ligado a esta sesión) para descargar.php -- el mismo patrón
+    // que el "enlace firmado" de Supabase. La ruta real nunca sale al navegador.
+    case 'solicitar_descarga': {
+      exigir_post();
+      $id = requiere_sesion();
+      $trackId = $_POST['track_id'] ?? '';
+      $ruta = solicitar_descarga($pdo, $id, $trackId);
+
+      $st = $pdo->prepare('SELECT titulo FROM tracks WHERE id = ?');
+      $st->execute([$trackId]);
+      $titulo = trim(preg_replace('/[^\p{L}\p{N}\s-]/u', '', (string) $st->fetchColumn()) ?? '') ?: 'track';
+      $ext = strtolower(pathinfo($ruta, PATHINFO_EXTENSION)) ?: 'mp3';
+
+      $ahora = time();
+      $_SESSION['descargas'] = array_filter($_SESSION['descargas'] ?? [], fn($d) => $d['expira'] > $ahora);
+      $token = bin2hex(random_bytes(16));
+      $_SESSION['descargas'][$token] = ['ruta' => $ruta, 'nombre' => "$titulo.$ext", 'expira' => $ahora + 300];
+      responder(['url' => 'descargar.php?t=' . $token]);
+    }
+
     case 'solicitar_membresia': {
       exigir_post();
       $id = requiere_sesion();

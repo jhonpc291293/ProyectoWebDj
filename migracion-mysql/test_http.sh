@@ -17,15 +17,23 @@ LOGIN_B=$(curl -s -c /tmp/ck_b -d "email=memberb@test.com" -d "password=claveb12
 echo "memberB login: $LOGIN_B"
 
 echo ""
-echo "=== Descargar (protegido por membresía) ==="
-CODE=$(curl -s -o /tmp/salida_a -w "%{http_code}" -b /tmp/ck_a "$BASE/descargar.php?track=$TRACK_ID")
+echo "=== Descargar (protegido por membresía, con enlace temporal) ==="
+API="$BASE/api/publica.php?accion=solicitar_descarga"
+URL_A=$(curl -s -b /tmp/ck_a -H "X-VPM: 1" -d "track_id=$TRACK_ID" "$API" | python -c "import sys,json; print(json.load(sys.stdin).get('url',''))")
+CODE=$(curl -s -o /tmp/salida_a -w "%{http_code}" -b /tmp/ck_a "$BASE/$URL_A")
 verificar "miembro A (con plan activo) descarga el track" 200 "$CODE"
 verificar "el contenido descargado es el archivo real" "contenido falso de audio" "$(cat /tmp/salida_a)"
 
-CODE=$(curl -s -o /tmp/salida_b -w "%{http_code}" -b /tmp/ck_b "$BASE/descargar.php?track=$TRACK_ID")
-verificar "miembro B (SIN plan) NO puede descargar" 403 "$CODE"
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b /tmp/ck_b "$BASE/$URL_A")
+verificar "el enlace temporal de A no le sirve a B (está atado a la sesión de A)" 403 "$CODE"
 
-CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/descargar.php?track=$TRACK_ID")
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b /tmp/ck_b -H "X-VPM: 1" -d "track_id=$TRACK_ID" "$API")
+verificar "miembro B (SIN plan) NO consigue enlace de descarga" 403 "$CODE"
+
+CODE=$(curl -s -o /dev/null -w "%{http_code}" -b /tmp/ck_a "$BASE/descargar.php?t=inventado")
+verificar "un enlace inventado no descarga nada" 403 "$CODE"
+
+CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/$URL_A")
 verificar "sin sesión (sin cookie) NO puede descargar" 403 "$CODE"
 
 echo ""
