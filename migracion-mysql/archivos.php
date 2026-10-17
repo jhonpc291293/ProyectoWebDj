@@ -20,7 +20,8 @@ final class ArchivoInvalido extends Exception {}
 // Rutas físicas reales. En producción: RUTA_PUBLICA = la carpeta "subidas"
 // dentro de public_html; RUTA_PRIVADA = una carpeta hermana de public_html,
 // un nivel afuera, inalcanzable por URL.
-define('RUTA_PUBLICA', __DIR__ . '/web/subidas');
+// en cPanel la carpeta pública es public_html; en las pruebas locales, web
+define('RUTA_PUBLICA', __DIR__ . '/' . (is_dir(__DIR__ . '/public_html') ? 'public_html' : 'web') . '/subidas');
 define('RUTA_PRIVADA', __DIR__ . '/privado');
 
 const BUCKETS = [
