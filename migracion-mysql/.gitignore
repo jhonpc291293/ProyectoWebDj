@@ -1,0 +1,4 @@
+# Carpetas que se generan al correr las pruebas (archivos subidos de prueba);
+# no son código, no se suben.
+/web/subidas/
+/privado/
