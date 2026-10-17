@@ -13,6 +13,9 @@
 
 declare(strict_types=1);
 
+// PHP en hora de Lima, igual que la conexión a MySQL (web/config.php)
+date_default_timezone_set('America/Lima');
+
 final class AccesoDenegado extends Exception {}
 
 // ---------------------------------------------------------------------------

@@ -58,6 +58,9 @@ echo "\n=== Recuperar contraseña ===\n";
 $token = solicitar_restablecer($pdo, 'miembro@test.com');
 verificar('genera un token para un correo existente', is_string($token) && strlen($token) === 64);
 
+$min = (int) $pdo->query("SELECT TIMESTAMPDIFF(MINUTE, NOW(), reset_expira) FROM usuarios WHERE email='miembro@test.com'")->fetchColumn();
+verificar("el enlace vence en 1 hora, no más (vence en $min min)", $min >= 59 && $min <= 60);
+
 $tokenInexistente = solicitar_restablecer($pdo, 'fantasma@test.com');
 verificar('no genera token (ni error) para un correo que no existe', $tokenInexistente === null);
 
@@ -70,6 +73,15 @@ try {
   verificar('el mismo token no debería poder reusarse', false);
 } catch (TokenInvalido $e) {
   verificar('el token ya usado queda invalidado (' . $e->getMessage() . ')', true);
+}
+
+$tokenViejo = solicitar_restablecer($pdo, 'miembro@test.com');
+$pdo->exec("UPDATE usuarios SET reset_expira = DATE_SUB(NOW(), INTERVAL 1 MINUTE) WHERE email='miembro@test.com'");
+try {
+  restablecer_con_token($pdo, $tokenViejo, 'otraclave123');
+  verificar('un enlace vencido no debería funcionar', false);
+} catch (TokenInvalido $e) {
+  verificar('un enlace vencido ya no funciona', true);
 }
 
 try {

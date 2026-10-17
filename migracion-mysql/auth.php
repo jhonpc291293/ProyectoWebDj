@@ -82,12 +82,56 @@ function solicitar_restablecer(PDO $pdo, string $email): ?string {
 
   $token = bin2hex(random_bytes(32));
   $hash = hash('sha256', $token);
-  $expira = (new DateTime('+1 hour'))->format('Y-m-d H:i:s');
 
-  $st = $pdo->prepare('UPDATE usuarios SET reset_token = ?, reset_expira = ? WHERE id = ?');
-  $st->execute([$hash, $expira, $userId]);
+  // el vencimiento se calcula en MySQL (misma hora con la que después se
+  // compara en restablecer_con_token); si se calculara en PHP, la diferencia
+  // de zona horaria entre PHP y MySQL cambiaría cuánto dura el enlace
+  $st = $pdo->prepare('UPDATE usuarios SET reset_token = ?, reset_expira = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?');
+  $st->execute([$hash, $userId]);
 
   return $token;
+}
+
+// ---------------------------------------------------------------------------
+// Manda el correo con el enlace para elegir contraseña nueva.
+//  - La dirección del enlace sale de $urlSitio (config.php) y NUNCA de la
+//    cabecera Host de la petición: con un Host falso, alguien podría pedir el
+//    correo de otra persona y hacer que el enlace lleve el token a su sitio.
+//  - Máximo un correo cada 2 minutos por cuenta, para que nadie llene el
+//    buzón de otra persona apretando "Olvidé mi contraseña" sin parar.
+//  - Si el correo no existe, no hace nada (y la respuesta es la misma).
+// ---------------------------------------------------------------------------
+function enviar_restablecer(PDO $pdo, string $email, string $urlSitio, string $remitente, string $marca): void {
+  $email = strtolower(trim($email));
+  $st = $pdo->prepare('SELECT 1 FROM usuarios WHERE email = ? AND reset_expira > DATE_ADD(NOW(), INTERVAL 58 MINUTE)');
+  $st->execute([$email]);
+  if ($st->fetchColumn()) return; // ya se mandó uno hace menos de 2 minutos
+
+  $token = solicitar_restablecer($pdo, $email);
+  if (!$token) return;
+
+  // sin saltos de línea: así nada puede colar cabeceras extra en el correo
+  $limpio = fn(string $s) => trim(str_replace(["\r", "\n"], '', $s));
+  $marca = $limpio($marca) ?: 'VIP PAITA MIX';
+  $remitente = $limpio($remitente);
+
+  $enlace = rtrim($urlSitio, '/') . '/?restablecer=' . $token;
+  $asunto = "Restablece tu contraseña de $marca";
+  $cuerpo = "Hola,\n\n"
+    . "Pediste cambiar tu contraseña de $marca. Entra a este enlace para elegir una nueva (vale por 1 hora):\n\n"
+    . "$enlace\n\n"
+    . "Si no fuiste tú, ignora este correo: tu contraseña sigue igual.\n";
+  $cabeceras = implode("\r\n", [
+    'From: ' . mb_encode_mimeheader($marca, 'UTF-8') . " <$remitente>",
+    "Reply-To: $remitente",
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+  ]);
+  // -f fija el remitente "de sobre": sin él, muchos servidores marcan el correo como spam
+  if (!mail($email, mb_encode_mimeheader($asunto, 'UTF-8'), $cuerpo, $cabeceras, '-f' . $remitente)) {
+    error_log("No se pudo enviar el correo de recuperación a $email");
+  }
 }
 
 function restablecer_con_token(PDO $pdo, string $token, string $nuevaPassword): void {

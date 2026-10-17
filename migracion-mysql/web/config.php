@@ -7,6 +7,10 @@ declare(strict_types=1);
 // (Perú no cambia de horario en el año). Sin esto, MySQL usa la hora del
 // servidor del hosting (casi siempre UTC) y el "límite de descargas por día"
 // se reiniciaría a las 7 p. m. en vez de a medianoche.
+// dirección del sitio (para los enlaces de los correos) y cuenta que los envía
+const URL_SITIO = 'http://127.0.0.1:8099';
+const CORREO_REMITENTE = 'no-responder@vippaitamix.com';
+
 $pdo = new PDO('mysql:host=vpm-mysql-test;dbname=vip_paita_mix;charset=utf8mb4', 'root', 'test1234', [
   PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
   PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone = '-05:00'",

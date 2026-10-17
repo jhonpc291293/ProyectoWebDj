@@ -76,9 +76,10 @@ try {
 
     case 'olvide': {
       exigir_post();
-      // en producción el token se manda por correo (falta SMTP); nunca se
-      // devuelve en la respuesta, y la respuesta es igual exista o no el correo
-      solicitar_restablecer($pdo, $_POST['email'] ?? '');
+      // el token viaja solo por correo, nunca en la respuesta; y la respuesta
+      // es igual exista o no el correo (no se revela quién tiene cuenta)
+      $marca = (string) $pdo->query('SELECT marca FROM settings WHERE id = 1')->fetchColumn();
+      enviar_restablecer($pdo, $_POST['email'] ?? '', URL_SITIO, CORREO_REMITENTE, $marca);
       responder(['mensaje' => 'Si el correo existe, te llegará un enlace para cambiar tu contraseña.']);
     }
 
