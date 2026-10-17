@@ -117,8 +117,15 @@ try {
       // qué tracks tienen archivo completo (sin revelar la ruta)
       $conArchivo = $pdo->query('SELECT track_id FROM track_files')->fetchAll(PDO::FETCH_COLUMN);
 
-      responder(['settings' => $s, 'planes' => $planes, 'crew' => $crew,
-                 'tracks' => $tracks, 'con_archivo' => $conArchivo]);
+      $comunicados = $pdo->query(
+        'SELECT id, titulo, cuerpo, imagen, autor, fijado, creado FROM comunicados
+          WHERE visible = 1 ORDER BY fijado DESC, creado DESC'
+      )->fetchAll(PDO::FETCH_ASSOC);
+      foreach ($comunicados as &$c) $c['fijado'] = (bool) $c['fijado'];
+      unset($c);
+
+      responder(['settings' => $s, 'planes' => $planes, 'crew' => $crew, 'tracks' => $tracks,
+                 'con_archivo' => $conArchivo, 'comunicados' => $comunicados]);
     }
 
     // ---------------- cuenta del miembro ----------------

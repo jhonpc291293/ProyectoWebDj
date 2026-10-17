@@ -30,10 +30,12 @@ const BUCKETS = [
   'comprobantes' => ['publico' => false, 'extensiones' => ['jpg','jpeg','png','pdf'],                'limite_mb' => 8],
 ];
 
+// el sufijo aleatorio evita que dos subidas del mismo nombre en el mismo
+// segundo se pisen (y que borrar una borre el archivo de la otra)
 function nombre_seguro(string $original): string {
   $limpio = strtolower($original);
   $limpio = preg_replace('/[^a-z0-9.]+/', '-', $limpio) ?? 'archivo';
-  return time() . '-' . $limpio;
+  return time() . '-' . bin2hex(random_bytes(3)) . '-' . $limpio;
 }
 
 /**

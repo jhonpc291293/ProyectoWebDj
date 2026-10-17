@@ -123,6 +123,9 @@ function admin_crear_usuario(PDO $pdo, string $adminId, string $email, string $p
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     throw new InvalidArgumentException('Correo no válido');
   }
+  if (strlen($password) < 6) {
+    throw new InvalidArgumentException('La contraseña necesita al menos 6 caracteres');
+  }
   $st = $pdo->prepare('SELECT 1 FROM usuarios WHERE email = ?');
   $st->execute([$email]);
   if ($st->fetchColumn()) {

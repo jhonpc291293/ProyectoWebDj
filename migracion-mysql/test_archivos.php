@@ -41,7 +41,12 @@ verificar('un archivo de "descargas" se guarda en RUTA_PRIVADA, no en la públic
 
 echo "\n=== Nombre de archivo con caracteres raros ===\n";
 $rutaRara = procesar_subida('portadas', $tmp, 'Mi Foto Año 2026 (final)!!.PNG', filesize($tmp), $mueve);
-verificar('limpia espacios, tildes/símbolos y mayúsculas del nombre', preg_match('/^portadas\/\d+-mi-foto-a-o-2026-final-\.png$/', $rutaRara) === 1);
+verificar('limpia espacios, tildes/símbolos y mayúsculas del nombre', preg_match('/^portadas\/\d+-[0-9a-f]{6}-mi-foto-a-o-2026-final-\.png$/', $rutaRara) === 1);
+
+echo "\n=== Dos subidas iguales en el mismo segundo no se pisan ===\n";
+$r1 = procesar_subida('descargas', $tmp, 'misma.mp3', filesize($tmp), $mueve);
+$r2 = procesar_subida('descargas', $tmp, 'misma.mp3', filesize($tmp), $mueve);
+verificar('cada subida recibe su propio nombre', $r1 !== $r2);
 
 echo "\n=== Subcarpeta con intento de escape ===\n";
 try {
