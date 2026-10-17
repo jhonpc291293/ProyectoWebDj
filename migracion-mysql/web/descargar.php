@@ -6,7 +6,6 @@
  * diario) y se registra la descarga.
  */
 declare(strict_types=1);
-session_start();
 require __DIR__ . '/../auth.php';
 require __DIR__ . '/../archivos.php';
 

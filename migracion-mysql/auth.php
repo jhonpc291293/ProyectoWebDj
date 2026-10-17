@@ -19,6 +19,22 @@
 declare(strict_types=1);
 require_once __DIR__ . '/funciones.php';
 
+// La sesión se abre aquí, con la cookie blindada, para todas las páginas:
+//  - httponly: el JavaScript de la página no puede leerla (si alguien
+//    lograra inyectar código, igual no podría robar la sesión)
+//  - secure: con HTTPS, la cookie nunca viaja sin cifrar
+//  - samesite=Lax: otro sitio no puede usarla para hacer pedidos a tu nombre
+// (desde la consola, en las pruebas, no hay sesión web que abrir)
+if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
+  session_name('vpm_sesion');
+  session_set_cookie_params([
+    'lifetime' => 0, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax',
+    'secure' => (($_SERVER['HTTPS'] ?? '') !== '' && $_SERVER['HTTPS'] !== 'off'),
+  ]);
+  ini_set('session.use_strict_mode', '1'); // no acepta IDs de sesión inventados
+  session_start();
+}
+
 final class CredencialesInvalidas extends Exception {}
 final class CorreoYaRegistrado extends Exception {}
 final class TokenInvalido extends Exception {}

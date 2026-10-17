@@ -68,6 +68,7 @@ function procesar_subida(
 
   $nombre = nombre_seguro($nombreOriginal);
   $carpetaBase = $conf['publico'] ? RUTA_PUBLICA : RUTA_PRIVADA;
+  if ($conf['publico']) proteger_carpeta_publica();
   $carpeta = $carpetaBase . '/' . $bucket . ($subcarpeta ? '/' . $subcarpeta : '');
   if (!is_dir($carpeta) && !mkdir($carpeta, 0755, true) && !is_dir($carpeta)) {
     throw new RuntimeException('No se pudo crear la carpeta de destino');
@@ -79,6 +80,21 @@ function procesar_subida(
   }
 
   return $bucket . ($subcarpeta ? '/' . $subcarpeta : '') . '/' . $nombre;
+}
+
+// Segunda capa de seguridad: aunque las extensiones ya se filtran al subir,
+// en la carpeta pública de subidas Apache nunca ejecuta código ni lista
+// archivos. Se escribe sola la primera vez que se sube algo.
+function proteger_carpeta_publica(): void {
+  $htaccess = RUTA_PUBLICA . '/.htaccess';
+  if (is_file($htaccess)) return;
+  if (!is_dir(RUTA_PUBLICA)) mkdir(RUTA_PUBLICA, 0755, true);
+  file_put_contents($htaccess,
+    "# Archivos subidos por el panel: aquí nunca se ejecuta código\n"
+    . "<FilesMatch \"\\.(php[0-9]?|phtml|phar|pht|cgi|pl|py|sh)$\">\n"
+    . "  Require all denied\n"
+    . "</FilesMatch>\n"
+    . "Options -Indexes -ExecCGI\n");
 }
 
 // para usar desde un formulario HTTP real, con $_FILES['campo']

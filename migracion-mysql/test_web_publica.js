@@ -143,7 +143,7 @@ function verificar(titulo, esperado, obtenido) {
 
   console.log('\n=== Recuperar contraseña desde el enlace del correo ===');
   const token = execSync(
-    `docker exec vpm-php-test php -r "require 'auth.php'; $pdo=new PDO('mysql:host=vpm-mysql-test;dbname=vip_paita_mix','root','test1234'); echo solicitar_restablecer($pdo,'cliente@test.com');"`,
+    `docker exec -w /app vpm-php-test php -r "require 'auth.php'; $pdo=new PDO('mysql:host=vpm-mysql-test;dbname=vip_paita_mix','root','test1234'); echo solicitar_restablecer($pdo,'cliente@test.com');"`,
     { env }).toString().trim();
   await page.goto(`${BASE}?restablecer=${token}`, { waitUntil: 'load' });
   await page.waitForSelector('#rPass');

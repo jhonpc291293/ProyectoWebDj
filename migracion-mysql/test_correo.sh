@@ -11,10 +11,12 @@ verificar() {
 correos() { MSYS_NO_PATHCONV=1 docker exec vpm-php-test cat /tmp/correos.txt 2>/dev/null; }
 cuantos() { correos | grep -c '^To: '; }
 olvide() { curl -s -H "$H" "${@:2}" -d "email=$1" "$PUB?accion=olvide"; }
+# vacía el buzón falso; chmod 666 porque con Apache PHP corre como www-data
+vaciar() { MSYS_NO_PATHCONV=1 docker exec vpm-php-test sh -c ': > /tmp/correos.txt && chmod 666 /tmp/correos.txt'; }
 
 curl -s -H "$H" -d "email=admin@test.com&password=claveadmin&nombre=Ronald" "$PUB?accion=registrar" >/dev/null
 curl -s -H "$H" -d "email=cliente@test.com&password=clave123&nombre=Cliente" "$PUB?accion=registrar" >/dev/null
-MSYS_NO_PATHCONV=1 docker exec vpm-php-test sh -c ': > /tmp/correos.txt'
+vaciar
 
 echo "=== El correo sale bien ==="
 R=$(olvide cliente@test.com)
@@ -36,7 +38,7 @@ verificar "con la clave elegida desde el correo, entra" "True" "$(curl -s -H "$H
 
 echo ""
 echo "=== Abusos ==="
-MSYS_NO_PATHCONV=1 docker exec vpm-php-test sh -c ': > /tmp/correos.txt'
+vaciar
 olvide admin@test.com -H "Host: sitio-del-atacante.com" >/dev/null
 verificar "con un Host falso, el enlace sigue apuntando al sitio real" "1" "$(correos | grep -c 'http://127.0.0.1:8099/?restablecer=')"
 verificar "y en ningún lado aparece el sitio del atacante" "0" "$(correos | grep -c 'atacante')"

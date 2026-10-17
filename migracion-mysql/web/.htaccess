@@ -1,0 +1,19 @@
+# VIP PAITA MIX · reglas de Apache para public_html
+
+# no mostrar el contenido de las carpetas como lista
+Options -Indexes
+
+# la portada es index.html (aunque el hosting deje algún index.php suyo)
+DirectoryIndex index.html
+
+# config.php tiene la clave de la base de datos: nunca se pide por URL.
+# PHP lo carga desde los otros archivos igual (esto solo frena al navegador).
+<Files "config.php">
+  Require all denied
+</Files>
+
+# HTTPS obligatorio. Se activa quitando los # de las 3 líneas de abajo,
+# SOLO cuando el certificado SSL ya esté instalado (si no, la web no abre).
+# RewriteEngine On
+# RewriteCond %{HTTPS} !=on
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
