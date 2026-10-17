@@ -87,8 +87,11 @@ try {
       $vencidas = $soyAdmin ? vencer_membresias($pdo, $yo) : 0; // antes: rpc("vencer_membresias") al abrir
       $moneda = $pdo->query('SELECT moneda FROM settings WHERE id = 1')->fetchColumn();
       $planes = $pdo->query('SELECT id, nombre, precio FROM planes ORDER BY precio')->fetchAll(PDO::FETCH_ASSOC);
-      $staff = $pdo->query("SELECT id, nombre, alias, email, rol FROM usuarios WHERE rol IN ('admin','editor')")
-        ->fetchAll(PDO::FETCH_ASSOC);
+      // la lista del equipo (con correos) es solo para el admin: un editor solo
+      // se ve a sí mismo, como con la RLS "ve su perfil" de antes
+      $staff = $soyAdmin
+        ? $pdo->query("SELECT id, nombre, alias, email, rol FROM usuarios WHERE rol IN ('admin','editor')")->fetchAll(PDO::FETCH_ASSOC)
+        : [array_intersect_key($perfil, array_flip(['id', 'nombre', 'alias', 'email', 'rol']))];
       responder(['perfil' => $perfil, 'moneda' => $moneda, 'vencidas' => $vencidas,
                  'planes' => $planes, 'staff' => $staff]);
     }

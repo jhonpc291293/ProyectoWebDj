@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel · VIP PAITA MIX</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lobster&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07060a; --panel:#13111a; --panel2:#1b1724; --line:rgba(255,255,255,.09);
+  --line-g:rgba(232,178,60,.3); --txt:#f3f0e9; --muted:#9c948a;
+  --gold:#e8b23c; --gold-soft:#f6d68c; --ok:#7ddba0; --warn:#ffb340; --bad:#ff6b81; --info:#5eb8f0;
+  --display:"Anton","Arial Black",sans-serif;
+  --script:"Lobster",cursive;
+  --body:"Space Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);font-size:15px;line-height:1.55}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,select,textarea{font:inherit}
+a{color:var(--gold)}
+h1,h2,h3,h4{margin:0}
+::selection{background:var(--gold);color:#120c02}
+
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px}
+.gate-box{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:34px}
+.gate-box h1{font-family:var(--display);font-size:26px;text-transform:uppercase;margin-bottom:6px}
+.gate-box h1.marca-script{font-family:var(--script);font-size:30px;text-transform:none;letter-spacing:0;margin-bottom:10px}
+.gate-box p.sub{color:var(--muted);font-size:14px;margin:0 0 24px}
+.brandline{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0 0 20px;font-size:13.5px;color:var(--muted)}
+.steps li{counter-increment:s;padding:9px 0 9px 34px;position:relative;border-bottom:1px solid var(--line)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:22px;height:22px;border-radius:50%;
+  border:1px solid var(--line-g);display:grid;place-items:center;font-size:11px;color:var(--txt)}
+.steps b{color:var(--txt)}
+
+.shell{display:grid;grid-template-columns:238px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:22px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{padding:0 22px 20px;font-family:var(--script);font-size:24px;letter-spacing:0}
+.logo span{color:var(--gold)}
+.logo small{display:block;font-family:var(--body);font-size:9.5px;letter-spacing:.2em;color:var(--muted);margin-top:3px}
+.menu{display:flex;flex-direction:column}
+.menu button{display:flex;align-items:center;gap:10px;padding:11px 22px;font-size:14px;color:var(--muted);
+  border-left:2px solid transparent;text-align:left}
+.menu button:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+.menu button.on{color:var(--txt);border-left-color:var(--gold);background:rgba(232,178,60,.09)}
+.menu button .pill{margin-left:auto;background:var(--gold);color:#120c02;font-size:10.5px;font-weight:700;
+  border-radius:999px;padding:1px 7px}
+.menu .sep{padding:18px 22px 7px;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#57515f}
+main{min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid var(--line);
+  background:rgba(7,6,10,.9);position:sticky;top:0;z-index:20;backdrop-filter:blur(10px)}
+.topbar h2{font-size:19px}
+.topbar .right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.who{font-size:12.5px;color:var(--muted)}
+.who b{color:var(--gold)}
+.content{padding:26px 28px 70px;flex:1}
+.barra-local{background:rgba(255,179,64,.1);border-bottom:1px solid rgba(255,179,64,.32);color:var(--warn);
+  padding:12px 28px;font-size:13px;line-height:1.5}
+.barra-local b{color:#ffd79a}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:9px;font-size:13.5px;
+  font-weight:700;border:1px solid var(--line-g);transition:.2s;white-space:nowrap}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn-p{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#120c02;border-color:transparent}
+.btn-p:hover{color:#120c02;box-shadow:0 0 22px rgba(232,178,60,.35)}
+.btn-d:hover{border-color:var(--bad);color:var(--bad)}
+.btn-ok{background:rgba(125,219,160,.14);border-color:rgba(125,219,160,.4);color:var(--ok)}
+.btn-sm{padding:6px 11px;font-size:12px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
+.kpi small{display:block;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.kpi b{font-size:28px;font-weight:700;line-height:1;font-family:var(--display)}
+.kpi .d{font-size:12px;color:var(--muted);margin-top:6px}
+.kpi.c1 b{color:var(--warn)}.kpi.c2 b{color:var(--ok)}.kpi.c3 b{color:var(--gold)}.kpi.c4 b{color:var(--info)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:22px}
+.card-h{display:flex;align-items:center;gap:12px;padding:15px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.card-h h3{font-size:15px}
+.card-h .right{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:11px 16px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--line);white-space:nowrap;background:var(--panel2)}
+td{padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td.acc{white-space:nowrap;text-align:right}
+.acciones-cuenta{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:150px}
+.acciones-cuenta select{width:100%}
+.acciones-cuenta .acciones-botones{display:flex;gap:6px;justify-content:flex-end}
+.chip{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);
+  color:var(--muted);white-space:nowrap}
+.chip.ok{color:var(--ok);border-color:rgba(125,219,160,.4)}
+.chip.warn{color:var(--warn);border-color:rgba(255,179,64,.4)}
+.chip.bad{color:var(--bad);border-color:rgba(255,107,129,.4)}
+.chip.g{color:var(--gold);border-color:var(--line-g)}
+.mini{font-size:12px;color:var(--muted)}
+.vacio{padding:44px 20px;text-align:center;color:var(--muted);font-size:14px}
+.bar{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));min-width:3px}
+.mini-art{width:38px;height:38px;border-radius:7px;background-size:cover;background-position:center;flex:none}
+.fila-track{display:flex;align-items:center;gap:11px}
+.buscar-tabla{padding:9px 12px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);min-width:180px}
+
+.f{margin-bottom:15px}
+.f label{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.f input[type=text],.f input[type=email],.f input[type=password],.f input[type=number],.f input[type=date],.f select,.f textarea{
+  width:100%;padding:11px 13px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+.f textarea{min-height:90px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,178,60,.12)}
+.f .help{font-size:12px;color:var(--muted);margin-top:5px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sw{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--panel2)}
+.sw input{accent-color:var(--gold);width:17px;height:17px}
+.drop{border:1px dashed var(--line-g);border-radius:9px;padding:13px;background:var(--panel2);display:flex;
+  align-items:center;gap:12px;flex-wrap:wrap}
+.drop input[type=file]{font-size:12.5px;color:var(--muted);max-width:100%}
+.drop .url{flex:1;min-width:160px;font-size:11.5px;color:var(--muted);word-break:break-all}
+.archivo-drop{border-style:solid;border-color:var(--line);padding:0;overflow:hidden}
+.archivo-drop.tiene-archivo{border-color:rgba(232,178,60,.35)}
+.archivo-drop .archivo-boton{display:flex;align-items:center;gap:13px;flex:1;min-width:220px;padding:13px;cursor:pointer;transition:.15s;text-transform:none;letter-spacing:normal}
+.archivo-boton:hover{background:rgba(232,178,60,.07)}
+.archivo-icono{flex-shrink:0;width:38px;height:38px;border-radius:9px;background:rgba(232,178,60,.12);
+  color:var(--gold);display:grid;place-items:center}
+.archivo-drop.tiene-archivo .archivo-icono{background:rgba(125,219,160,.15);color:var(--ok)}
+.archivo-info{min-width:0;flex:1}
+.archivo-info b{display:block;font-size:13px}
+.archivo-estado{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.archivo-drop [data-clear]{margin:0 13px}
+.req{color:var(--gold)}
+.bad-f input,.bad-f textarea,.bad-f select{border-color:var(--bad)!important}
+.grupo{margin:26px 0 12px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.74);backdrop-filter:blur(3px);z-index:60;opacity:0;pointer-events:none;transition:.25s}
+.ov.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;pointer-events:none}
+.modal.on{pointer-events:auto}
+.modal-box{width:min(640px,100%);max-height:88vh;display:flex;flex-direction:column;background:var(--panel);
+  border:1px solid var(--line-g);border-radius:15px;transform:translateY(14px) scale(.98);opacity:0;transition:.25s}
+.modal.on .modal-box{transform:none;opacity:1}
+.modal-h{display:flex;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}
+.modal-h h3{font-size:17px}
+.modal-h button{margin-left:auto;font-size:24px;color:var(--muted);line-height:1}
+.modal-b{padding:22px;overflow-y:auto}
+.modal-f{padding:16px 22px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+.toast{position:fixed;right:24px;bottom:24px;z-index:90;background:var(--panel2);border:1px solid var(--line-g);
+  border-left:3px solid var(--gold);border-radius:10px;padding:13px 20px;font-size:14px;opacity:0;
+  transform:translateY(12px);pointer-events:none;transition:.28s;box-shadow:0 16px 40px rgba(0,0,0,.6);max-width:min(390px,86vw)}
+.toast.on{opacity:1;transform:none}
+.toast.err{border-left-color:var(--bad)}
+.spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.25);border-top-color:var(--gold);border-radius:50%;
+  display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px 0}
+  .menu{flex-direction:row;overflow-x:auto}
+  .menu button{border-left:0;border-bottom:2px solid transparent;padding:10px 15px;white-space:nowrap}
+  .menu button.on{border-left:0;border-bottom-color:var(--gold)}
+  .menu .sep{display:none}
+  .logo{padding:0 18px 12px}
+  .content,.topbar{padding-left:16px;padding-right:16px}
+  .f2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div class="gate hide" id="gateLogin">
+  <form class="gate-box" id="loginForm">
+    <p class="brandline">Panel privado</p>
+    <h1 class="marca-script">Vip Paita <span style="color:var(--gold)">Mix</span></h1>
+    <p class="sub">Acceso para el administrador y los DJs editores.</p>
+    <div class="f"><label>Correo</label><input type="email" id="lgMail" autocomplete="username" required></div>
+    <div class="f"><label>Contraseña</label><input type="password" id="lgPass" autocomplete="current-password" required></div>
+    <button class="btn btn-p" type="submit" id="lgBtn" style="width:100%;justify-content:center">Entrar</button>
+    <p class="help" style="font-size:12.5px;color:var(--muted);margin-top:16px" id="lgMsg"></p>
+  </form>
+</div>
+
+<!-- ===== SIN PERMISO ===== -->
+<div class="gate hide" id="gateNoStaff">
+  <div class="gate-box">
+    <p class="brandline">Acceso restringido</p>
+    <h1>Esta cuenta no es del equipo</h1>
+    <p class="sub" id="noStaffMsg">Tu cuenta existe, pero no tiene rol de administrador ni de editor.
+      Si eres DJ del pool, pide al administrador que te asigne el rol de editor.</p>
+    <a class="btn btn-p" href="index.html" style="width:100%;justify-content:center">Ir a la web</a>
+    <button class="btn" id="salirNoStaff" style="width:100%;justify-content:center;margin-top:10px">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ===== PANEL ===== -->
+<div class="shell hide" id="app">
+  <aside>
+    <div class="logo">Vip Paita <span>Mix</span><small>Panel de administración</small></div>
+    <nav class="menu" id="menu"></nav>
+  </aside>
+  <main>
+    <div class="topbar">
+      <h2 id="viewTitle">Resumen</h2>
+      <div class="right">
+        <span class="who" id="who"></span>
+        <a class="btn btn-sm" href="index.html" target="_blank">Ver la web ↗</a>
+        <button class="btn btn-sm" id="logout">Salir</button>
+      </div>
+    </div>
+    <div class="content" id="view"></div>
+  </main>
+</div>
+
+<div class="ov" id="ov"></div>
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-h"><h3 id="mTitle">Editar</h3><button id="mX">&times;</button></div>
+    <div class="modal-b" id="mBody"></div>
+    <div class="modal-f" id="mFoot"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+   PANEL VIP PAITA MIX
+   admin  → todo: catálogo, miembros, pagos, planes, crew, marca, editores
+   editor → solo sus propios tracks y sus estadísticas
+   ========================================================================= */
+const $  = (s,c=document)=>c.querySelector(s);
+const $$ = (s,c=document)=>[...c.querySelectorAll(s)];
+let usuario=null, perfil=null, MONEDA="S/";
+const cache = { staff:[], crew:[], planes:[], archivos:{} };
+
+let tt;
+function aviso(msg,error=false){ const t=$("#toast"); t.innerHTML=msg; t.classList.toggle("err",error);
+  t.classList.add("on"); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("on"),error?5200:2800); }
+const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = n => MONEDA+" "+(+n||0).toFixed(2).replace(/\.00$/,"");
+const fecha = d => d ? new Date(String(d).length>10?d:d+"T00:00:00").toLocaleDateString("es-PE",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+const fechaH = d => d ? new Date(d).toLocaleString("es-PE",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
+const esAdmin = () => perfil?.rol==="admin";
+const hexRgb = hex => { let h=(hex||"").replace("#",""); if(h.length===3) h=h.split("").map(c=>c+c).join("");
+  const n=parseInt(h,16)||0; return [(n>>16)&255,(n>>8)&255,n&255]; };
+const aHex = n => Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,"0");
+const aclarar = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c+(255-c)*pct; return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
+const oscurecer = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c*(1-pct); return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
+const FUENTES_TITULO=["Anton","Bebas Neue","Oswald","Archivo Black","Passion One","Alfa Slab One","Righteous","Teko","Big Shoulders Display"];
+const FUENTES_TEXTO=["Space Grotesk","Inter","Poppins","Work Sans","Manrope","Sora","DM Sans","Outfit","Nunito Sans"];
+function cargarFuente(nombre,pesos){
+  if(!nombre) return;
+  const id="gf-"+nombre.replace(/\s+/g,"-").toLowerCase();
+  if(document.getElementById(id)) return;
+  const link=document.createElement("link"); link.id=id; link.rel="stylesheet";
+  link.href=`https://fonts.googleapis.com/css2?family=${nombre.replace(/ /g,"+")}:wght@${pesos}&display=swap`;
+  document.head.appendChild(link);
+}
+const MESES_TRACK = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+function periodoTrack(d){
+  const fechaTrack=new Date(d||0);
+  if(Number.isNaN(fechaTrack.getTime())) return null;
+  const anio=fechaTrack.getFullYear(), mes=fechaTrack.getMonth()+1;
+  return {anio,mes,claveMes:`${anio}-${String(mes).padStart(2,"0")}`,semana:Math.ceil(fechaTrack.getDate()/7)};
+}
+
+function guardado(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function guardar(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+/* ---------- conexión con el servidor ---------- */
+// api() habla con api/panel.php (cuerpo JSON); apiPublica() con api/publica.php
+// (login, logout, sesión). Ambas llevan la cookie de sesión del sitio y la
+// cabecera X-VPM, que el servidor exige en los POST (protección anti-CSRF).
+// Devuelven {data, error} como hacía el cliente de Supabase, para que el resto
+// del panel siga leyendo los resultados igual que antes.
+async function pedir(url, op){
+  try{
+    const r=await fetch(url,{credentials:"same-origin",...op,headers:{"X-VPM":"1",...(op.headers||{})}});
+    const j=await r.json().catch(()=>({ok:false,error:`Error ${r.status} del servidor`}));
+    return j.ok ? {data:j, error:null} : {data:null, error:{message:j.error||`Error ${r.status}`, status:r.status}};
+  }catch(e){ return {data:null, error:{message:"No se pudo conectar con el servidor"}}; }
+}
+const api = (accion, datos) => pedir(`api/panel.php?accion=${encodeURIComponent(accion)}`,
+  datos ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(datos)} : {});
+const apiPublica = (accion, datos) => {
+  const op={};
+  if(datos){ op.method="POST"; op.body=new FormData(); Object.entries(datos).forEach(([k,v])=>op.body.append(k,v??"")); }
+  return pedir(`api/publica.php?accion=${encodeURIComponent(accion)}`, op);
+};
+// sube un archivo a la carpeta del bucket y devuelve lo que se guarda en la
+// base de datos: la ruta privada (descargas) o la URL pública (lo demás)
+async function subirArchivo(bucket, file){
+  const fd=new FormData(); fd.append("bucket",bucket); fd.append("archivo",file);
+  try{
+    const r=await fetch("subir.php",{method:"POST",credentials:"same-origin",body:fd});
+    const t=await r.text();
+    if(!t.startsWith("OK:")) return {error:{message:t.replace(/^ERROR:/,"")||`Error ${r.status}`}};
+    const ruta=t.slice(3);
+    return {valor: bucket==="descargas" ? ruta : "/subidas/"+ruta};
+  }catch(e){ return {error:{message:"No se pudo conectar con el servidor"}}; }
+}
+
+/* ---------- arranque ---------- */
+(async function(){
+  const {data}=await apiPublica("sesion");
+  data?.usuario ? entrar(data.usuario) : $("#gateLogin").classList.remove("hide");
+})();
+
+$("#loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const b=$("#lgBtn"); b.disabled=true; b.innerHTML='<span class="spin"></span> Entrando…';
+  const {data,error}=await apiPublica("login",{email:$("#lgMail").value.trim(),password:$("#lgPass").value});
+  b.disabled=false; b.textContent="Entrar";
+  if(error) return $("#lgMsg").innerHTML=`<span style="color:var(--bad)">${esc(error.message)}</span>`;
+  entrar(data.usuario);
+});
+async function salir(){ await apiPublica("logout",{}); location.reload(); }
+$("#logout").addEventListener("click",salir);
+$("#salirNoStaff").addEventListener("click",salir);
+
+async function entrar(user){
+  usuario=user;
+  perfil=user;
+  $("#gateLogin").classList.add("hide");
+  if(!["admin","editor"].includes(perfil.rol)){ $("#gateNoStaff").classList.remove("hide"); return; }
+
+  // "yo" además vence las membresías pasadas de fecha (antes: rpc vencer_membresias)
+  const {data:yo,error}=await api("yo");
+  if(error){ $("#gateLogin").classList.remove("hide");
+    return $("#lgMsg").innerHTML=`<span style="color:var(--bad)">No pude abrir el panel: ${esc(error.message)}</span>`; }
+  perfil=yo.perfil; usuario=yo.perfil;
+  if(yo.moneda) MONEDA=yo.moneda;
+  cache.staff=yo.staff||[perfil];
+  cache.planes=yo.planes||[];
+
+  $("#app").classList.remove("hide");
+  $("#who").innerHTML = `${esc(perfil.nombre||perfil.email)} · <b>${esAdmin()?"Administrador":"DJ editor"}</b>`;
+  avisoArchivoLocal();
+  pintarMenu();
+  await contadores();
+  ver("resumen");
+}
+
+function avisoArchivoLocal(){
+  if(location.protocol!=="file:") return;
+  const enZip=/\.zip|AppData[\\/]Local[\\/]Temp/i.test(decodeURIComponent(location.pathname));
+  const b=document.createElement("div"); b.className="barra-local";
+  b.innerHTML = enZip
+    ? `<b>Estás abriendo el panel desde dentro del ZIP.</b> Esa carpeta es temporal y no contiene index.html.
+       Extrae la carpeta (clic derecho → Extraer todo) y abre admin.html desde ahí.`
+    : `<b>Panel abierto como archivo local.</b> Funciona para editar, pero al publicar el sitio usa la dirección web.`;
+  $("main").insertBefore(b,$(".content"));
+}
+
+
+/* =========================================================================
+   MENÚ SEGÚN ROL
+   ========================================================================= */
+const MENU_ADMIN = [
+  {v:"resumen",  t:"Resumen"},
+  {sep:"Catálogo"},
+  {v:"tracks",   t:"Tracks"},
+  {sep:"Miembros"},
+  {v:"pagos",    t:"Pagos por aprobar", pill:"pillPagos"},
+  {v:"compras",  t:"Compras sueltas", pill:"pillCompras"},
+  {v:"miembros", t:"Miembros"},
+  {v:"plans",    t:"Planes"},
+  {sep:"Marca"},
+  {v:"settings",     t:"Marca y contacto"},
+  {v:"crew",         t:"El crew"},
+  {v:"comunicados",  t:"Comunicados"},
+  {v:"editores", t:"Editores y roles"},
+  {v:"mensajes", t:"Mensajes", pill:"pillMsg"}
+];
+const MENU_EDITOR = [
+  {v:"resumen", t:"Mi resumen"},
+  {sep:"Catálogo"},
+  {v:"tracks",  t:"Mis tracks"},
+  {sep:"Marca"},
+  {v:"comunicados", t:"Comunicados"}
+];
+function pintarMenu(){
+  const m = esAdmin()?MENU_ADMIN:MENU_EDITOR;
+  $("#menu").innerHTML = m.map(i=> i.sep
+    ? `<div class="sep">${i.sep}</div>`
+    : `<button data-v="${i.v}">${i.t}${i.pill?`<span class="pill hide" id="${i.pill}">0</span>`:""}</button>`).join("");
+}
+$("#menu").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(b) ver(b.dataset.v); });
+
+const TITULOS = {resumen:"Resumen",tracks:"Catálogo",pagos:"Pagos por aprobar",compras:"Compras sueltas",
+  miembros:"Miembros",plans:"Planes de membresía",settings:"Marca y contacto",crew:"El crew",
+  comunicados:"Comunicados",editores:"Editores y roles",mensajes:"Mensajes"};
+function ver(v){
+  const permitidas = esAdmin()
+    ? MENU_ADMIN.filter(i=>i.v).map(i=>i.v)
+    : MENU_EDITOR.filter(i=>i.v).map(i=>i.v);
+  if(!permitidas.includes(v)) return ver(esAdmin()?"resumen":"resumen");
+  $$("#menu button[data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  $("#viewTitle").textContent = v==="tracks" && !esAdmin() ? "Mis tracks" : (TITULOS[v]||v);
+  const viejo=$("#view"), nuevo=viejo.cloneNode(false);
+  viejo.replaceWith(nuevo);
+  nuevo.innerHTML=`<div class="vacio"><span class="spin"></span> Cargando…</div>`;
+  ({resumen:vistaResumen, tracks:vistaTracks, pagos:vistaPagos, compras:vistaCompras, miembros:vistaMiembros,
+    plans:vistaPlanes, settings:vistaMarca, crew:vistaCrew, comunicados:vistaComunicados,
+    editores:vistaEditores, mensajes:vistaMensajes}[v]||vistaResumen)();
+}
+window.ver=ver;
+
+async function contadores(){
+  if(!esAdmin()) return;
+  const {data:n}=await api("contadores");
+  const set=(el,k)=>{ if(!el) return; el.textContent=k||0; el.classList.toggle("hide",!k); };
+  set($("#pillPagos"),n?.pagos); set($("#pillCompras"),n?.compras); set($("#pillMsg"),n?.mensajes);
+}
+
+/* =========================================================================
+   RESUMEN
+   ========================================================================= */
+async function vistaResumen(){
+  if(!esAdmin()) return resumenEditor();
+  const {data:r,error}=await api("resumen");
+  if(error) return errorVista(error);
+  // mismas variables que antes, para no tocar el HTML de abajo
+  const pend={count:r.pendientes}, act={count:r.activos}, tracks={count:r.tracks},
+        dl7={count:r.descargas_7d}, top={data:r.top}, edits={data:r.editores};
+  const ingresos=+r.ingresos_mes||0;
+  const maxDl=Math.max(1,...(top.data||[]).map(t=>t.descargas||0));
+  $("#view").innerHTML=`
+    <div class="kpis">
+      <div class="kpi c1"><small>Pagos por aprobar</small><b>${pend.count||0}</b><div class="d">esperando revisión</div></div>
+      <div class="kpi c2"><small>Miembros activos</small><b>${act.count||0}</b><div class="d">con acceso vigente</div></div>
+      <div class="kpi c3"><small>Ingresos del mes</small><b>${money(ingresos)}</b><div class="d">membresías aprobadas</div></div>
+      <div class="kpi c4"><small>Descargas 7 días</small><b>${dl7.count||0}</b><div class="d">${tracks.count||0} tracks en el pool</div></div>
+    </div>
+    ${pend.count?`<div class="card" style="border-color:rgba(255,179,64,.4)">
+      <div class="card-h"><h3 style="color:var(--warn)">Tienes ${pend.count} pago(s) esperando aprobación</h3>
+      <div class="right"><button class="btn btn-p btn-sm" onclick="ver('pagos')">Revisar ahora</button></div></div></div>`:""}
+    <div class="card">
+      <div class="card-h"><h3>Tracks más descargados</h3>
+        <div class="right"><button class="btn btn-sm" onclick="ver('tracks')">Ver catálogo</button></div></div>
+      ${(top.data||[]).length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Track</th><th>Tipo</th><th>Editor</th><th style="width:32%">Descargas</th><th>Plays</th></tr></thead>
+        <tbody>${top.data.map(t=>`<tr>
+          <td><b>${esc(t.titulo)}</b><div class="mini">${esc(t.artista||"")}</div></td>
+          <td><span class="chip g">${esc(t.tipo)}</span></td>
+          <td class="mini">${esc(t.editor||"—")}</td>
+          <td><div style="display:flex;align-items:center;gap:10px">
+            <div class="bar" style="width:${Math.round((t.descargas||0)/maxDl*100)}%"></div>
+            <span class="mini">${t.descargas||0}</span></div></td>
+          <td class="mini">${t.reproducciones||0}</td></tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Aún no hay descargas registradas.</div>`}
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Aporte por editor</h3></div>
+      ${(edits.data||[]).length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Editor</th><th>Tracks</th><th>Descargas</th><th>Último aporte</th></tr></thead>
+        <tbody>${edits.data.map(e=>`<tr><td><b>${esc(e.editor)}</b></td><td>${e.tracks}</td>
+          <td>${e.descargas||0}</td><td class="mini">${fechaH(e.ultimo_aporte)}</td></tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Sin datos.</div>`}
+    </div>
+    <p class="mini">Estas cifras salen de las vistas <b>v_ingresos_mes</b>, <b>v_top_tracks</b>,
+      <b>v_editores</b> y <b>v_miembros</b>, que puedes conectar a Power BI.</p>`;
+}
+
+async function resumenEditor(){
+  // para un editor, el servidor ya devuelve solo sus propios tracks
+  const {data:r,error}=await api("tracks");
+  if(error) return errorVista(error);
+  const t=r.tracks||[];
+  const totalDl=t.reduce((a,x)=>a+(x.descargas||0),0);
+  const visibles=t.filter(x=>x.visible).length;
+  const maxDl=Math.max(1,...t.map(x=>x.descargas||0));
+  $("#view").innerHTML=`
+    <div class="kpis">
+      <div class="kpi c3"><small>Mis tracks</small><b>${t.length}</b><div class="d">${visibles} publicados</div></div>
+      <div class="kpi c2"><small>Descargas de mi material</small><b>${totalDl}</b><div class="d">acumulado</div></div>
+      <div class="kpi c4"><small>Último aporte</small><b style="font-size:19px">${t[0]?fecha(t[0].creado):"—"}</b></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Mis tracks por descargas</h3>
+        <div class="right"><button class="btn btn-p btn-sm" onclick="ver('tracks')">Subir un track</button></div></div>
+      ${t.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Track</th><th>Tipo</th><th style="width:34%">Descargas</th><th>Estado</th></tr></thead>
+        <tbody>${[...t].sort((a,b)=>(b.descargas||0)-(a.descargas||0)).map(x=>`<tr>
+          <td><b>${esc(x.titulo)}</b><div class="mini">${esc(x.artista||"")} · ${x.bpm||"?"} BPM</div></td>
+          <td><span class="chip g">${esc(x.tipo)}</span></td>
+          <td><div style="display:flex;align-items:center;gap:10px">
+            <div class="bar" style="width:${Math.round((x.descargas||0)/maxDl*100)}%"></div>
+            <span class="mini">${x.descargas||0}</span></div></td>
+          <td><span class="chip ${x.visible?"ok":""}">${x.visible?"publicado":"oculto"}</span></td>
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Todavía no subiste ningún track.<br>
+        <button class="btn btn-p btn-sm" style="margin-top:14px" onclick="ver('tracks')">Subir el primero</button></div>`}
+    </div>`;
+}
+
+/* =========================================================================
+   CATÁLOGO
+   ========================================================================= */
+const CAMPOS_TRACK = [
+  {k:"titulo",l:"Título",t:"text",req:true},
+  {k:"artista",l:"Artista original",t:"text",ph:"Sensación / Varios"},
+  {k:"tipo",l:"Tipo",t:"select",opts:["edit","remix","mashup","intro","acapella","transicion"],def:"edit",mitad:true},
+  {k:"genero",l:"Género",t:"text",ph:"Cumbia",mitad:true},
+  {k:"bpm",l:"BPM",t:"number",mitad:true},
+  {k:"tonalidad",l:"Tonalidad",t:"text",ph:"Am",mitad:true},
+  {k:"duracion",l:"Duración (mm:ss)",t:"text",ph:"3:40",mitad:true},
+  {k:"anio",l:"Año",t:"number",mitad:true},
+  {k:"portada",l:"Portada",t:"file",bucket:"portadas",help:"Cuadrada, JPG o WebP, menos de 500 KB."},
+  {k:"preview",l:"Muestra pública (60-90 s)",t:"file",bucket:"previews",
+   help:"La escucha cualquiera. Si la dejas vacía suena una demo generada."},
+  {k:"_archivo",l:"Archivo completo (solo miembros)",t:"file",bucket:"descargas",virtual:true,
+   help:"Este es el que se descarga con membresía. Queda en una carpeta privada del servidor."},
+  {k:"gratis",l:"Gratis para usuarios registrados",t:"bool",mitad:true},
+  {k:"precio",l:"Precio de venta suelta (0 = no se vende suelto)",t:"number",step:"0.01",def:0,mitad:true,
+   help:"Si pones un precio, cualquiera puede comprar solo esta canción sin necesitar membresía."},
+  {k:"plan_minimo_id",l:"Plan mínimo requerido",t:"plan",mitad:true,
+   help:"Solo ese plan (o uno de precio mayor) podrá descargarla. Vacío = cualquier membresía activa alcanza, como siempre."},
+  {k:"destacado",l:"Destacado",t:"bool",mitad:true},
+  {k:"visible",l:"Publicado en la web",t:"bool",def:true}
+];
+
+let TRACKS_VISTA=[];
+async function vistaTracks(){
+  // admin: todo el catálogo; editor: solo los suyos (lo decide el servidor)
+  const {data,error}=await api("tracks");
+  if(error) return errorVista(error);
+  TRACKS_VISTA=data.tracks||[];
+  cache.archivos=data.archivos||{};
+  render();
+  // delegado una sola vez: #view no se reemplaza al buscar, solo su innerHTML,
+  // así que si esto viviera dentro de render() se acumularía un handler por tecleo
+  $("#view").addEventListener("click",e=>{
+    const ed=e.target.closest("[data-edit]"), de=e.target.closest("[data-del]");
+    if(ed) formTrack(TRACKS_VISTA.find(t=>t.id===ed.dataset.edit));
+    if(de) borrarTrack(TRACKS_VISTA.find(t=>t.id===de.dataset.del));
+  });
+
+  function render(filtro="", mesFiltro="", semanaFiltro=""){
+    const f=filtro.toLowerCase();
+    const mesActivo=mesFiltro?Number(mesFiltro):0;
+    const semanas=[1,2,3,4,5];
+    const lista=TRACKS_VISTA.filter(t=>{
+      const p=periodoTrack(t.creado);
+      const coincideTexto=!f||`${t.titulo} ${t.artista} ${t.genero} ${t.editor} ${t.tipo}`.toLowerCase().includes(f);
+      const coincideMes=!mesActivo||p?.mes===mesActivo;
+      const coincideSemana=!semanaFiltro||p?.semana===Number(semanaFiltro);
+      return coincideTexto&&coincideMes&&coincideSemana;
+    });
+    $("#view").innerHTML=`
+      <div class="card">
+        <div class="card-h"><h3>${esAdmin()?"Catálogo":"Mis tracks"} <span class="mini">· ${lista.length} de ${TRACKS_VISTA.length}</span></h3>
+          <div class="right">
+            <input class="buscar-tabla" id="bt" placeholder="Buscar en la tabla…" value="${esc(filtro)}">
+            <select class="buscar-tabla" id="mesTrack" aria-label="Filtrar por mes">
+              <option value="">Todos los meses</option>
+              ${MESES_TRACK.map((mes,i)=>`<option value="${i+1}" ${String(i+1)===String(mesActivo)?"selected":""}>${mes}</option>`).join("")}
+            </select>
+            <select class="buscar-tabla" id="semanaTrack" aria-label="Filtrar por semana del mes" ${mesActivo?"":"disabled"}>
+              <option value="">Todas las semanas</option>
+              ${semanas.map(s=>`<option value="${s}" ${String(s)===String(semanaFiltro)?"selected":""}>Semana ${s}</option>`).join("")}
+            </select>
+            <button class="btn btn-p btn-sm" id="nuevo">+ Subir track</button></div></div>
+        ${lista.length?`<div class="tbl-wrap"><table>
+          <thead><tr><th>Track</th><th>Tipo</th><th>Género · BPM</th>${esAdmin()?"<th>Editor</th>":""}
+            <th>Archivo</th><th>Descargas</th><th>Estado</th><th></th></tr></thead>
+          <tbody>${lista.map(t=>`<tr>
+            <td><div class="fila-track">
+              <div class="mini-art" style="${t.portada?`background-image:url('${esc(t.portada)}')`:"background:linear-gradient(135deg,#2a2136,#12101a)"}"></div>
+              <div><b>${esc(t.titulo)}</b><div class="mini">${esc(t.artista||"—")}${t.gratis?' · <span style="color:var(--ok)">gratis</span>':""}${
+                t.plan_minimo_id?` · <span style="color:var(--gold)">desde ${esc(cache.planes.find(p=>p.id===t.plan_minimo_id)?.nombre||"plan")}</span>`:""}</div></div>
+            </div></td>
+            <td><span class="chip g">${esc(t.tipo)}</span></td>
+            <td class="mini">${esc(t.genero||"—")}${t.bpm?` · ${t.bpm}`:""}</td>
+            ${esAdmin()?`<td class="mini">${esc(t.editor||"—")}</td>`:""}
+            <td>${cache.archivos[t.id]?`<span class="chip ok">cargado</span>`:`<span class="chip warn">falta</span>`}
+                ${t.preview?"":`<div class="mini">sin muestra</div>`}</td>
+            <td>${t.descargas||0}</td>
+            <td><span class="chip ${t.visible?"ok":""}">${t.visible?"publicado":"oculto"}</span></td>
+            <td class="acc">
+              <button class="btn btn-sm" data-edit="${t.id}">Editar</button>
+              <button class="btn btn-sm btn-d" data-del="${t.id}">Borrar</button></td>
+          </tr>`).join("")}</tbody></table></div>`
+        :`<div class="vacio">${filtro?"Nada coincide con la búsqueda.":"Todavía no hay tracks. Sube el primero con el botón de arriba."}</div>`}
+      </div>
+      ${!esAdmin()?`<p class="mini">Solo ves y editas los tracks que subiste tú. El administrador ve todo el catálogo.</p>`:""}`;
+
+    $("#nuevo").addEventListener("click",()=>formTrack(null));
+    let d; $("#bt").addEventListener("input",e=>{ clearTimeout(d); const v=e.target.value;
+      d=setTimeout(()=>{ render(v,$("#mesTrack").value,$("#semanaTrack").value); const i=$("#bt"); i.focus(); i.setSelectionRange(v.length,v.length); },260); });
+    $("#mesTrack").addEventListener("change",e=>render($("#bt").value,e.target.value,""));
+    $("#semanaTrack").addEventListener("change",e=>render($("#bt").value,$("#mesTrack").value,e.target.value));
+  }
+}
+
+function formTrack(fila){
+  const nuevo=!fila;
+  const campos=[...CAMPOS_TRACK];
+  if(esAdmin()) campos.splice(2,0,{k:"editor_id",l:"DJ que lo subió",t:"staff",mitad:true});
+  abrirModal(nuevo?"Subir track":"Editar track",
+    `<div id="formT">${campos.map(c=>campoHTML(c, nuevo?c.def:(c.k==="_archivo"?cache.archivos[fila.id]:fila[c.k]))).join("")}</div>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:nuevo?"Publicar":"Guardar",clase:"btn-p",accion:async btn=>{
+        const obj={}; let ok=true, archivo=null;
+        campos.forEach(c=>{
+          const el=$(`[name="${c.k}"]`,$("#mBody")); const val=leerCampo(c,el);
+          if(c.req&&!val){ el.closest(".f").classList.add("bad-f"); ok=false; return; }
+          el.closest(".f").classList.remove("bad-f");
+          if(c.virtual){ archivo=val; return; }
+          obj[c.k]=val;
+        });
+        if(!ok) return aviso("Revisa los campos marcados.",true);
+        // de quién es el track, su alias y su correo los decide el servidor:
+        // un editor siempre queda como dueño; el admin puede elegir a otro DJ
+        if(!nuevo) obj.id=fila.id;
+        if(archivo) obj.archivo=archivo;
+
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Guardando…';
+        const {error}=await api("guardar_track",obj);
+        btn.disabled=false; btn.textContent=nuevo?"Publicar":"Guardar";
+        if(error) return errorAviso(error);
+        cerrarModal(); aviso(nuevo?"Track publicado.":"Cambios guardados."); ver("tracks");
+      }} ]);
+  agruparMitades($("#formT"));
+  activarArchivos();
+}
+
+function borrarTrack(t){
+  abrirModal("Confirmar",
+    `<p style="margin:0">¿Borrar <b>${esc(t?.titulo||"este track")}</b>? Se elimina del catálogo
+     junto con su archivo asociado. No se puede deshacer.</p>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:"Sí, borrar",clase:"btn-d",accion:async btn=>{
+        btn.disabled=true;
+        // el servidor borra el track y sus archivos (salvo los que otro registro aún use)
+        const {error}=await api("borrar_track",{id:t.id});
+        if(error){ btn.disabled=false; return errorAviso(error); }
+        cerrarModal(); aviso("Track borrado."); ver("tracks");
+      }} ]);
+}
+
+/* =========================================================================
+   PAGOS POR APROBAR
+   ========================================================================= */
+async function vistaPagos(){
+  const {data:r,error}=await api("membresias");
+  if(error) return errorVista(error);
+  const data=r.membresias||[];
+  // cada fila ya trae los datos del miembro; se arma el mismo mapa de antes
+  const perfiles={};
+  data.forEach(m=>perfiles[m.user_id]={id:m.user_id,nombre:m.nombre,alias:m.alias,telefono:m.telefono});
+  const pend=data.filter(m=>m.estado==="pendiente");
+
+  $("#view").innerHTML=`
+    <div class="card" style="${pend.length?"border-color:rgba(255,179,64,.4)":""}">
+      <div class="card-h"><h3>Pendientes <span class="mini">· ${pend.length}</span></h3></div>
+      ${pend.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Recibido</th><th>Miembro</th><th>Plan</th><th>Monto</th><th>Comprobante</th><th></th></tr></thead>
+        <tbody>${pend.map(m=>`<tr>
+          <td class="mini">${fechaH(m.creado)}</td>
+          <td><b>${esc(perfiles[m.user_id]?.nombre||"—")}</b>
+            <div class="mini">${esc(perfiles[m.user_id]?.telefono||"")}${m.notas?" · "+esc(m.notas):""}</div></td>
+          <td>${esc(m.plan_nombre||"—")}</td>
+          <td><b style="color:var(--gold)">${money(m.monto)}</b></td>
+          <td>${m.comprobante?`<button class="btn btn-sm" data-ver="${esc(m.comprobante)}">Ver captura</button>`:`<span class="chip">sin captura</span>`}</td>
+          <td class="acc">
+            <button class="btn btn-sm btn-ok" data-ok="${m.id}">Aprobar</button>
+            <button class="btn btn-sm btn-d" data-no="${m.id}">Rechazar</button></td>
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">No hay pagos esperando aprobación.</div>`}
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Historial de membresías <span class="mini">· ${data.length}</span></h3>
+        <div class="right"><button class="btn btn-sm" id="csv">Descargar CSV</button></div></div>
+      ${data.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Miembro</th><th>Plan</th><th>Monto</th><th>Vigencia</th><th>Estado</th><th></th></tr></thead>
+        <tbody>${data.map(m=>`<tr>
+          <td class="mini">${fechaH(m.creado)}</td>
+          <td>${esc(perfiles[m.user_id]?.nombre||"—")}</td>
+          <td class="mini">${esc(m.plan_nombre||"—")}</td>
+          <td>${money(m.monto)}</td>
+          <td class="mini">${m.inicio?`${fecha(m.inicio)} → ${fecha(m.fin)}`:"—"}</td>
+          <td><span class="chip ${{activa:"ok",pendiente:"warn",vencida:"",rechazada:"bad"}[m.estado]||""}">${esc(m.estado)}</span></td>
+          <td class="acc">${m.estado==="activa"
+            ? `<button class="btn btn-sm" data-ext="${m.id}">+30 días</button>`
+            : m.estado!=="pendiente" ? `<button class="btn btn-sm btn-ok" data-ok="${m.id}">Reactivar</button>`:""}</td>
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Sin registros.</div>`}
+    </div>`;
+
+  $("#view").addEventListener("click",async e=>{
+    const ok=e.target.closest("[data-ok]"), no=e.target.closest("[data-no]"),
+          v=e.target.closest("[data-ver]"), ext=e.target.closest("[data-ext]");
+    if(ok){ ok.disabled=true; ok.innerHTML='<span class="spin"></span>';
+      const {data:res,error}=await api("aprobar_membresia",{id:ok.dataset.ok});
+      if(error){ ok.disabled=false; ok.textContent="Aprobar"; return errorAviso(error); }
+      const m=res.membresia;
+      aviso("Membresía activada. El miembro ya puede descargar.");
+      avisoWhatsApp(perfiles[m.user_id], m);
+      ver("pagos"); contadores(); }
+    if(no){ const {error}=await api("rechazar_membresia",{id:no.dataset.no});
+      if(error) return errorAviso(error);
+      aviso("Pago rechazado."); ver("pagos"); contadores(); }
+    if(ext){ const m=data.find(x=>x.id===ext.dataset.ext);
+      const nueva=new Date(m.fin+"T12:00:00"); nueva.setDate(nueva.getDate()+30);
+      const {error}=await api("cambiar_fin_membresia",{id:m.id, fin:nueva.toISOString().slice(0,10)});
+      if(error) return errorAviso(error);
+      aviso("Membresía extendida 30 días."); ver("pagos"); }
+    if(v){ verComprobante(v.dataset.ver); }
+  });
+  $("#csv").addEventListener("click",()=>descargarCSV("membresias",data.map(m=>({
+    fecha:m.creado, miembro:perfiles[m.user_id]?.nombre||"", plan:m.plan_nombre, monto:m.monto,
+    estado:m.estado, inicio:m.inicio, fin:m.fin }))));
+}
+
+// ofrece avisar por WhatsApp justo después de aprobar un pago; requiere un clic
+// directo del admin (no se abre solo) para que el navegador no bloquee la pestaña
+function abrirAvisoWhatsApp(perfil, tituloModal, mensaje){
+  const digitos=(perfil?.telefono||"").replace(/\D/g,"");
+  if(!digitos) return aviso(`${tituloModal}. Esta persona no dejó su WhatsApp — avísale por otro medio.`);
+  const numero = digitos.length===9 ? "51"+digitos : digitos;
+  abrirModal(tituloModal, `
+    <p style="margin:0">Ya se activó para <b>${esc(perfil?.nombre||"—")}</b>
+      (${esc(perfil.telefono)}). Puedes avisarle ahora mismo por WhatsApp con el mensaje ya listo.</p>`,
+    [ {texto:"Cerrar",accion:()=>cerrarModal()},
+      {texto:"Abrir WhatsApp",clase:"btn-p",accion:()=>{
+        window.open(`https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`,"_blank");
+        cerrarModal();
+      }} ]);
+}
+function avisoWhatsApp(perfil, m){
+  const msg = `Hola ${perfil?.nombre||""}! Tu membresía${m.plan_nombre?` ${m.plan_nombre}`:""} ya está activa. `
+    + `Válida hasta ${fecha(m.fin)}. ¡Ya puedes descargar todo el catálogo!`;
+  abrirAvisoWhatsApp(perfil,"Membresía activada",msg);
+}
+function avisoWhatsAppCompra(perfil, titulos){
+  const lista = titulos.length>1 ? titulos.join(", ") : (titulos[0]||"tu canción");
+  const msg = `Hola ${perfil?.nombre||""}! Ya aprobamos tu compra: ${lista}. `
+    + `Ya puedes descargarla${titulos.length>1?"s":""} desde la web, cuando quieras.`;
+  abrirAvisoWhatsApp(perfil,"Compra aprobada",msg);
+}
+
+async function verComprobante(ruta){
+  // ver_comprobante.php vuelve a validar en el servidor que quien mira sea el admin o el dueño
+  const url="ver_comprobante.php?ruta="+encodeURIComponent(ruta);
+  const esPdf=/\.pdf$/i.test(ruta);
+  abrirModal("Comprobante de pago",
+    esPdf ? `<p style="margin:0 0 14px">El comprobante es un PDF.</p>`
+          : `<img src="${esc(url)}" alt="Comprobante" style="width:100%;border-radius:10px">`,
+    [{texto:"Abrir en otra pestaña",accion:()=>window.open(url,"_blank")},
+     {texto:"Cerrar",clase:"btn-p",accion:()=>cerrarModal()}]);
+}
+
+/* =========================================================================
+   COMPRAS SUELTAS (canciones individuales, sin membresía)
+   ========================================================================= */
+async function vistaCompras(){
+  const {data:r,error}=await api("compras");
+  if(error) return errorVista(error);
+  // se arma la misma forma que devolvía Supabase (compra_tracks[].tracks.titulo)
+  const data=(r.compras||[]).map(c=>({...c,
+    compra_tracks:(c.tracks||[]).map(t=>({track_id:t.track_id, precio:t.precio, tracks:{titulo:t.titulo}}))}));
+  const perfiles={};
+  data.forEach(c=>perfiles[c.user_id]={id:c.user_id,nombre:c.nombre,alias:c.alias,telefono:c.telefono});
+  const pend=data.filter(c=>c.estado==="pendiente");
+  const listaTitulos=c=>(c.compra_tracks||[]).map(ct=>ct.tracks?.titulo||"—");
+
+  $("#view").innerHTML=`
+    <div class="card" style="${pend.length?"border-color:rgba(255,179,64,.4)":""}">
+      <div class="card-h"><h3>Pendientes <span class="mini">· ${pend.length}</span></h3></div>
+      ${pend.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Recibido</th><th>Comprador</th><th>Canciones</th><th>Monto</th><th>Comprobante</th><th></th></tr></thead>
+        <tbody>${pend.map(c=>`<tr>
+          <td class="mini">${fechaH(c.creado)}</td>
+          <td><b>${esc(perfiles[c.user_id]?.nombre||"—")}</b>
+            <div class="mini">${esc(perfiles[c.user_id]?.telefono||"")}</div></td>
+          <td class="mini">${listaTitulos(c).map(esc).join(", ")}</td>
+          <td><b style="color:var(--gold)">${money(c.monto)}</b></td>
+          <td>${c.comprobante?`<button class="btn btn-sm" data-ver="${esc(c.comprobante)}">Ver captura</button>`:`<span class="chip">sin captura</span>`}</td>
+          <td class="acc">
+            <button class="btn btn-sm btn-ok" data-ok="${c.id}">Aprobar</button>
+            <button class="btn btn-sm btn-d" data-no="${c.id}">Rechazar</button></td>
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">No hay compras esperando aprobación.</div>`}
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Historial de compras <span class="mini">· ${data.length}</span></h3>
+        <div class="right"><button class="btn btn-sm" id="csv">Descargar CSV</button></div></div>
+      ${data.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Comprador</th><th>Canciones</th><th>Monto</th><th>Estado</th></tr></thead>
+        <tbody>${data.map(c=>`<tr>
+          <td class="mini">${fechaH(c.creado)}</td>
+          <td>${esc(perfiles[c.user_id]?.nombre||"—")}</td>
+          <td class="mini">${listaTitulos(c).map(esc).join(", ")}</td>
+          <td>${money(c.monto)}</td>
+          <td><span class="chip ${{aprobada:"ok",pendiente:"warn",rechazada:"bad"}[c.estado]||""}">${esc(c.estado)}</span></td>
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Sin registros.</div>`}
+    </div>`;
+
+  $("#view").addEventListener("click",async e=>{
+    const ok=e.target.closest("[data-ok]"), no=e.target.closest("[data-no]"), v=e.target.closest("[data-ver]");
+    if(ok){ ok.disabled=true; ok.innerHTML='<span class="spin"></span>';
+      const {data:res,error}=await api("aprobar_compra",{id:ok.dataset.ok});
+      if(error){ ok.disabled=false; ok.textContent="Aprobar"; return errorAviso(error); }
+      const c=res.compra;
+      aviso("Compra aprobada. Ya puede descargar esas canciones.");
+      const original=data.find(x=>x.id===c.id);
+      avisoWhatsAppCompra(perfiles[c.user_id], listaTitulos(original||{compra_tracks:[]}));
+      ver("compras"); contadores(); }
+    if(no){ const {error}=await api("rechazar_compra",{id:no.dataset.no});
+      if(error) return errorAviso(error);
+      aviso("Compra rechazada."); ver("compras"); contadores(); }
+    if(v){ verComprobante(v.dataset.ver); }
+  });
+  $("#csv").addEventListener("click",()=>descargarCSV("compras",data.map(c=>({
+    fecha:c.creado, comprador:perfiles[c.user_id]?.nombre||"", canciones:listaTitulos(c).join(", "),
+    monto:c.monto, estado:c.estado }))));
+}
+
+/* =========================================================================
+   MIEMBROS
+   ========================================================================= */
+async function vistaMiembros(){
+  const {data:r,error}=await api("miembros");
+  if(error) return errorVista(error);
+  const data=(r.miembros||[]).map(m=>({...m, dias_restantes:+m.dias_restantes||0, descargas_totales:+m.descargas_totales||0}));
+  const act=data.filter(m=>m.estado==="activa").length;
+  $("#view").innerHTML=`
+    <div class="kpis">
+      <div class="kpi c2"><small>Activos</small><b>${act}</b></div>
+      <div class="kpi c3"><small>Registrados</small><b>${data.length}</b></div>
+      <div class="kpi c1"><small>Por vencer (7 días)</small><b>${data.filter(m=>m.estado==="activa"&&m.dias_restantes<=7).length}</b></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>Miembros</h3>
+        <div class="right"><button class="btn btn-sm" id="csv">Descargar CSV</button></div></div>
+      ${data.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Miembro</th><th>Correo</th><th>Contacto</th><th>Plan</th><th>Vence</th><th>Descargas</th><th>Estado</th>${esAdmin()?"<th>Rol / acciones</th>":""}</tr></thead>
+        <tbody>${data.map(m=>`<tr>
+          <td><b>${esc(m.nombre||"—")}</b>${m.alias?`<div class="mini">${esc(m.alias)}</div>`:""}</td>
+          <td class="mini">${esc(m.email||"—")}</td>
+          <td class="mini">${esc(m.telefono||"—")}</td>
+          <td class="mini">${esc(m.plan_nombre||"—")}</td>
+          <td class="mini">${m.fin?`${fecha(m.fin)}${m.estado==="activa"?` · ${m.dias_restantes}d`:""}`:"—"}</td>
+          <td>${m.descargas_totales||0}</td>
+          <td><span class="chip ${{activa:"ok",pendiente:"warn",rechazada:"bad"}[m.estado]||""}">${esc(m.estado||"sin membresía")}</span></td>
+          ${esAdmin()?`<td class="acc"><div class="acciones-cuenta"><select data-miembro-rol="${m.id}" class="chip" style="background:var(--panel2);padding:6px 9px">
+              <option value="member" selected>Miembro</option><option value="editor">Editor</option><option value="admin">Administrador</option>
+            </select><span class="acciones-botones"><button class="btn btn-sm" data-edit-miembro="${m.id}">Editar</button>
+            <button class="btn btn-sm" data-clave-miembro="${m.id}">Restablecer clave</button>
+            <button class="btn btn-sm btn-d" data-del-miembro="${m.id}">Borrar</button></span></div></td>`:""}
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Todavía no hay miembros registrados.</div>`}
+    </div>`;
+  if(esAdmin()){
+    const perfiles=data.reduce((map,m)=>{ map[m.id]=m; return map; },{});
+    $("#view").addEventListener("click",e=>{
+      const editar=e.target.closest("[data-edit-miembro]"), borrar=e.target.closest("[data-del-miembro]"),
+            clave=e.target.closest("[data-clave-miembro]");
+      if(editar) editarMiembro(perfiles[editar.dataset.editMiembro]);
+      if(borrar) borrarMiembro(perfiles[borrar.dataset.delMiembro]);
+      if(clave) resetearClave(perfiles[clave.dataset.claveMiembro]);
+    });
+    $("#view").addEventListener("change",async e=>{
+      const selector=e.target.closest("[data-miembro-rol]"); if(!selector) return;
+      const {error}=await api("cambiar_rol",{id:selector.dataset.miembroRol,rol:selector.value});
+      if(error){ selector.value="member"; return errorAviso(error); }
+      aviso("Rol actualizado. La cuenta aparecerá en Editores y roles si corresponde.");
+      ver("miembros");
+    });
+  }
+  $("#csv").addEventListener("click",()=>descargarCSV("miembros",data));
+}
+
+function editarMiembro(miembro, vista="miembros"){
+  abrirModal("Editar miembro",`
+    <div id="formMiembro">
+      <div class="f"><label>Nombre</label><input type="text" name="nombre" value="${esc(miembro.nombre||"")}"></div>
+      <div class="f"><label>Alias</label><input type="text" name="alias" value="${esc(miembro.alias||"")}"></div>
+      <div class="f"><label>Correo electrónico</label><input type="email" name="email" value="${esc(miembro.email||"")}" required></div>
+      <div class="f"><label>Teléfono</label><input type="text" name="telefono" value="${esc(miembro.telefono||"")}"></div>
+    </div>`,[
+      {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:"Guardar",clase:"btn-p",accion:async btn=>{
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Guardando…';
+        const body=$("#mBody"), email=$('[name="email"]',body).value.trim();
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+          btn.disabled=false; btn.textContent="Guardar"; return aviso("Revisa el correo electrónico.",true);
+        }
+        const {error}=await api("editar_usuario",{id:miembro.id,email,
+          nombre:$('[name="nombre"]',body).value.trim(),alias:$('[name="alias"]',body).value.trim(),
+          telefono:$('[name="telefono"]',body).value.trim()});
+        if(error){ btn.disabled=false; btn.textContent="Guardar"; return aviso("No se pudo actualizar el miembro: "+esc(error.message),true); }
+        cerrarModal(); aviso("Miembro actualizado."); ver(vista);
+      }}
+    ]);
+}
+
+function borrarMiembro(miembro, vista="miembros"){
+  abrirModal("Borrar miembro",`<p style="margin:0">¿Borrar la cuenta de <b>${esc(miembro.nombre||"este miembro")}</b>? También se eliminarán sus datos asociados. No se puede deshacer.</p>`,[
+    {texto:"Cancelar",accion:()=>cerrarModal()},
+    {texto:"Sí, borrar",clase:"btn-d",accion:async btn=>{
+      btn.disabled=true; btn.innerHTML='<span class="spin"></span> Borrando…';
+      const {error}=await api("borrar_usuario",{id:miembro.id});
+      if(error){ btn.disabled=false; btn.textContent="Sí, borrar";
+        return aviso("No se pudo borrar el miembro: "+esc(error.message),true); }
+      cerrarModal(); aviso("Miembro borrado."); ver(vista);
+    }}
+  ]);
+}
+
+function resetearClave(miembro){
+  const generar=()=>Math.random().toString(36).slice(-4)+Math.random().toString(36).slice(-4);
+  abrirModal("Restablecer contraseña",`
+    <p style="margin:0 0 14px">Se le asignará esta contraseña nueva a <b>${esc(miembro.nombre||miembro.email||"este miembro")}</b>.
+      Avísale para que ingrese con ella y la cambie cuando quiera desde su cuenta.</p>
+    <div class="f"><label>Contraseña nueva</label><input type="text" name="clave" value="${generar()}" minlength="6"></div>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:"Restablecer",clase:"btn-p",accion:async btn=>{
+        const clave=$('[name="clave"]',$("#mBody")).value.trim();
+        if(clave.length<6) return aviso("La contraseña necesita 6 caracteres o más.",true);
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Restableciendo…';
+        const {error}=await api("resetear_password",{id:miembro.id,password:clave});
+        if(error){ btn.disabled=false; btn.textContent="Restablecer";
+          return aviso("No se pudo restablecer la contraseña: "+esc(error.message),true); }
+        cerrarModal();
+        abrirAvisoWhatsApp(miembro,"Contraseña restablecida",
+          `Hola ${miembro?.nombre||""}! Te restablecimos el acceso. Tu nueva contraseña temporal es: ${clave}\n`
+          +`Ingresa con tu correo (${miembro.email||""}) y esa clave. Puedes cambiarla cuando quieras desde tu cuenta.`);
+      }} ]);
+}
+
+/* =========================================================================
+   PLANES · CREW · MARCA · EDITORES · MENSAJES
+   ========================================================================= */
+const ENT={
+  plans:{titulo:"Planes",singular:"plan",orden:"orden",ordenable:true,
+    cols:[{k:"nombre",l:"Plan",t:"fuerte"},{k:"dias",l:"Días"},{k:"precio",l:"Precio",t:"money"},
+          {k:"limite_diario",l:"Límite diario",t:"limite"},{k:"destacado",l:"Destacado",t:"si"},
+          {k:"activo",l:"Estado",t:"visible"}],
+    campos:[{k:"nombre",l:"Nombre del plan",t:"text",req:true,mitad:true},
+      {k:"dias",l:"Días de acceso",t:"number",def:30,req:true,mitad:true},
+      {k:"precio",l:"Precio",t:"number",step:"0.01",req:true,mitad:true},
+      {k:"limite_diario",l:"Descargas por día (0 = ilimitado)",t:"number",def:0,mitad:true},
+      {k:"descripcion",l:"Descripción corta",t:"text"},
+      {k:"beneficios",l:"Beneficios",t:"lineas",help:"Uno por línea. Se muestran con un check en la web."},
+      {k:"destacado",l:'Marcar como "el más elegido"',t:"bool",mitad:true},
+      {k:"activo",l:"Visible en la web",t:"bool",def:true,mitad:true}]},
+  crew:{titulo:"El crew",singular:"integrante",orden:"orden",ordenable:true,
+    cols:[{k:"alias",l:"Alias",t:"fuerte"},{k:"nombre",l:"Nombre"},{k:"cargo",l:"Cargo"},
+          {k:"foto",l:"Foto",t:"img"},{k:"visible",l:"Estado",t:"visible"}],
+    campos:[{k:"alias",l:"Alias de DJ",t:"text",req:true,mitad:true},
+      {k:"email",l:"Correo de la cuenta",t:"email",help:"Se usará para filtrar sus tracks en el catálogo."},
+      {k:"nombre",l:"Nombre real",t:"text",mitad:true},
+      {k:"cargo",l:"Cargo",t:"text",def:"DJ / Editor",mitad:true},
+      {k:"ig",l:"Instagram (URL)",t:"text",mitad:true},
+      {k:"bio",l:"Bio corta",t:"textarea"},
+      {k:"foto",l:"Foto",t:"file",bucket:"portadas",help:"Cuadrada, menos de 500 KB."},
+      {k:"visible",l:"Mostrar en la web",t:"bool",def:true}]}
+};
+
+async function vistaPlanes(){ vistaEntidad("plans"); }
+async function vistaCrew(){ vistaEntidad("crew"); }
+
+// nombre de la vista en el panel -> tabla y acciones en el servidor
+const ENT_API={ plans:{tabla:"planes",lista:"planes",guardar:"guardar_plan"},
+                crew: {tabla:"crew",  lista:"crew",  guardar:"guardar_crew"} };
+
+async function vistaEntidad(nombre){
+  const def=ENT[nombre], ea=ENT_API[nombre];
+  const {data:r,error}=await api(ea.lista);
+  if(error) return errorVista(error);
+  const data=r[ea.lista]||[];
+  $("#view").innerHTML=`
+    <div class="card">
+      <div class="card-h"><h3>${def.titulo} <span class="mini">· ${data.length}</span></h3>
+        <div class="right"><button class="btn btn-p btn-sm" id="nuevo">+ Nuevo ${def.singular}</button></div></div>
+      ${data.length?`<div class="tbl-wrap"><table>
+        <thead><tr>${def.ordenable?"<th></th>":""}${def.cols.map(c=>`<th>${c.l}</th>`).join("")}<th></th></tr></thead>
+        <tbody>${data.map((r,i)=>`<tr>
+          ${def.ordenable?`<td><div style="display:flex;flex-direction:column;gap:2px">
+            <button class="btn btn-sm" data-sube="${i}" ${i===0?"disabled":""} style="padding:2px 6px">▲</button>
+            <button class="btn btn-sm" data-baja="${i}" ${i===data.length-1?"disabled":""} style="padding:2px 6px">▼</button></div></td>`:""}
+          ${def.cols.map(c=>`<td>${celda(c,r)}</td>`).join("")}
+          <td class="acc"><button class="btn btn-sm" data-edit="${r.id}">Editar</button>
+            <button class="btn btn-sm btn-d" data-del="${r.id}">Borrar</button></td>
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Nada aquí todavía.</div>`}
+    </div>`;
+  $("#nuevo").addEventListener("click",()=>formEnt(nombre,null));
+  $("#view").addEventListener("click",async e=>{
+    const ed=e.target.closest("[data-edit]"), de=e.target.closest("[data-del]"),
+          su=e.target.closest("[data-sube]"), ba=e.target.closest("[data-baja]");
+    if(ed) formEnt(nombre,data.find(r=>r.id===ed.dataset.edit));
+    if(de) borrarEnt(nombre,data.find(r=>r.id===de.dataset.del));
+    if(su) await mover(nombre,data,+su.dataset.sube,-1);
+    if(ba) await mover(nombre,data,+ba.dataset.baja,+1);
+  });
+}
+function celda(c,r){
+  const v=r[c.k];
+  switch(c.t){
+    case "fuerte": return `<b>${esc(v)}</b>`;
+    case "money":  return `<b style="color:var(--gold)">${money(v)}</b>`;
+    case "visible":return `<span class="chip ${v?"ok":""}">${v?"visible":"oculto"}</span>`;
+    case "si":     return v?"sí":"—";
+    case "limite": return v>0?`${v}/día`:"ilimitado";
+    case "img":    return v?`<img src="${esc(v)}" style="width:38px;height:38px;object-fit:cover;border-radius:7px">`:"—";
+    default:       return v||v===0?esc(v):"—";
+  }
+}
+function formEnt(nombre,fila){
+  const def=ENT[nombre], nuevo=!fila;
+  abrirModal(`${nuevo?"Nuevo":"Editar"} ${def.singular}`,
+    `<div id="formE">${def.campos.map(c=>campoHTML(c,nuevo?c.def:fila[c.k])).join("")}</div>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:nuevo?"Crear":"Guardar",clase:"btn-p",accion:async btn=>{
+        const obj={}; let ok=true;
+        def.campos.forEach(c=>{ const el=$(`[name="${c.k}"]`,$("#mBody")), val=leerCampo(c,el);
+          if(c.req&&(val===""||val===null)){ el.closest(".f").classList.add("bad-f"); ok=false; return; }
+          el.closest(".f").classList.remove("bad-f"); obj[c.k]=val; });
+        if(!ok) return aviso("Revisa los campos marcados.",true);
+        // un registro nuevo va al final del orden (lo pone el servidor); y al
+        // guardar un integrante del crew con correo, el servidor copia ese correo
+        // a sus tracks, como antes
+        if(!nuevo) obj.id=fila.id;
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Guardando…';
+        const {error}=await api(ENT_API[nombre].guardar,obj);
+        btn.disabled=false; btn.textContent=nuevo?"Crear":"Guardar";
+        if(error) return errorAviso(error);
+        cerrarModal(); aviso("Guardado."); ver(nombre);
+      }} ]);
+  agruparMitades($("#formE"));
+  activarArchivos();
+}
+function borrarEnt(nombre,fila){
+  abrirModal("Confirmar",`<p style="margin:0">¿Borrar <b>${esc(fila?.nombre||fila?.alias||"este registro")}</b>?</p>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:"Sí, borrar",clase:"btn-d",accion:async btn=>{ btn.disabled=true;
+        const {error}=await api("borrar_fila",{tabla:ENT_API[nombre].tabla,id:fila.id});
+        if(error){ btn.disabled=false; return errorAviso(error); }
+        cerrarModal(); aviso("Borrado."); ver(nombre); }} ]);
+}
+async function mover(nombre,filas,i,dir){
+  const a=filas[i], b=filas[i+dir]; if(!b) return;
+  const {error}=await api("intercambiar_orden",{tabla:ENT_API[nombre].tabla,a:a.id,b:b.id});
+  if(error) return errorAviso(error);
+  ver(nombre);
+}
+
+/* ---------- comunicados: cualquiera del equipo publica; cada uno edita lo suyo ---------- */
+async function vistaComunicados(){
+  const {data:r,error}=await api("comunicados");
+  if(error) return errorVista(error);
+  const data=r.comunicados||[];
+  $("#view").innerHTML=`
+    <div class="card">
+      <div class="card-h"><h3>Comunicados <span class="mini">· ${data.length}</span></h3>
+        <div class="right"><button class="btn btn-p btn-sm" id="nuevo">+ Nuevo comunicado</button></div></div>
+      ${data.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th></th><th>Título</th><th>Autor</th><th>Fecha</th><th>Fijado</th><th>Estado</th><th></th></tr></thead>
+        <tbody>${data.map(c=>{
+          const puede = esAdmin() || c.autor_id===usuario.id;
+          return `<tr>
+            <td>${c.imagen?`<div class="mini-art" style="background-image:url('${esc(c.imagen)}')"></div>`:""}</td>
+            <td><b>${esc(c.titulo)}</b>${c.cuerpo?`<div class="mini">${esc(c.cuerpo.slice(0,60))}${c.cuerpo.length>60?"…":""}</div>`:""}</td>
+            <td class="mini">${esc(c.autor||"—")}</td>
+            <td class="mini">${fecha(c.creado)}</td>
+            <td>${c.fijado?`<span class="chip g">fijado</span>`:"—"}</td>
+            <td><span class="chip ${c.visible?"ok":""}">${c.visible?"publicado":"oculto"}</span></td>
+            <td class="acc">${puede?`
+              <button class="btn btn-sm" data-edit="${c.id}">Editar</button>
+              <button class="btn btn-sm btn-d" data-del="${c.id}">Borrar</button>`:`<span class="mini">solo su autor</span>`}</td>
+          </tr>`;
+        }).join("")}</tbody></table></div>`
+      :`<div class="vacio">Todavía no hay comunicados. Publica el primero con el botón de arriba.</div>`}
+    </div>
+    <p class="mini">Cualquiera del equipo (admin o editor) puede publicar. Cada uno edita o borra solo
+      lo que publicó; el administrador puede editar o borrar cualquiera.</p>`;
+  $("#nuevo").addEventListener("click",()=>formComunicado(null));
+  $("#view").addEventListener("click",e=>{
+    const ed=e.target.closest("[data-edit]"), de=e.target.closest("[data-del]");
+    if(ed) formComunicado(data.find(c=>c.id===ed.dataset.edit));
+    if(de) borrarComunicado(data.find(c=>c.id===de.dataset.del));
+  });
+}
+const CAMPOS_COMUNICADO=[
+  {k:"titulo",l:"Título",t:"text",req:true},
+  {k:"cuerpo",l:"Texto / detalle",t:"textarea"},
+  {k:"imagen",l:"Imagen o póster (opcional)",t:"file",bucket:"portadas",help:"Cuadrada o vertical, menos de 800 KB."},
+  {k:"fijado",l:"Fijar arriba de los demás",t:"bool",mitad:true},
+  {k:"visible",l:"Publicado en la web",t:"bool",def:true,mitad:true}
+];
+function formComunicado(fila){
+  const nuevo=!fila;
+  abrirModal(nuevo?"Nuevo comunicado":"Editar comunicado",
+    `<div id="formC">${CAMPOS_COMUNICADO.map(c=>campoHTML(c,nuevo?c.def:fila[c.k])).join("")}</div>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:nuevo?"Publicar":"Guardar",clase:"btn-p",accion:async btn=>{
+        const obj={}; let ok=true;
+        CAMPOS_COMUNICADO.forEach(c=>{
+          const el=$(`[name="${c.k}"]`,$("#mBody")); const val=leerCampo(c,el);
+          if(c.req&&!val){ el.closest(".f").classList.add("bad-f"); ok=false; return; }
+          el.closest(".f").classList.remove("bad-f");
+          obj[c.k]=val;
+        });
+        if(!ok) return aviso("Revisa los campos marcados.",true);
+        // el autor de un comunicado nuevo lo pone el servidor (la cuenta en sesión)
+        if(!nuevo) obj.id=fila.id;
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Guardando…';
+        const {error}=await api("guardar_comunicado",obj);
+        btn.disabled=false; btn.textContent=nuevo?"Publicar":"Guardar";
+        if(error) return errorAviso(error);
+        cerrarModal(); aviso(nuevo?"Comunicado publicado.":"Cambios guardados."); ver("comunicados");
+      }} ]);
+  agruparMitades($("#formC"));
+  activarArchivos();
+}
+function borrarComunicado(c){
+  abrirModal("Confirmar",`<p style="margin:0">¿Borrar el comunicado <b>${esc(c?.titulo||"")}</b>? No se puede deshacer.</p>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:"Sí, borrar",clase:"btn-d",accion:async btn=>{
+        btn.disabled=true;
+        const {error}=await api("borrar_comunicado",{id:c.id});
+        if(error){ btn.disabled=false; return errorAviso(error); }
+        cerrarModal(); aviso("Comunicado borrado."); ver("comunicados");
+      }} ]);
+}
+
+/* ---------- marca ---------- */
+const CAMPOS_MARCA=[
+  {g:"Identidad"},
+  {k:"marca",l:"Nombre comercial",t:"text",req:true,mitad:true},
+  {k:"creador",l:"Creador",t:"text",mitad:true},
+  {k:"desde",l:"Año de fundación",t:"number",mitad:true},
+  {k:"ciudad",l:"Ciudad",t:"text",mitad:true},
+  {k:"claim",l:"Frase de la marca",t:"textarea"},
+  {k:"logo_url",l:"Logo",t:"file",bucket:"portadas",help:"PNG con fondo transparente, alto de 80 px o más."},
+  {k:"hero_img",l:"Imagen de portada",t:"file",bucket:"portadas",help:"Foto de fondo del inicio. Horizontal, menos de 800 KB."},
+  {k:"hero_video_fondo",l:"O video de fondo (reemplaza la imagen)",t:"file",bucket:"previews",accept:"video/*",limite:30,
+   help:"Si subes un video aquí, se usa de fondo en vez de la imagen de portada, en bucle y sin sonido. Ideal 10-20 segundos, liviano (menos de 20-30 MB) para que cargue rápido. Quítalo para volver a la imagen."},
+  {g:"Video del hero (para eventos)"},
+  {k:"video_activo",l:"Mostrar video en el inicio",t:"bool",def:false,
+   help:"Actívalo solo mientras dure el evento o la promoción; desactívalo y el inicio vuelve a verse como siempre."},
+  {k:"video_url",l:"Link de YouTube",t:"text",ph:"https://www.youtube.com/watch?v=...",mitad:true,
+   help:"Puede ser un video oculto/no listado de YouTube."},
+  {k:"video_archivo",l:"O sube el video directo",t:"file",bucket:"previews",accept:"video/*",mitad:true,
+   help:"Si subes un archivo aquí, se usa este en vez del link de YouTube. Menos de 25 MB, ideal 10-20 segundos en bucle."},
+  {g:"Audio destacado del hero"},
+  {k:"audio_destacado_titulo",l:"Título a mostrar",t:"text",ph:"Nuevo lanzamiento exclusivo",mitad:true,
+   help:"Aparece junto al botón de play, en el inicio."},
+  {k:"audio_destacado_archivo",l:"Archivo de audio",t:"file",bucket:"previews",accept:"audio/*",mitad:true,limite:500,
+   help:"Es independiente del catálogo (no hace falta que sea un track). Aparece en el inicio apenas lo subas; quítalo para que deje de mostrarse. Hasta 500 MB — si es un set largo, conviene subirlo en MP3 (no WAV) para que pese bastante menos."},
+  {g:"Apariencia"},
+  {k:"tema",l:"Tema de temporada",t:"select",def:"normal",
+   opts:{normal:"Normal (colores de siempre)", halloween:"🎃 Halloween", navidad:"🎄 Navidad", "ano-nuevo":"🎆 Año Nuevo"},
+   help:"Cambia los colores de acento en toda la web pública al instante. El panel no cambia."},
+  {g:"Colores y tipografía personalizados"},
+  {k:"color_fondo",l:"Fondo general",t:"color",def:"#08070b",mitad:true},
+  {k:"color_tarjetas",l:"Tarjetas y secciones",t:"color",def:"#14111a",mitad:true},
+  {k:"color_encabezado",l:"Encabezado (menú superior)",t:"color",def:"#08070b",mitad:true},
+  {k:"color_piepagina",l:"Pie de página",t:"color",def:"#0d0b11",mitad:true},
+  {k:"color_texto",l:"Texto",t:"color",def:"#f4f1ea",mitad:true},
+  {k:"color_acento",l:"Acento (el dorado)",t:"color",def:"#e8b23c",mitad:true,
+   help:"Estos colores personalizados mandan por encima del tema de temporada. Quítalos todos para volver a los de siempre."},
+  {k:"fuente_titulos",l:"Tipografía de títulos",t:"select",def:"",mitad:true,
+   opts:Object.fromEntries(["",...FUENTES_TITULO].map(f=>[f,f||"Usar la de siempre (Anton)"]))},
+  {k:"fuente_texto",l:"Tipografía de texto general",t:"select",def:"",mitad:true,
+   opts:Object.fromEntries(["",...FUENTES_TEXTO].map(f=>[f,f||"Usar la de siempre (Space Grotesk)"])),
+   help:"La tipografía elegida se carga sola desde Google Fonts, no hace falta instalar nada."},
+  {g:"Portada"},
+  {k:"hero_l1",l:"Título línea 1",t:"text",mitad:true},
+  {k:"hero_l2",l:"Título línea 2 (contorneada)",t:"text",mitad:true},
+  {k:"hero_l3",l:"Título línea 3",t:"text",mitad:true},
+  {k:"frases",l:"Frases del letrero animado",t:"lineas",help:"Una por línea: géneros, tipos de contenido…"},
+  {k:"hitos",l:"Hitos de la historia",t:"pares",help:"Una por línea, formato  año | qué pasó"},
+  {g:"Cobros"},
+  {k:"moneda",l:"Símbolo de moneda",t:"text",mitad:true},
+  {k:"yape_numero",l:"Número de Yape / Plin",t:"text",mitad:true},
+  {k:"yape_nombre",l:"Titular de la cuenta",t:"text",mitad:true},
+  {k:"yape_qr",l:"Código QR de Yape / Plin",t:"file",bucket:"portadas",help:"Se muestra junto al número al momento de pagar, para quien prefiera escanear en vez de yapear manual."},
+  {k:"pago_nota",l:"Instrucciones de pago",t:"textarea",help:"Se muestra en la sección de membresías y al pagar."},
+  {g:"Contacto"},
+  {k:"whatsapp",l:"WhatsApp (solo números)",t:"text",ph:"51999999999",mitad:true},
+  {k:"email",l:"Correo",t:"text",mitad:true},
+  {k:"redes.instagram",l:"Instagram",t:"text",mitad:true},
+  {k:"redes.facebook",l:"Facebook",t:"text",mitad:true},
+  {k:"redes.tiktok",l:"TikTok",t:"text",mitad:true},
+  {k:"redes.youtube",l:"YouTube",t:"text",mitad:true}
+];
+function previewColoresHTML(){
+  return `<div id="colorPreview" style="border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:2px 0 20px">
+      <div data-prev="encabezado" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+        <b data-prev-texto data-prev-titulo style="font-family:var(--display);letter-spacing:.02em;font-size:15px">VIP PAITA MIX</b>
+        <span data-prev-acento style="padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--body)">MEMBRESÍAS</span>
+      </div>
+      <div data-prev="fondo" style="padding:22px 16px">
+        <div data-prev="tarjetas" style="padding:16px;border-radius:10px">
+          <b data-prev-texto data-prev-titulo style="display:block;font-family:var(--display)">Vista previa de una tarjeta</b>
+          <p data-prev-texto style="margin:6px 0 0;font-size:12.5px;opacity:.65;font-family:var(--body)">Así se vería un texto dentro del catálogo.</p>
+          <span data-prev-acento-txt style="font-size:12.5px;font-weight:700;font-family:var(--body)">Un precio o enlace destacado</span>
+        </div>
+      </div>
+      <div data-prev="piepagina" style="padding:12px 16px">
+        <span data-prev-texto style="font-size:12px;opacity:.6;font-family:var(--body)">© Vip Paita Mix — vista previa</span>
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm" id="restaurarColores" style="margin:-8px 0 22px">Restaurar apariencia original</button>`;
+}
+const CLAVES_COLOR=["color_fondo","color_tarjetas","color_encabezado","color_piepagina","color_texto","color_acento"];
+const CLAVES_FUENTE=["fuente_titulos","fuente_texto"];
+function actualizarPreviewColores(){
+  const cont=$("#formM"), prev=$("#colorPreview"); if(!cont||!prev) return;
+  const val=k=>{ const el=$(`[name="${k}"]`,cont); return (el&&el.value)||CAMPOS_MARCA.find(c=>c.k===k)?.def; };
+  const setVar=(prop,v)=> v ? prev.style.setProperty(prop,v) : prev.style.removeProperty(prop);
+  $('[data-prev="encabezado"]',prev).style.background=val("color_encabezado");
+  $('[data-prev="fondo"]',prev).style.background=val("color_fondo");
+  $('[data-prev="tarjetas"]',prev).style.background=val("color_tarjetas");
+  $('[data-prev="piepagina"]',prev).style.background=val("color_piepagina");
+  $$('[data-prev-texto]',prev).forEach(el=>el.style.color=val("color_texto"));
+  $$('[data-prev-acento]',prev).forEach(el=>{ el.style.background=val("color_acento"); el.style.color="#120c02"; });
+  $$('[data-prev-acento-txt]',prev).forEach(el=>el.style.color=val("color_acento"));
+  const fTitulos=$(`[name="fuente_titulos"]`,cont)?.value, fTexto=$(`[name="fuente_texto"]`,cont)?.value;
+  setVar("--display",fTitulos?`"${fTitulos}","Arial Black",Impact,sans-serif`:"");
+  setVar("--body",fTexto?`"${fTexto}",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`:"");
+}
+async function vistaMarca(){
+  const {data:r,error}=await api("settings");
+  if(error) return errorVista(error);
+  const d=r.settings||{};
+  const val=k=>k.includes(".")?(d[k.split(".")[0]]||{})[k.split(".")[1]]:d[k];
+  $("#view").innerHTML=`
+    <div class="card"><div class="card-h"><h3>Contenido de la marca</h3>
+      <div class="right"><button class="btn btn-p btn-sm" id="save">Guardar cambios</button></div></div>
+      <div style="padding:22px" id="formM">${CAMPOS_MARCA.map(c=>c.g
+        ? `<div class="grupo">${c.g}</div>${c.g==="Colores y tipografía personalizados"?previewColoresHTML():""}`
+        : campoHTML(c,val(c.k))).join("")}</div></div>`;
+  agruparMitades($("#formM"));
+  activarArchivos();
+  activarColores(actualizarPreviewColores);
+  actualizarPreviewColores();
+  $$('[name="fuente_titulos"], [name="fuente_texto"]',$("#formM")).forEach(sel=>
+    sel.addEventListener("change",()=>{ cargarFuente(sel.value, sel.name==="fuente_titulos"?"400;700":"400;500;600;700"); actualizarPreviewColores(); }));
+  $("#restaurarColores").addEventListener("click",()=>{
+    CLAVES_COLOR.forEach(k=>{ const wrap=$(`[data-color="${k}"]`,$("#formM")); if(wrap) limpiarColor(k,$("#formM"),wrap,actualizarPreviewColores); });
+    CLAVES_FUENTE.forEach(k=>{ const sel=$(`[name="${k}"]`,$("#formM")); if(sel) sel.value=""; });
+    actualizarPreviewColores();
+    aviso("Apariencia restaurada. No olvides Guardar cambios.");
+  });
+  $("#save").addEventListener("click",async e=>{
+    const btn=e.target; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Guardando…';
+    const obj={redes:{}}; let ok=true;
+    CAMPOS_MARCA.filter(c=>!c.g).forEach(c=>{
+      const el=$(`[name="${c.k}"]`,$("#formM")), v=leerCampo(c,el);
+      if(c.req&&!v){ el.closest(".f").classList.add("bad-f"); ok=false; return; }
+      el.closest(".f").classList.remove("bad-f");
+      if(c.k.startsWith("redes.")) obj.redes[c.k.split(".")[1]]=v; else obj[c.k]=v;
+    });
+    if(!ok){ btn.disabled=false; btn.textContent="Guardar cambios"; return aviso("Faltan campos obligatorios.",true); }
+    const {error}=await api("guardar_settings",obj);
+    btn.disabled=false; btn.textContent="Guardar cambios";
+    if(error) return errorAviso(error);
+    MONEDA=obj.moneda||MONEDA; aviso("Marca actualizada. Recarga la web para verlo.");
+  });
+}
+
+/* ---------- editores y roles ---------- */
+async function vistaEditores(){
+  const {data:r,error}=await api("usuarios");
+  if(error) return errorVista(error);
+  const data=r.usuarios||[];
+  const staff=data.filter(p=>p.rol!=="member");
+  const filaRol=p=>`<tr>
+      <td><b>${esc(p.nombre||"—")}</b>${p.alias?`<div class="mini">${esc(p.alias)}</div>`:""}</td>
+      <td class="mini">${esc(p.email||"—")}</td>
+      <td class="mini">${esc(p.telefono||"—")}</td>
+      <td><span class="chip ${p.rol==="admin"?"g":p.rol==="editor"?"ok":""}">${
+        {admin:"administrador",editor:"editor",member:"miembro"}[p.rol]}</span></td>
+      <td class="mini">${fecha(p.creado)}</td>
+      <td class="acc"><div class="acciones-cuenta">
+        <select data-rol="${p.id}" class="chip" style="background:var(--panel2);padding:6px 9px" ${esAdmin()?"":"disabled"}>
+          ${["admin","editor","member"].map(r=>`<option value="${r}" ${r===p.rol?"selected":""}>${
+            {admin:"administrador",editor:"editor",member:"miembro"}[r]}</option>`).join("")}
+        </select>
+        ${esAdmin()?`<span class="acciones-botones"><button class="btn btn-sm" data-edit-editor="${p.id}">Editar</button>
+          <button class="btn btn-sm" data-clave-editor="${p.id}">Restablecer clave</button>
+          <button class="btn btn-sm btn-d" data-del-editor="${p.id}" ${p.id===usuario.id?'disabled title="No puedes borrar tu propia cuenta"':""}>Borrar</button>`:""}
+        ${esAdmin()?`</span>`:""}</div></td></tr>`;
+  $("#view").innerHTML=`
+    <div class="card">
+      <div class="card-h"><h3>Equipo <span class="mini">· ${staff.length}</span></h3>
+        <div class="right"><button class="btn btn-p btn-sm" id="nuevaCuenta">+ Nueva cuenta</button></div></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Persona</th><th>Correo</th><th>Teléfono</th><th>Rol</th><th>Desde</th><th>Acciones</th></tr></thead>
+        <tbody>${staff.map(filaRol).join("")}</tbody></table></div>
+    </div>
+    <div class="card"><div class="card-h"><h3>Asignación de roles</h3></div>
+      <div style="padding:20px" class="mini">Las cuentas de miembros se administran en <b>Miembros</b>. Desde allí puedes convertir una cuenta en editor o administrador.</div></div>
+    <div class="card"><div class="card-h"><h3>Cómo agregar un DJ al equipo</h3></div>
+      <div style="padding:20px" class="mini">
+          <p style="margin:0 0 10px">1. Usa <b>+ Nueva cuenta</b> arriba y elígele de una vez el rol <b>editor</b>,
+            o deja que el DJ se registre solo desde la web (botón <b>Ingresar → Crear cuenta</b>) y luego
+            súbelo de <b>miembro</b> a <b>editor</b> desde la vista <b>Miembros</b>.</p>
+        <p style="margin:0">2. Desde ese momento entra a este panel y gestiona solo sus propios tracks.</p></div></div>`;
+  $("#nuevaCuenta").addEventListener("click",()=>formNuevaCuenta());
+  $("#view").addEventListener("click",e=>{
+    const editar=e.target.closest("[data-edit-editor]"), borrar=e.target.closest("[data-del-editor]"),
+          clave=e.target.closest("[data-clave-editor]");
+    if(editar) editarMiembro(data.find(p=>p.id===editar.dataset.editEditor),"editores");
+    if(borrar) borrarMiembro(data.find(p=>p.id===borrar.dataset.delEditor),"editores");
+    if(clave) resetearClave(data.find(p=>p.id===clave.dataset.claveEditor));
+  });
+  $("#view").addEventListener("change",async e=>{
+    const s=e.target.closest("[data-rol]"); if(!s) return;
+    if(s.dataset.rol===usuario.id && s.value!=="admin"){
+      aviso("No puedes quitarte a ti mismo el rol de administrador.",true); ver("editores"); return; }
+    const {error}=await api("cambiar_rol",{id:s.dataset.rol,rol:s.value});
+    if(error){ ver("editores"); return errorAviso(error); }
+    aviso("Rol actualizado."); ver("editores");
+  });
+}
+
+// crea una cuenta directamente desde el panel, con el rol elegido (solo el admin)
+function formNuevaCuenta(){
+  abrirModal("Nueva cuenta", `
+    <div id="formNC">
+      <div class="f"><label>Nombre o alias</label><input type="text" name="nombre" placeholder="DJ Ejemplo"></div>
+      <div class="f"><label>Correo <span class="req">*</span></label><input type="email" name="email"></div>
+      <div class="f"><label>Contraseña temporal <span class="req">*</span></label><input type="text" name="password" placeholder="mínimo 6 caracteres"></div>
+      <div class="f"><label>Rol</label>
+        <select name="rol">
+          <option value="editor" selected>Editor (DJ que sube tracks)</option>
+          <option value="admin">Administrador</option>
+          <option value="member">Miembro (solo descarga)</option>
+        </select></div>
+      <p class="help">Comparte esta contraseña con la persona por WhatsApp o el medio que uses;
+        puede cambiarla luego con "Olvidé mi contraseña" en la web.</p>
+    </div>`,
+    [ {texto:"Cancelar",accion:()=>cerrarModal()},
+      {texto:"Crear cuenta",clase:"btn-p",accion:async btn=>{
+        const cont=$("#mBody");
+        const email=$('[name="email"]',cont).value.trim();
+        const password=$('[name="password"]',cont).value;
+        const nombre=$('[name="nombre"]',cont).value.trim();
+        const rol=$('[name="rol"]',cont).value;
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return aviso("Revisa el correo.",true);
+        if(password.length<6) return aviso("La contraseña necesita 6 caracteres o más.",true);
+        btn.disabled=true; btn.innerHTML='<span class="spin"></span> Creando…';
+        const {error}=await api("crear_usuario",{nombre,email,password,rol});
+        if(error){ btn.disabled=false; btn.textContent="Crear cuenta";
+          return aviso("No se pudo crear la cuenta: "+esc(error.message),true); }
+        cerrarModal(); aviso("Cuenta creada."); ver("editores");
+      }} ]);
+}
+
+/* ---------- mensajes ---------- */
+async function vistaMensajes(){
+  const {data:r,error}=await api("mensajes");
+  if(error) return errorVista(error);
+  const data=r.mensajes||[];
+  $("#view").innerHTML=`
+    <div class="card">
+      <div class="card-h"><h3>Mensajes recibidos <span class="mini">· ${data.length}</span></h3>
+        <div class="right"><button class="btn btn-sm" id="csv">Descargar CSV</button></div></div>
+      ${data.length?`<div class="tbl-wrap"><table>
+        <thead><tr><th>Recibido</th><th>De</th><th>Motivo</th><th>Fecha evento</th><th>Estado</th><th></th></tr></thead>
+        <tbody>${data.map(b=>`<tr>
+          <td class="mini">${fechaH(b.creado)}</td>
+          <td><b>${esc(b.nombre||"—")}</b><div class="mini">${esc(b.email||"")}</div></td>
+          <td class="mini">${esc(b.tipo||"")}<div class="mini">${esc(b.lugar||"")}</div></td>
+          <td class="mini">${b.fecha?fecha(b.fecha):"—"}</td>
+          <td><select data-eb="${b.id}" class="chip" style="background:var(--panel2);padding:5px 8px">
+            ${["nuevo","cotizado","cerrado","perdido"].map(s=>`<option ${s===b.estado?"selected":""}>${s}</option>`).join("")}</select></td>
+          <td class="acc"><button class="btn btn-sm" data-vb="${b.id}">Ver</button>
+            <button class="btn btn-sm btn-d" data-db="${b.id}">Borrar</button></td>
+        </tr>`).join("")}</tbody></table></div>`
+      :`<div class="vacio">Sin mensajes.</div>`}
+    </div>`;
+  $("#view").addEventListener("change",async e=>{
+    const s=e.target.closest("[data-eb]"); if(!s) return;
+    const {error}=await api("estado_mensaje",{id:s.dataset.eb,estado:s.value});
+    if(error) return errorAviso(error);
+    aviso("Estado actualizado."); contadores();
+  });
+  $("#view").addEventListener("click",async e=>{
+    const v=e.target.closest("[data-vb]"), d=e.target.closest("[data-db]");
+    if(v){ const b=data.find(x=>x.id===v.dataset.vb);
+      abrirModal("Mensaje de "+(b.nombre||"—"),
+        `<div class="f"><label>Correo</label><div>${esc(b.email||"—")}</div></div>
+         <div class="f2"><div class="f"><label>Motivo</label><div>${esc(b.tipo||"—")}</div></div>
+         <div class="f"><label>Fecha</label><div>${b.fecha?fecha(b.fecha):"—"}</div></div></div>
+         <div class="f"><label>Lugar</label><div>${esc(b.lugar||"—")}</div></div>
+         <div class="f"><label>Mensaje</label><div style="white-space:pre-wrap">${esc(b.mensaje||"—")}</div></div>`,
+        [{texto:"Responder por correo",clase:"btn-p",accion:()=>window.open(`mailto:${b.email}`)},
+         {texto:"Cerrar",accion:()=>cerrarModal()}]); }
+    if(d){ const {error}=await api("borrar_mensaje",{id:d.dataset.db});
+      if(error) return errorAviso(error);
+      aviso("Mensaje borrado."); ver("mensajes"); contadores(); }
+  });
+  $("#csv").addEventListener("click",()=>descargarCSV("mensajes",data));
+}
+
+/* =========================================================================
+   FORMULARIOS: MODAL, CAMPOS, ARCHIVOS
+   ========================================================================= */
+let cerrarModal=()=>{};
+function abrirModal(titulo,cuerpo,botones){
+  $("#mTitle").textContent=titulo; $("#mBody").innerHTML=cuerpo; $("#mFoot").innerHTML="";
+  botones.forEach(b=>{ const el=document.createElement("button");
+    el.className="btn "+(b.clase||""); el.textContent=b.texto;
+    el.addEventListener("click",()=>b.accion(el)); $("#mFoot").appendChild(el); });
+  $("#ov").classList.add("on"); $("#modal").classList.add("on");
+  cerrarModal=()=>{ $("#ov").classList.remove("on"); $("#modal").classList.remove("on"); };
+}
+$("#mX").addEventListener("click",()=>cerrarModal());
+$("#ov").addEventListener("click",()=>cerrarModal());
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") cerrarModal(); });
+
+function campoHTML(c,valor){
+  const v=valor??c.def??"";
+  const lbl=`${c.l}${c.req?' <span class="req">*</span>':""}`;
+  const help=c.help?`<div class="help">${c.help}</div>`:"";
+  const cls="f"+(c.mitad?" mitad":"");
+  let ctrl;
+  switch(c.t){
+    case "textarea": ctrl=`<textarea name="${c.k}" placeholder="${c.ph||""}">${esc(v)}</textarea>`; break;
+    case "bool": return `<div class="${cls}"><div class="sw"><input type="checkbox" name="${c.k}" ${v?"checked":""}>
+      <span>${c.l}</span></div>${help}</div>`;
+    case "select": {
+      // c.opts acepta un arreglo (["edit","remix"], valor = texto) o un objeto
+      // ({normal:"Normal", halloween:"🎃 Halloween"}, valor de base ≠ texto visible)
+      const opts = Array.isArray(c.opts) ? c.opts.map(o=>({val:o,label:o})) : Object.entries(c.opts).map(([val,label])=>({val,label}));
+      ctrl=`<select name="${c.k}">${opts.map(o=>`<option value="${esc(o.val)}" ${o.val===v?"selected":""}>${esc(o.label)}</option>`).join("")}</select>`;
+      break;
+    }
+    case "staff": ctrl=`<select name="${c.k}">${cache.staff.map(s=>
+      `<option value="${s.id}" ${s.id===v?"selected":""}>${esc(s.alias||s.nombre)}</option>`).join("")}</select>`; break;
+    case "plan": ctrl=`<select name="${c.k}"><option value="">Cualquier membresía activa</option>
+      ${cache.planes.map(p=>`<option value="${p.id}" ${p.id===v?"selected":""}>${esc(p.nombre)} (${money(p.precio)}) o superior</option>`).join("")}
+      </select>`; break;
+    case "number": ctrl=`<input type="number" name="${c.k}" step="${c.step||1}" value="${esc(v)}">`; break;
+    case "lineas": ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).join("\n"))}</textarea>`; break;
+    case "pares":  ctrl=`<textarea name="${c.k}">${esc((Array.isArray(v)?v:[]).map(x=>`${x.anio} | ${x.texto}`).join("\n"))}</textarea>`; break;
+    case "color": { const defColor=c.def||"#000000";
+      ctrl=`<div class="drop" data-color="${c.k}" data-def="${defColor}" style="align-items:center">
+        <input type="color" value="${v||defColor}">
+        <span class="mini" data-color-estado style="flex:1">${v
+          ?`Personalizado: <b style="color:var(--ok)">${esc(v)}</b>`:"Usando el color del tema actual"}</span>
+        ${v?`<button type="button" class="btn btn-sm" data-clear-color="${c.k}">Quitar</button>`:""}
+      </div><input type="hidden" name="${c.k}" value="${esc(v)}">`; break; }
+    case "file": { const inputId="arch-"+c.k;
+      const iconos={portadas:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m4 17 5-5 4 4 3-3 4 4"/></svg>`,
+        previews:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 15V9a8 8 0 0 1 16 0v6"/><path d="M4 15a2 2 0 0 0 2 2h1v-6H4v4Zm16 0a2 2 0 0 1-2 2h-1v-6h3v4Z"/></svg>`,
+        descargas:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`};
+      const icono=iconos[c.bucket]||iconos.previews;
+      const nombreArchivo=v?esc(String(v).split("/").pop()):"";
+      ctrl=`<div class="drop archivo-drop ${v?"tiene-archivo":""}" data-bucket="${c.bucket}">
+        <label class="archivo-boton" for="${inputId}">
+          <span class="archivo-icono">${icono}</span>
+          <span class="archivo-info">
+            <b>${v?"Reemplazar archivo":"Elegir archivo"}</b>
+            <span class="archivo-estado" data-url="${c.k}">${v?nombreArchivo:"Ningún archivo subido todavía"}</span>
+          </span>
+        </label>
+        <input type="file" id="${inputId}" data-for="${c.k}" data-limite="${c.limite||""}" hidden
+          ${c.accept?`accept="${c.accept}"`:c.bucket==="portadas"?'accept="image/*"':c.bucket==="previews"?'accept="audio/*"':'accept="audio/*,.zip"'}>
+        ${v?`<button type="button" class="btn btn-sm" data-clear="${c.k}">Quitar</button>`:""}
+      </div><input type="hidden" name="${c.k}" value="${esc(v)}">`; break; }
+    default: ctrl=`<input type="text" name="${c.k}" value="${esc(v)}" placeholder="${c.ph||""}">`;
+  }
+  return `<div class="${cls}"><label>${lbl}</label>${ctrl}${help}</div>`;
+}
+function leerCampo(c,el){
+  if(!el) return null;
+  switch(c.t){
+    case "bool":   return el.checked;
+    case "number": return el.value===""?null:+el.value;
+    case "staff":  return el.value||null;
+    case "plan":   return el.value||null;
+    case "lineas": return el.value.split("\n").map(s=>s.trim()).filter(Boolean);
+    case "pares":  return el.value.split("\n").map(s=>s.trim()).filter(Boolean).map(l=>{
+                     const [anio,texto]=l.split("|").map(x=>(x||"").trim());
+                     return {anio,texto:texto||""}; });
+    default:       return el.value.trim();
+  }
+}
+function agruparMitades(cont){
+  if(!cont) return;
+  const h=[...cont.children];
+  for(let i=0;i<h.length;i++){
+    if(h[i].classList?.contains("mitad") && h[i+1]?.classList?.contains("mitad")){
+      const box=document.createElement("div"); box.className="f2";
+      cont.insertBefore(box,h[i]); box.appendChild(h[i]); box.appendChild(h[i+1]); i++;
+    }
+  }
+}
+function activarArchivos(){
+  $$("#mBody input[type=file], #view input[type=file]").forEach(inp=>{
+    inp.addEventListener("change",async()=>{
+      const file=inp.files[0]; if(!file) return;
+      const cont=inp.closest("#mBody")||inp.closest("#view");
+      const bucket=inp.closest(".drop").dataset.bucket, clave=inp.dataset.for;
+      const et=$(`[data-url="${clave}"]`,cont);
+      const drop=inp.closest(".drop"), tituloBoton=$(".archivo-boton b",drop);
+      const limite = +inp.dataset.limite || (bucket==="descargas"?200:bucket==="previews"?25:8);
+      if(file.size>limite*1024*1024) return aviso(`El archivo pasa de ${limite} MB.`,true);
+      et.innerHTML='<span class="spin"></span> subiendo…';
+      // el servidor elige el nombre final y valida extensión y tamaño otra vez;
+      // las carpetas públicas guardan la URL, la privada solo la ruta
+      const {valor,error}=await subirArchivo(bucket,file);
+      if(error){ et.textContent="error al subir"; return errorAviso(error); }
+      $(`[name="${clave}"]`,cont).value=valor;
+      et.textContent=file.name;
+      drop.classList.add("tiene-archivo");
+      if(tituloBoton) tituloBoton.textContent="Reemplazar archivo";
+      if(!$("[data-clear]",drop)){
+        const btn=document.createElement("button"); btn.type="button"; btn.className="btn btn-sm";
+        btn.dataset.clear=clave; btn.textContent="Quitar";
+        btn.addEventListener("click",()=>limpiarArchivo(clave,cont,drop));
+        drop.appendChild(btn);
+      }
+      aviso("Archivo subido.");
+    });
+  });
+  $$("#mBody [data-clear], #view [data-clear]").forEach(b=>
+    b.addEventListener("click",()=>limpiarArchivo(b.dataset.clear,b.closest("#mBody")||b.closest("#view"),b.closest(".drop"))));
+}
+function limpiarArchivo(clave,cont,drop){
+  $(`[name="${clave}"]`,cont).value="";
+  $(`[data-url="${clave}"]`,cont).textContent="Ningún archivo subido todavía";
+  const inputArchivo=$("input[type=file]",drop); if(inputArchivo) inputArchivo.value="";
+  drop.classList.remove("tiene-archivo");
+  const tituloBoton=$(".archivo-boton b",drop); if(tituloBoton) tituloBoton.textContent="Elegir archivo";
+  $("[data-clear]",drop)?.remove();
+}
+function activarColores(onCambio){
+  $$("#mBody [data-color], #view [data-color]").forEach(wrap=>{
+    const clave=wrap.dataset.color, cont=wrap.closest("#mBody")||wrap.closest("#view");
+    wrap.querySelector('input[type="color"]').addEventListener("input",e=>{
+      $(`[name="${clave}"]`,cont).value=e.target.value;
+      $("[data-color-estado]",wrap).innerHTML=`Personalizado: <b style="color:var(--ok)">${e.target.value}</b>`;
+      if(!wrap.querySelector("[data-clear-color]")){
+        const btn=document.createElement("button"); btn.type="button"; btn.className="btn btn-sm";
+        btn.dataset.clearColor=clave; btn.textContent="Quitar";
+        btn.addEventListener("click",()=>limpiarColor(clave,cont,wrap,onCambio));
+        wrap.appendChild(btn);
+      }
+      onCambio?.();
+    });
+  });
+  $$("#mBody [data-clear-color], #view [data-clear-color]").forEach(b=>
+    b.addEventListener("click",()=>limpiarColor(b.dataset.clearColor,b.closest("#mBody")||b.closest("#view"),b.closest("[data-color]"),onCambio)));
+}
+function limpiarColor(clave,cont,wrap,onCambio){
+  $(`[name="${clave}"]`,cont).value="";
+  $("[data-color-estado]",wrap).textContent="Usando el color del tema actual";
+  wrap.querySelector('input[type="color"]').value=wrap.dataset.def||"#000000";
+  wrap.querySelector("[data-clear-color]")?.remove();
+  onCambio?.();
+}
+
+/* =========================================================================
+   CSV Y ERRORES
+   ========================================================================= */
+function descargarCSV(nombre,filas){
+  if(!filas.length) return aviso("No hay datos que exportar.",true);
+  const cols=Object.keys(filas[0]);
+  const csv=[cols.join(";")].concat(filas.map(f=>cols.map(c=>{
+    let v=f[c]; if(v&&typeof v==="object") v=JSON.stringify(v);
+    return `"${String(v??"").replace(/"/g,'""')}"`; }).join(";"))).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"}));
+  a.download=`${nombre}-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+function errorVista(e){
+  $("#view").innerHTML=`<div class="card"><div class="vacio">
+    <b style="color:var(--bad)">No pude leer los datos</b><br><br>${esc(e.message)}<br><br>
+    <span class="mini">Si dice “Error interno del servidor”, revisa que la base de datos esté creada
+    con <b>schema.sql</b> y que <b>config.php</b> tenga los datos de conexión correctos.</span></div></div>`;
+}
+function errorAviso(e){ aviso(`<b>No se pudo guardar</b><br>${esc(e.message||e)}`,true); }
+</script>
+</body>
+</html>

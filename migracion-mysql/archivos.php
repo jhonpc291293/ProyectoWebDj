@@ -25,7 +25,10 @@ define('RUTA_PRIVADA', __DIR__ . '/privado');
 
 const BUCKETS = [
   'portadas'     => ['publico' => true,  'extensiones' => ['jpg','jpeg','png','webp','gif'],        'limite_mb' => 8],
-  'previews'     => ['publico' => true,  'extensiones' => ['mp3','wav','m4a','mp4','webm'],          'limite_mb' => 100],
+  // 500 MB: el audio destacado del inicio puede ser un set largo. Ojo: el
+  // hosting también tiene sus propios topes (upload_max_filesize y
+  // post_max_size de PHP) que hay que subir en cPanel para que esto valga.
+  'previews'     => ['publico' => true,  'extensiones' => ['mp3','wav','m4a','mp4','webm'],          'limite_mb' => 500],
   'descargas'    => ['publico' => false, 'extensiones' => ['mp3','wav','m4a','zip'],                 'limite_mb' => 200],
   'comprobantes' => ['publico' => false, 'extensiones' => ['jpg','jpeg','png','pdf'],                'limite_mb' => 8],
 ];

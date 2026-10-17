@@ -129,8 +129,9 @@ function verificar(titulo, esperado, obtenido) {
 
   console.log('\n=== Cerrar sesión e ingresar ===');
   await page.click('#btnCuenta');
-  await botonModal('Cerrar sesión').click();
-  await page.waitForLoadState('load');
+  // cerrar sesión recarga la página: hay que esperar esa recarga, no el estado
+  // "load" de la página vieja (que ya estaba cargada y daría falso negativo)
+  await Promise.all([page.waitForNavigation({ waitUntil: 'load' }), botonModal('Cerrar sesión').click()]);
   await page.waitForSelector('#lista .tr:not(.tr-cab)');
   verificar('tras cerrar sesión vuelve el botón Ingresar', false, await page.locator('#btnIngresar').evaluate(e => e.classList.contains('hide')));
   await page.click('#btnIngresar');
