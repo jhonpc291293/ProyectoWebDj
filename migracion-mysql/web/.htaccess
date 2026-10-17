@@ -12,6 +12,12 @@ DirectoryIndex index.html
   Require all denied
 </Files>
 
+# la configuración de PHP que crea el hosting (límites de subida, etc.)
+# tampoco tiene por qué verse desde el navegador
+<FilesMatch "^(php\.ini|\.user\.ini)$">
+  Require all denied
+</FilesMatch>
+
 # HTTPS obligatorio. Se activa quitando los # de las 3 líneas de abajo,
 # SOLO cuando el certificado SSL ya esté instalado (si no, la web no abre).
 # RewriteEngine On
