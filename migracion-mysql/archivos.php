@@ -26,11 +26,11 @@ define('RUTA_PRIVADA', __DIR__ . '/privado');
 
 const BUCKETS = [
   'portadas'     => ['publico' => true,  'extensiones' => ['jpg','jpeg','png','webp','gif'],        'limite_mb' => 8],
-  // 500 MB: el audio destacado del inicio puede ser un set largo. Ojo: el
-  // hosting también tiene sus propios topes (upload_max_filesize y
-  // post_max_size de PHP) que hay que subir en cPanel para que esto valga.
-  'previews'     => ['publico' => true,  'extensiones' => ['mp3','wav','m4a','mp4','webm'],          'limite_mb' => 500],
-  'descargas'    => ['publico' => false, 'extensiones' => ['mp3','wav','m4a','zip'],                 'limite_mb' => 200],
+  // 120 MB: el servidor web de HostingPeru corta cualquier subida de más de
+  // 128 MB (medido: 100 MB pasa, 128 MB da 413), aunque PHP esté en 512M.
+  // Si el proveedor sube ese tope, se puede subir este número.
+  'previews'     => ['publico' => true,  'extensiones' => ['mp3','wav','m4a','mp4','webm'],          'limite_mb' => 120],
+  'descargas'    => ['publico' => false, 'extensiones' => ['mp3','wav','m4a','zip'],                 'limite_mb' => 120],
   'comprobantes' => ['publico' => false, 'extensiones' => ['jpg','jpeg','png','pdf'],                'limite_mb' => 8],
 ];
 

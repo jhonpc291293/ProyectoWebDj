@@ -297,6 +297,8 @@ async function subirArchivo(bucket, file){
   const fd=new FormData(); fd.append("bucket",bucket); fd.append("archivo",file);
   try{
     const r=await fetch("subir.php",{method:"POST",credentials:"same-origin",body:fd});
+    // 413: el servidor del hosting rechazó el archivo por tamaño, antes de llegar a PHP
+    if(r.status===413) return {error:{message:"El archivo es más grande de lo que permite el hosting (máximo unos 120 MB)."}};
     const t=await r.text();
     if(!t.startsWith("OK:")) return {error:{message:t.replace(/^ERROR:/,"")||`Error ${r.status}`}};
     const ruta=t.slice(3);
@@ -1154,8 +1156,8 @@ const CAMPOS_MARCA=[
   {g:"Audio destacado del hero"},
   {k:"audio_destacado_titulo",l:"Título a mostrar",t:"text",ph:"Nuevo lanzamiento exclusivo",mitad:true,
    help:"Aparece junto al botón de play, en el inicio."},
-  {k:"audio_destacado_archivo",l:"Archivo de audio",t:"file",bucket:"previews",accept:"audio/*",mitad:true,limite:500,
-   help:"Es independiente del catálogo (no hace falta que sea un track). Aparece en el inicio apenas lo subas; quítalo para que deje de mostrarse. Hasta 500 MB — si es un set largo, conviene subirlo en MP3 (no WAV) para que pese bastante menos."},
+  {k:"audio_destacado_archivo",l:"Archivo de audio",t:"file",bucket:"previews",accept:"audio/*",mitad:true,limite:120,
+   help:"Es independiente del catálogo (no hace falta que sea un track). Aparece en el inicio apenas lo subas; quítalo para que deje de mostrarse. Hasta 120 MB — si es un set largo, conviene subirlo en MP3 (no WAV) para que pese bastante menos."},
   {g:"Apariencia"},
   {k:"tema",l:"Tema de temporada",t:"select",def:"normal",
    opts:{normal:"Normal (colores de siempre)", halloween:"🎃 Halloween", navidad:"🎄 Navidad", "ano-nuevo":"🎆 Año Nuevo"},
@@ -1507,7 +1509,8 @@ function activarArchivos(){
       const bucket=inp.closest(".drop").dataset.bucket, clave=inp.dataset.for;
       const et=$(`[data-url="${clave}"]`,cont);
       const drop=inp.closest(".drop"), tituloBoton=$(".archivo-boton b",drop);
-      const limite = +inp.dataset.limite || (bucket==="descargas"?200:bucket==="previews"?25:8);
+      // el hosting corta cualquier subida de más de 128 MB: 120 deja margen
+      const limite = +inp.dataset.limite || (bucket==="descargas"?120:bucket==="previews"?25:8);
       if(file.size>limite*1024*1024) return aviso(`El archivo pasa de ${limite} MB.`,true);
       et.innerHTML='<span class="spin"></span> subiendo…';
       // el servidor elige el nombre final y valida extensión y tamaño otra vez;
