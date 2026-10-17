@@ -1,0 +1,7 @@
+{
+  "name": "vpm-exportar",
+  "private": true,
+  "description": "Exporta los datos y archivos de Supabase al formato del hosting MySQL (Fase 6).",
+  "scripts": { "exportar": "node exportar.js salida" },
+  "dependencies": { "pg": "^8.13.0" }
+}

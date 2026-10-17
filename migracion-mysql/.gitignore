@@ -2,3 +2,6 @@
 # no son código, no se suben.
 /web/subidas/
 /privado/
+# la salida de la exportación son datos reales de clientes: nunca a git
+/migrar/salida/
+/migrar/node_modules/

@@ -23,7 +23,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 function responder(array $datos, int $codigo = 200): never {
   http_response_code($codigo);
-  echo json_encode(['ok' => $codigo < 400] + $datos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  echo json_encode(fechas_iso(['ok' => $codigo < 400] + $datos), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   exit;
 }
 

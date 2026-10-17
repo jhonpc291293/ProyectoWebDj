@@ -24,7 +24,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 function responder(array $datos, int $codigo = 200): never {
   http_response_code($codigo);
-  echo json_encode(['ok' => $codigo < 400] + $datos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  echo json_encode(fechas_iso(['ok' => $codigo < 400] + $datos), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   exit;
 }
 
@@ -57,7 +57,9 @@ function relativa_de_url(?string $url, string $bucket): ?string {
   $marca = '/subidas/' . $bucket . '/';
   $i = strpos((string) $url, $marca);
   if ($i === false) return null;
-  $rel = $bucket . '/' . substr((string) $url, $i + strlen($marca));
+  // se decodifica (%20 -> espacio) porque en el disco el archivo tiene el
+  // nombre real; el chequeo de ".." va DESPUÉS, para que %2e%2e no lo esquive
+  $rel = $bucket . '/' . rawurldecode(strtok(substr((string) $url, $i + strlen($marca)), '?#'));
   return str_contains($rel, '..') ? null : $rel;
 }
 

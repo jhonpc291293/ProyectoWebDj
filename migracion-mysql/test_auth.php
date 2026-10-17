@@ -5,6 +5,7 @@ require __DIR__ . '/auth.php';
 
 $pdo = new PDO('mysql:host=vpm-mysql-test;dbname=vip_paita_mix;charset=utf8mb4', 'root', 'test1234', [
   PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+  PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone = '-05:00'", // igual que web/config.php
 ]);
 
 $fallos = 0;

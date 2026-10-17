@@ -44,6 +44,21 @@ function inicio_dia_local(): string {
   return $hoy->format('Y-m-d H:i:s');
 }
 
+// Las fechas con hora se guardan en hora de Lima (ver web/config.php). Antes
+// de mandarlas al navegador se les agrega la zona (-05:00), como hacía
+// Supabase: sin zona, el navegador las leería en la hora local de quien mira,
+// y alguien fuera de Perú vería las horas corridas.
+function fechas_iso(mixed $v): mixed {
+  if (is_array($v)) {
+    foreach ($v as $k => $x) $v[$k] = fechas_iso($x);
+    return $v;
+  }
+  if (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $v)) {
+    return str_replace(' ', 'T', $v) . '-05:00';
+  }
+  return $v;
+}
+
 function hoy_lima(): string {
   $tz = new DateTimeZone('America/Lima');
   return (new DateTime('now', $tz))->format('Y-m-d');
