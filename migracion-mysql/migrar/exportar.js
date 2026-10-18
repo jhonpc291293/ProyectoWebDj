@@ -126,11 +126,11 @@ function inserts(tabla, columnas, filas) {
 
   // ----------------------------- marca -----------------------------
   const COLS_SETTINGS = ['marca', 'creador', 'desde', 'ciudad', 'claim', 'hero_l1', 'hero_l2', 'hero_l3', 'logo_url',
-    'hero_img', 'hero_video_fondo', 'whatsapp', 'email', 'moneda', 'yape_nombre', 'yape_numero', 'yape_qr', 'pago_nota',
+    'hero_img', 'hero_video_fondo', 'todos_foto', 'whatsapp', 'email', 'moneda', 'yape_nombre', 'yape_numero', 'yape_qr', 'pago_nota',
     'frases', 'hitos', 'redes', 'tema', 'color_fondo', 'color_tarjetas', 'color_encabezado', 'color_piepagina',
     'color_texto', 'color_acento', 'fuente_titulos', 'fuente_texto', 'video_activo', 'video_url', 'video_archivo',
     'audio_destacado_titulo', 'audio_destacado_archivo'];
-  const URLS_SETTINGS = ['logo_url', 'hero_img', 'hero_video_fondo', 'yape_qr', 'video_archivo', 'audio_destacado_archivo'];
+  const URLS_SETTINGS = ['logo_url', 'hero_img', 'hero_video_fondo', 'todos_foto', 'yape_qr', 'video_archivo', 'audio_destacado_archivo'];
   const st = (await q('SELECT * FROM public.settings WHERE id = 1'))[0];
   let sqlSettings = '-- settings: sin fila en Supabase, se dejan los valores por defecto\n';
   if (st) {

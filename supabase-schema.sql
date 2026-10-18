@@ -157,6 +157,7 @@ alter table public.settings add column if not exists audio_destacado_titulo  tex
 alter table public.settings add column if not exists audio_destacado_archivo text not null default '';
 alter table public.settings add column if not exists hero_video_fondo text not null default '';
 alter table public.settings add column if not exists yape_qr text not null default '';
+alter table public.settings add column if not exists todos_foto text not null default '';  -- foto de la tarjeta "Todos" del catálogo
 
 -- el crew que se muestra en la web (independiente de las cuentas de acceso)
 create table if not exists public.crew (

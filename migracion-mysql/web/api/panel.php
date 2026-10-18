@@ -526,7 +526,7 @@ try {
       // solo se aceptan columnas conocidas: nada de lo que mande el navegador
       // llega a la consulta como nombre de columna sin pasar por esta lista
       $textos = ['marca', 'creador', 'ciudad', 'claim', 'hero_l1', 'hero_l2', 'hero_l3', 'logo_url', 'hero_img',
-        'hero_video_fondo', 'whatsapp', 'email', 'moneda', 'yape_nombre', 'yape_numero', 'yape_qr', 'pago_nota',
+        'hero_video_fondo', 'todos_foto', 'whatsapp', 'email', 'moneda', 'yape_nombre', 'yape_numero', 'yape_qr', 'pago_nota',
         'color_fondo', 'color_tarjetas', 'color_encabezado', 'color_piepagina', 'color_texto', 'color_acento',
         'fuente_titulos', 'fuente_texto', 'video_url', 'video_archivo',
         'audio_destacado_titulo', 'audio_destacado_archivo'];
@@ -595,7 +595,7 @@ function url_en_uso(PDO $pdo, ?string $url): bool {
     'SELECT 1 FROM tracks WHERE portada = ? OR preview = ?
      UNION SELECT 1 FROM crew WHERE foto = ?
      UNION SELECT 1 FROM comunicados WHERE imagen = ?
-     UNION SELECT 1 FROM settings WHERE ? IN (logo_url, hero_img, hero_video_fondo, yape_qr,
+     UNION SELECT 1 FROM settings WHERE ? IN (logo_url, hero_img, hero_video_fondo, todos_foto, yape_qr,
                                               video_archivo, audio_destacado_archivo)
      LIMIT 1'
   );

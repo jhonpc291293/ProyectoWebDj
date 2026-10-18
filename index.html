@@ -186,6 +186,7 @@ h2.title em{font-style:normal;color:var(--gold)}
 .catalogo-dj .nombre{display:block;padding:7px 5px 8px;font-size:11px;font-weight:700;line-height:1.15;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 .catalogo-dj.todos .foto{background:linear-gradient(135deg,var(--gold),#9b5d14);color:#120c02}
+.catalogo-dj.todos.con-foto .foto{background-color:var(--panel2);background-size:cover;background-position:center}
 @media (max-width:700px){
   .catalogo-djs{padding-inline:16px}
   .catalogo-dj{flex:0 0 88px;min-width:88px}
@@ -1043,8 +1044,9 @@ function pintarCatalogoDjs(){
   const djs=CREW.filter(d=>d.visible!==false).map(d=>({
     nombre:d.alias||d.nombre||"DJ", foto:d.foto||"", email:String(d.email||"").trim()
   }));
-  $("#catalogoDjs").innerHTML=`<button class="catalogo-dj todos on" data-dj="">
-    <span class="foto">★</span><span class="nombre">Todos</span></button>`
+  // la tarjeta "Todos" lleva la foto que suba el admin; sin foto, la estrella dorada
+  $("#catalogoDjs").innerHTML=`<button class="catalogo-dj todos ${S.todos_foto?"con-foto":""} on" data-dj="">
+    <span class="foto" style="${S.todos_foto?`background-image:url('${esc(S.todos_foto)}')`:""}">${S.todos_foto?"":"★"}</span><span class="nombre">Todos</span></button>`
     + djs.map(d=>{
       const nombre=d.nombre;
       const iniciales=nombre.replace(/^DJ\s*/i,"").slice(0,2).toUpperCase();

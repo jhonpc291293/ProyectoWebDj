@@ -62,6 +62,7 @@ CREATE TABLE settings (
   logo_url    VARCHAR(500) NOT NULL DEFAULT '',
   hero_img    VARCHAR(500) NOT NULL DEFAULT '',
   hero_video_fondo VARCHAR(500) NOT NULL DEFAULT '',
+  todos_foto  VARCHAR(500) NOT NULL DEFAULT '',  -- foto de la tarjeta "Todos" del catálogo
   whatsapp    VARCHAR(30)  NOT NULL DEFAULT '51999999999',
   email       VARCHAR(255) NOT NULL DEFAULT 'contacto@vippaitamix.com',
   moneda      VARCHAR(10)  NOT NULL DEFAULT 'S/',
