@@ -1669,11 +1669,17 @@ async function descargar(id, boton){
   try{
     const {data:ruta,error}=await sb.rpc("solicitar_descarga",{p_track:t.id});
     if(error) throw error;
-    const {data,error:e2}=await sb.storage.from("descargas").createSignedUrl(ruta,300,{download:true});
-    if(e2) throw e2;
-    // enlace temporal: el archivo baja con nombre limpio y sin salir de la página
+    // el archivo baja con el título tal cual se ve en la web: solo se quitan los
+    // caracteres que Windows no acepta en un nombre de archivo (\ / : * ? " < > |)
     const ext=(String(ruta).split(".").pop()||"mp3").toLowerCase();
-    const nombre=(t.titulo.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ-]/gi,"").trim()||"track")+"."+ext;
+    const nombre=(String(t.titulo).replace(/[\\/:*?"<>|\u0000-\u001f]/g,"").replace(/\s+/g," ").trim().replace(/\.+$/,"")||"track")+"."+ext;
+    // Supabase ignora el atributo download del enlace (es otro dominio): el nombre
+    // tiene que ir dentro del enlace firmado para que el servidor lo mande así. Se
+    // agrega a mano: la opción download de la librería no lo codifica bien y un
+    // "&" del título (p. ej. "Jowell & Randy") cortaría el nombre
+    const {data,error:e2}=await sb.storage.from("descargas").createSignedUrl(ruta,300);
+    if(e2) throw e2;
+    data.signedUrl+=(data.signedUrl.includes("?")?"&":"?")+"download="+encodeURIComponent(nombre);
     const a=document.createElement("a");
     a.href=data.signedUrl; a.download=nombre; a.rel="noopener";
     document.body.appendChild(a); a.click(); a.remove();

@@ -158,7 +158,10 @@ try {
 
       $st = $pdo->prepare('SELECT titulo FROM tracks WHERE id = ?');
       $st->execute([$trackId]);
-      $titulo = trim(preg_replace('/[^\p{L}\p{N}\s-]/u', '', (string) $st->fetchColumn()) ?? '') ?: 'track';
+      // el archivo baja con el título tal cual se ve en la web: solo se quitan
+      // los caracteres que Windows no acepta en un nombre (\ / : * ? " < > |)
+      $titulo = preg_replace(['/[\\\\\/:*?"<>|\x00-\x1f]/u', '/\s+/u'], ['', ' '], (string) $st->fetchColumn()) ?? '';
+      $titulo = rtrim(trim($titulo), '.') ?: 'track';
       $ext = strtolower(pathinfo($ruta, PATHINFO_EXTENSION)) ?: 'mp3';
 
       $ahora = time();
