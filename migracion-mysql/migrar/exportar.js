@@ -168,6 +168,41 @@ function inserts(tabla, columnas, filas) {
   const bookings = rellenar((await q('SELECT * FROM public.bookings')).map(b => ({ ...b, creado: fechaHora(b.creado) })),
     { nombre: '', email: '', tipo: '', lugar: '', estado: 'nuevo' });
 
+  // -------------------- registros huérfanos --------------------
+  // En Supabase algunas tablas no tenían la llave foránea, así que al borrar
+  // una canción o un usuario quedaron filas sueltas apuntando a la nada (en
+  // producción: 10 track_files de canciones ya borradas). En MySQL esas
+  // relaciones sí existen: lo que apunta a algo inexistente se descarta (o,
+  // si la columna lo permite, se deja vacía), avisando cuánto fue.
+  const idsTrack = new Set(tracks.map(t => t.id));
+  const idsUsuario = new Set(filasUsuarios.map(u => u.id));
+  const idsPlan = new Set(planes.map(p => p.id));
+  function sinHuerfanos(nombre, filas, debeExistir, puedeQuedarVacio = {}) {
+    let descartadas = 0, vaciadas = 0;
+    const limpias = filas.filter(f => {
+      for (const [col, ids] of Object.entries(debeExistir)) if (f[col] != null && !ids.has(f[col])) { descartadas++; return false; }
+      for (const [col, ids] of Object.entries(puedeQuedarVacio)) if (f[col] != null && !ids.has(f[col])) { f[col] = null; vaciadas++; }
+      return true;
+    });
+    if (descartadas) avisos.push(`${nombre}: ${descartadas} registro(s) descartado(s) porque apuntaban a algo que ya no existe.`);
+    if (vaciadas) avisos.push(`${nombre}: ${vaciadas} referencia(s) a usuarios/planes borrados quedaron vacías.`);
+    return limpias;
+  }
+  const trackFilesOk = sinHuerfanos('track_files', trackFiles, { track_id: idsTrack });
+  const comprasOk = sinHuerfanos('compras', compras, { user_id: idsUsuario }, { aprobado_por: idsUsuario });
+  const idsCompraOk = new Set(comprasOk.map(c => c.id));
+  const compraTracksOk = sinHuerfanos('compra_tracks', compraTracks, { compra_id: idsCompraOk, track_id: idsTrack });
+  const membershipsOk = sinHuerfanos('memberships', memberships, { user_id: idsUsuario }, { plan_id: idsPlan, aprobado_por: idsUsuario });
+  const downloadsOk = sinHuerfanos('downloads', downloads, { track_id: idsTrack }, { user_id: idsUsuario });
+  const playsOk = sinHuerfanos('plays', plays, { track_id: idsTrack }, { user_id: idsUsuario });
+  const tracksOk = tracks.map(t => {
+    const g = { ...t };
+    if (g.editor_id && !idsUsuario.has(g.editor_id)) g.editor_id = null;
+    if (g.plan_minimo_id && !idsPlan.has(g.plan_minimo_id)) g.plan_minimo_id = null;
+    return g;
+  });
+  const comunicadosOk = comunicados.map(c => (c.autor_id && !idsUsuario.has(c.autor_id) ? { ...c, autor_id: null } : c));
+
   // ----------------------------- datos.sql -----------------------------
   fs.mkdirSync(SALIDA, { recursive: true });
   const partes = [
@@ -179,21 +214,21 @@ function inserts(tabla, columnas, filas) {
     inserts('usuarios', ['id', 'email', 'password_hash', 'nombre', 'alias', 'rol', 'telefono', 'avatar', 'creado'], filasUsuarios),
     sqlSettings,
     inserts('crew', ['id', 'orden', 'alias', 'nombre', 'cargo', 'email', 'bio', 'foto', 'ig', 'visible', 'creado'], crew),
-    inserts('comunicados', ['id', 'titulo', 'cuerpo', 'imagen', 'autor_id', 'autor', 'fijado', 'visible', 'creado'], comunicados),
+    inserts('comunicados', ['id', 'titulo', 'cuerpo', 'imagen', 'autor_id', 'autor', 'fijado', 'visible', 'creado'], comunicadosOk),
     inserts('planes', ['id', 'orden', 'nombre', 'dias', 'precio', 'descripcion', 'beneficios', 'limite_diario', 'destacado', 'activo', 'creado'], planes),
     // OJO con el orden: las descargas van ANTES que los tracks. MySQL tiene un
     // trigger que suma +1 al contador del track por cada descarga insertada;
     // como los tracks todavía no existen, no suma nada, y luego los tracks
     // entran con su contador real. Al revés, cada descarga se contaría doble.
-    inserts('downloads', ['id', 'creado', 'user_id', 'track_id'], downloads),
+    inserts('downloads', ['id', 'creado', 'user_id', 'track_id'], downloadsOk),
     inserts('tracks', ['id', 'titulo', 'artista', 'tipo', 'genero', 'bpm', 'tonalidad', 'duracion', 'anio', 'portada', 'preview',
-      'editor_id', 'editor', 'editor_email', 'gratis', 'precio', 'plan_minimo_id', 'destacado', 'visible', 'descargas', 'creado'], tracks),
-    inserts('track_files', ['track_id', 'ruta', 'peso_mb', 'formato'], trackFiles),
-    inserts('compras', ['id', 'user_id', 'monto', 'metodo', 'comprobante', 'estado', 'aprobado_por', 'creado'], compras),
-    inserts('compra_tracks', ['compra_id', 'track_id', 'precio'], compraTracks),
+      'editor_id', 'editor', 'editor_email', 'gratis', 'precio', 'plan_minimo_id', 'destacado', 'visible', 'descargas', 'creado'], tracksOk),
+    inserts('track_files', ['track_id', 'ruta', 'peso_mb', 'formato'], trackFilesOk),
+    inserts('compras', ['id', 'user_id', 'monto', 'metodo', 'comprobante', 'estado', 'aprobado_por', 'creado'], comprasOk),
+    inserts('compra_tracks', ['compra_id', 'track_id', 'precio'], compraTracksOk),
     inserts('memberships', ['id', 'user_id', 'plan_id', 'plan_nombre', 'monto', 'metodo', 'comprobante', 'estado', 'inicio', 'fin',
-      'notas', 'aprobado_por', 'creado'], memberships),
-    inserts('plays', ['id', 'creado', 'track_id', 'user_id'], plays),
+      'notas', 'aprobado_por', 'creado'], membershipsOk),
+    inserts('plays', ['id', 'creado', 'track_id', 'user_id'], playsOk),
     inserts('bookings', ['id', 'creado', 'nombre', 'email', 'tipo', 'fecha', 'lugar', 'mensaje', 'estado', 'notas'], bookings),
     'COMMIT;', 'SET FOREIGN_KEY_CHECKS = 1;',
   ];
@@ -221,7 +256,7 @@ function inserts(tabla, columnas, filas) {
   for (const t of tracks) for (const c of ['portada', 'preview']) {
     if (t[c]?.startsWith('/subidas/') && !enDisco(decodeURIComponent(t[c].slice(1)))) avisos.push(`El track "${t.titulo}" apunta a un ${c} que no existe en Storage.`);
   }
-  for (const f of trackFiles) if (f.ruta && !enDisco(path.join('privado', f.ruta))) avisos.push(`El archivo completo ${f.ruta} no existe en Storage.`);
+  for (const f of trackFilesOk) if (f.ruta && !enDisco(path.join('privado', f.ruta))) avisos.push(`El archivo completo ${f.ruta} no existe en Storage.`);
 
   const resumen = [
     'VIP PAITA MIX · resumen de la exportación', '',
