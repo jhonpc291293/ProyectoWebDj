@@ -121,8 +121,8 @@ h2.title em{font-style:normal;color:var(--gold)}
 .hero-glow::after{width:44vw;height:44vw;right:-10vw;bottom:-18vw;background:radial-gradient(circle,rgba(var(--gold-deep-rgb),.55),transparent 64%);animation:f2 22s ease-in-out infinite}
 @keyframes f1{50%{transform:translate(7vw,5vh) scale(1.1)}}
 @keyframes f2{50%{transform:translate(-6vw,-7vh) scale(1.08)}}
-/* sombreado en negro fijo; solo el final se funde con el fondo general de la página */
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,7,11,.55),rgba(8,7,11,.2) 40%,var(--bg))}
+/* sombreado en negro fijo de arriba abajo: el fondo general personalizado no se mezcla con el inicio */
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,7,11,.55),rgba(8,7,11,.2) 40%,rgba(8,7,11,.92))}
 .hero-in{position:relative;z-index:2;padding:96px 0 82px}
 .hero-fila{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap}
 .hero-texto{flex:1 1 420px;min-width:280px}
