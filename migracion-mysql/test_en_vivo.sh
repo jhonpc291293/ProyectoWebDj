@@ -2,10 +2,10 @@
 # Pruebas contra el hosting REAL, solo por HTTP (sin Docker ni acceso a la
 # base de datos). Las credenciales de la protección temporal del sitio se
 # pasan al ejecutar, nunca se guardan aquí:
-#   SITIO=http://vippaitamix.com AUTH='usuario:clave' bash test_en_vivo.sh
+#   SITIO=https://vippaitamix.com AUTH='usuario:clave' bash test_en_vivo.sh
 # Crea una cuenta de prueba (pruebas.<hora>@vippaitamix.com): la base de
 # datos de prueba se vacía igual el día del cambio.
-SITIO="${SITIO:-http://vippaitamix.com}"; PUB="$SITIO/api/publica.php"; H="X-VPM: 1"
+SITIO="${SITIO:-https://vippaitamix.com}"; PUB="$SITIO/api/publica.php"; H="X-VPM: 1"
 [ -z "$AUTH" ] && { echo "Falta AUTH='usuario:clave'"; exit 1; }
 FALLOS=0
 export PYTHONIOENCODING=utf-8

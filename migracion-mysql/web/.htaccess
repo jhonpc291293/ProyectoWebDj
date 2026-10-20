@@ -13,13 +13,14 @@ DirectoryIndex index.html
 </Files>
 
 # la configuración de PHP que crea el hosting (límites de subida, etc.)
-# tampoco tiene por qué verse desde el navegador
-<FilesMatch "^(php\.ini|\.user\.ini)$">
+# tampoco tiene por qué verse desde el navegador (ni sus copias: php.ini.respaldo...)
+<FilesMatch "^(php\.ini.*|\.user\.ini)$">
   Require all denied
 </FilesMatch>
 
-# HTTPS obligatorio. Se activa quitando los # de las 3 líneas de abajo,
-# SOLO cuando el certificado SSL ya esté instalado (si no, la web no abre).
-# RewriteEngine On
-# RewriteCond %{HTTPS} !=on
-# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# HTTPS obligatorio (el certificado SSL ya está instalado)
+# (salvo en las pruebas locales, que corren sin certificado)
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP_HOST} !^(127\.0\.0\.1|localhost)(:[0-9]+)?$
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
