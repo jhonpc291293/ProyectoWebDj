@@ -231,7 +231,19 @@ h2.title em{font-style:normal;color:var(--gold)}
 .dl.en-carrito{border-color:rgba(125,219,160,.4);color:var(--ok)}
 .dl.en-carrito:hover{background:var(--ok);color:#0a1f14;border-color:transparent}
 .vacio{padding:56px 20px;text-align:center;color:var(--muted)}
-.mas{display:block;margin:22px auto 0}
+.paginacion{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin:22px auto 0}
+.paginacion button{min-width:40px;height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel);color:var(--txt);font:inherit;font-weight:700;cursor:pointer;transition:.15s}
+.paginacion button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.paginacion button.on{background:var(--gold);border-color:var(--gold);color:#120c02}
+.paginacion button:disabled{opacity:.35;cursor:default}
+.paginacion .puntos{color:var(--muted);padding:0 4px}
+@media (max-width:700px){
+  .paginacion{gap:4px}
+  .paginacion button{min-width:34px;height:38px;padding:0 8px}
+  .paginacion .puntos{padding:0 1px}
+  .paginacion .txt{display:none}
+}
 
 /* ============ MEMBRESÍAS ============ */
 .planes{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:20px}
@@ -560,7 +572,7 @@ canvas#viz{width:140px;height:38px;opacity:.9}
       <button class="btn btn-sm btn-g hide" id="limpiar" style="margin-left:auto">Limpiar filtros</button></div>
 
     <div class="lista reveal" id="lista"></div>
-    <button class="btn btn-g mas hide" id="verMas">Cargar más</button>
+    <nav class="paginacion hide" id="paginacion" aria-label="Páginas del catálogo"></nav>
   </div>
 </section>
 
@@ -754,7 +766,7 @@ const DEF = {
 
 /* ---------- estado ---------- */
 let S={}, PLANES=[], CREW=[], TRACKS=[], COMUNICADOS=[], sb=null, sesion=null, perfil=null, MEMB={estado:"ninguna"};
-let modoRespaldo=false, PAGE=24, mostrados=PAGE, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
+let modoRespaldo=false, PAGE=24, pagina=1, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
 let COMPRADOS=new Set(); // ids de tracks que el usuario ya compró y le aprobaron (acceso para siempre)
 let CARRITO=[]; try{ CARRITO=JSON.parse(localStorage.getItem("vpm_carrito")||"[]"); }catch(e){}
 let ARCHIVOS_TRACK=new Map(); // track_id -> ruta; solo para saber si el track ya tiene archivo subido
@@ -1160,17 +1172,19 @@ function filtrar(){
 let VISTA=[];
 function pintarLista(){
   VISTA=filtrar();
+  pagina=Math.max(1,Math.min(pagina,Math.ceil(VISTA.length/PAGE)));
   const hayFiltro = filtro.q||filtro.tipo||filtro.genero||filtro.bpmMin||filtro.bpmMax||filtro.dj;
   $("#limpiar").classList.toggle("hide",!hayFiltro);
   $("#resInfo").innerHTML = VISTA.length
     ? `<b>${VISTA.length}</b> track${VISTA.length===1?"":"s"}${hayFiltro?" con estos filtros":" en el catálogo"}`
+      + (VISTA.length>PAGE ? ` · mostrando ${(pagina-1)*PAGE+1}–${Math.min(pagina*PAGE,VISTA.length)}` : "")
     : "Sin resultados";
   if(!VISTA.length){
     $("#lista").innerHTML = `<div class="vacio">No encontramos tracks con esos filtros.<br>
       <button class="btn btn-g btn-sm" style="margin-top:14px" onclick="limpiarFiltros()">Ver todo el catálogo</button></div>`;
-    $("#verMas").classList.add("hide"); return;
+    $("#paginacion").classList.add("hide"); return;
   }
-  const lote=VISTA.slice(0,mostrados);
+  const lote=VISTA.slice((pagina-1)*PAGE,pagina*PAGE);
   $("#lista").innerHTML = `<div class="tr tr-cab" style="border-bottom:1px solid var(--line)">
       <span></span><span>Track</span><span class="c-dj">DJ</span><span>Género · Tipo</span><span>BPM</span><span>Tono</span><span class="c-precio">Precio</span><span style="text-align:right">Descargar</span>
     </div>` + lote.map(t=>{
@@ -1218,15 +1232,31 @@ function pintarLista(){
       </button>
     </div>`;
   }).join("");
-  $("#verMas").classList.toggle("hide", VISTA.length<=mostrados);
+  pintarPaginacion();
   pintarEstadoPlayer();
+}
+// 1 … 4 5 [6] 7 8 … 20: siempre la primera, la última y dos a cada lado de la actual
+// (uno a cada lado en celular, para que entre en una sola fila)
+function pintarPaginacion(){
+  const total=Math.ceil(VISTA.length/PAGE), nav=$("#paginacion");
+  nav.classList.toggle("hide", total<=1);
+  if(total<=1){ nav.innerHTML=""; return; }
+  const nums=[], vecinos=innerWidth<=700?1:2;
+  for(let n=1;n<=total;n++){
+    if(n===1||n===total||Math.abs(n-pagina)<=vecinos) nums.push(n);
+    else if(nums[nums.length-1]!=="…") nums.push("…");
+  }
+  nav.innerHTML=`<button data-pag="${pagina-1}" ${pagina===1?"disabled":""} aria-label="Página anterior">‹<span class="txt"> Anterior</span></button>`
+    + nums.map(n=>n==="…" ? `<span class="puntos">…</span>`
+      : `<button data-pag="${n}" class="${n===pagina?"on":""}" ${n===pagina?'aria-current="page"':""}>${n}</button>`).join("")
+    + `<button data-pag="${pagina+1}" ${pagina===total?"disabled":""} aria-label="Página siguiente"><span class="txt">Siguiente </span>›</button>`;
 }
 function limpiarFiltros(){
   filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:filtro.orden};
   $("#q").value=""; $("#fGenero").value=""; $("#bpmMin").value=""; $("#bpmMax").value="";
   $$("#chipsTipo .chip").forEach((c,i)=>c.classList.toggle("on",i===0));
   $$("#catalogoDjs .catalogo-dj").forEach((c,i)=>c.classList.toggle("on",i===0));
-  mostrados=PAGE; pintarLista();
+  pagina=1; pintarLista();
 }
 window.limpiarFiltros=limpiarFiltros;
 
@@ -1706,7 +1736,7 @@ function conectar(){
   // catálogo
   $("#catalogoDjs").addEventListener("click",e=>{ const c=e.target.closest(".catalogo-dj"); if(!c) return;
     $$("#catalogoDjs .catalogo-dj").forEach(x=>x.classList.toggle("on",x===c));
-    filtro.dj=c.dataset.dj; mostrados=PAGE; pintarLista(); });
+    filtro.dj=c.dataset.dj; pagina=1; pintarLista(); });
   // flechas de los carruseles horizontales (DJs del catálogo y el crew): los
   // botones viven en el HTML fijo, así que se enganchan una sola vez acá
   $$(".carrusel-wrap .flecha").forEach(btn=>{
@@ -1716,16 +1746,20 @@ function conectar(){
     window.addEventListener("resize",()=>flechasCarrusel(cont));
   });
   let deb; $("#q").addEventListener("input",e=>{ clearTimeout(deb);
-    deb=setTimeout(()=>{ filtro.q=e.target.value; mostrados=PAGE; pintarLista(); },220); });
-  $("#fGenero").addEventListener("change",e=>{ filtro.genero=e.target.value; mostrados=PAGE; pintarLista(); });
-  $("#orden").addEventListener("change",e=>{ filtro.orden=e.target.value; pintarLista(); });
-  $("#bpmMin").addEventListener("input",e=>{ filtro.bpmMin=+e.target.value||null; mostrados=PAGE; pintarLista(); });
-  $("#bpmMax").addEventListener("input",e=>{ filtro.bpmMax=+e.target.value||null; mostrados=PAGE; pintarLista(); });
+    deb=setTimeout(()=>{ filtro.q=e.target.value; pagina=1; pintarLista(); },220); });
+  $("#fGenero").addEventListener("change",e=>{ filtro.genero=e.target.value; pagina=1; pintarLista(); });
+  $("#orden").addEventListener("change",e=>{ filtro.orden=e.target.value; pagina=1; pintarLista(); });
+  $("#bpmMin").addEventListener("input",e=>{ filtro.bpmMin=+e.target.value||null; pagina=1; pintarLista(); });
+  $("#bpmMax").addEventListener("input",e=>{ filtro.bpmMax=+e.target.value||null; pagina=1; pintarLista(); });
   $("#chipsTipo").addEventListener("click",e=>{ const c=e.target.closest(".chip"); if(!c) return;
     $$("#chipsTipo .chip").forEach(x=>x.classList.toggle("on",x===c));
-    filtro.tipo=c.dataset.tipo; mostrados=PAGE; pintarLista(); });
+    filtro.tipo=c.dataset.tipo; pagina=1; pintarLista(); });
   $("#limpiar").addEventListener("click",limpiarFiltros);
-  $("#verMas").addEventListener("click",()=>{ mostrados+=PAGE; pintarLista(); });
+  $("#paginacion").addEventListener("click",e=>{ const b=e.target.closest("button[data-pag]"); if(!b||b.disabled) return;
+    pagina=+b.dataset.pag; pintarLista();
+    // vuelve al inicio de la lista, sin quedar tapado por el menú fijo
+    const y=$("#lista").getBoundingClientRect().top+scrollY-($(".nav")?.offsetHeight||0)-16;
+    scrollTo({top:y,behavior:"smooth"}); });
 
   $("#lista").addEventListener("click",e=>{
     const pl=e.target.closest("[data-play]"), dl=e.target.closest("[data-dl]"),
