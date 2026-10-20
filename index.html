@@ -766,7 +766,7 @@ const DEF = {
 
 /* ---------- estado ---------- */
 let S={}, PLANES=[], CREW=[], TRACKS=[], COMUNICADOS=[], sb=null, sesion=null, perfil=null, MEMB={estado:"ninguna"};
-let modoRespaldo=false, PAGE=24, pagina=1, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
+let modoRespaldo=false, PAGE=10, pagina=1, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
 let COMPRADOS=new Set(); // ids de tracks que el usuario ya compró y le aprobaron (acceso para siempre)
 let CARRITO=[]; try{ CARRITO=JSON.parse(localStorage.getItem("vpm_carrito")||"[]"); }catch(e){}
 let ARCHIVOS_TRACK=new Map(); // track_id -> ruta; solo para saber si el track ya tiene archivo subido
