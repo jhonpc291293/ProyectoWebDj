@@ -404,6 +404,7 @@ const MENU_ADMIN = [
   {sep:"Marca"},
   {v:"settings",     t:"Marca y contacto"},
   {v:"crew",         t:"El crew"},
+  {v:"servicios",    t:"Servicios"},
   {v:"comunicados",  t:"Comunicados"},
   {v:"editores", t:"Editores y roles"},
   {v:"mensajes", t:"Mensajes", pill:"pillMsg"}
@@ -424,7 +425,7 @@ function pintarMenu(){
 $("#menu").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(b) ver(b.dataset.v); });
 
 const TITULOS = {resumen:"Resumen",tracks:"Catálogo",pagos:"Pagos por aprobar",compras:"Compras sueltas",
-  miembros:"Miembros",plans:"Planes de membresía",settings:"Marca y contacto",crew:"El crew",
+  miembros:"Miembros",plans:"Planes de membresía",settings:"Marca y contacto",crew:"El crew",servicios:"Servicios",
   comunicados:"Comunicados",editores:"Editores y roles",mensajes:"Mensajes"};
 function ver(v){
   const permitidas = esAdmin()
@@ -437,7 +438,7 @@ function ver(v){
   viejo.replaceWith(nuevo);
   nuevo.innerHTML=`<div class="vacio"><span class="spin"></span> Cargando…</div>`;
   ({resumen:vistaResumen, tracks:vistaTracks, pagos:vistaPagos, compras:vistaCompras, miembros:vistaMiembros,
-    plans:vistaPlanes, settings:vistaMarca, crew:vistaCrew, comunicados:vistaComunicados,
+    plans:vistaPlanes, settings:vistaMarca, crew:vistaCrew, servicios:vistaServicios, comunicados:vistaComunicados,
     editores:vistaEditores, mensajes:vistaMensajes}[v]||vistaResumen)();
 }
 window.ver=ver;
@@ -1052,11 +1053,20 @@ const ENT={
       {k:"ig",l:"Instagram (URL)",t:"text",mitad:true},
       {k:"bio",l:"Bio corta",t:"textarea"},
       {k:"foto",l:"Foto",t:"file",bucket:"portadas",help:"Cuadrada, menos de 500 KB."},
+      {k:"visible",l:"Mostrar en la web",t:"bool",def:true}]},
+  servicios:{titulo:"Servicios",singular:"servicio",orden:"orden",ordenable:true,
+    cols:[{k:"icono",l:""},{k:"titulo",l:"Servicio",t:"fuerte"},{k:"foto",l:"Foto",t:"img"},{k:"visible",l:"Estado",t:"visible"}],
+    campos:[{k:"titulo",l:"Nombre del servicio",t:"text",req:true,mitad:true,ph:"DJ para tu evento"},
+      {k:"icono",l:"Ícono (emoji)",t:"text",ph:"🎧",mitad:true,help:"Se muestra si no subes foto."},
+      {k:"descripcion",l:"Descripción",t:"textarea",
+       help:"Qué incluye. Sin precios: el visitante toca «Cotizar», llena el formulario y te llega por WhatsApp y a Mensajes."},
+      {k:"foto",l:"Foto",t:"file",bucket:"portadas",help:"Horizontal, de un evento o del servicio. Menos de 800 KB."},
       {k:"visible",l:"Mostrar en la web",t:"bool",def:true}]}
 };
 
 async function vistaPlanes(){ vistaEntidad("plans"); }
 async function vistaCrew(){ vistaEntidad("crew"); }
+async function vistaServicios(){ vistaEntidad("servicios"); }
 
 async function vistaEntidad(nombre){
   const def=ENT[nombre];
@@ -1128,7 +1138,7 @@ function formEnt(nombre,fila){
   activarArchivos();
 }
 function borrarEnt(nombre,fila){
-  abrirModal("Confirmar",`<p style="margin:0">¿Borrar <b>${esc(fila?.nombre||fila?.alias||"este registro")}</b>?</p>`,
+  abrirModal("Confirmar",`<p style="margin:0">¿Borrar <b>${esc(fila?.nombre||fila?.alias||fila?.titulo||"este registro")}</b>?</p>`,
     [ {texto:"Cancelar",accion:()=>cerrarModal()},
       {texto:"Sí, borrar",clase:"btn-d",accion:async btn=>{ btn.disabled=true;
         const {error}=await sb.from(nombre).delete().eq("id",fila.id);

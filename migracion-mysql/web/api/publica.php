@@ -124,8 +124,11 @@ try {
       foreach ($comunicados as &$c) $c['fijado'] = (bool) $c['fijado'];
       unset($c);
 
+      $servicios = $pdo->query('SELECT id, orden, titulo, descripcion, icono, foto FROM servicios WHERE visible = 1 ORDER BY orden')
+        ->fetchAll(PDO::FETCH_ASSOC);
+
       responder(['settings' => $s, 'planes' => $planes, 'crew' => $crew, 'tracks' => $tracks,
-                 'con_archivo' => $conArchivo, 'comunicados' => $comunicados]);
+                 'con_archivo' => $conArchivo, 'comunicados' => $comunicados, 'servicios' => $servicios]);
     }
 
     // ---------------- cuenta del miembro ----------------

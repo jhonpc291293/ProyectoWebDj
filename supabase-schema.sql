@@ -175,6 +175,24 @@ create table if not exists public.crew (
 );
 alter table public.crew add column if not exists email text default '';
 
+-- servicios que se ofrecen (sección "Servicios" de la web): sin precios, solo "Cotizar"
+create table if not exists public.servicios (
+  id          uuid primary key default gen_random_uuid(),
+  orden       int  default 0,
+  titulo      text not null,
+  descripcion text default '',
+  icono       text default '',
+  foto        text default '',
+  visible     boolean default true,
+  creado      timestamptz default now()
+);
+-- (su seguridad está en las secciones 7 y 8, junto a la de las otras tablas)
+insert into public.servicios (orden, titulo, descripcion, icono)
+select * from (values
+  (1, 'DJ para tu evento', 'Bodas, quinceañeros, cumpleaños, discotecas y eventos corporativos. Música a la medida de tu público.', '🎧'),
+  (2, 'Edits a medida', 'Tu canción con la intro, el outro y el BPM que necesitas para tu set.', '🎛️')
+) as v(orden, titulo, descripcion, icono) where not exists (select 1 from public.servicios);
+
 -- comunicados del equipo: novedades, avisos de temporada, dinámicas nuevas...
 -- cualquiera del equipo (admin o editor) publica; cada uno edita solo los suyos
 create table if not exists public.comunicados (
@@ -687,6 +705,15 @@ grant select, insert, update, delete on
   public.plans, public.memberships, public.bookings, public.comunicados,
   public.compras, public.compra_tracks to authenticated;
 grant select on public.downloads, public.plays to authenticated;
+
+-- servicios: cualquiera lee lo visible; solo el admin escribe
+alter table public.servicios enable row level security;
+drop policy if exists "lectura publica" on public.servicios;
+drop policy if exists "admin total"     on public.servicios;
+create policy "lectura publica" on public.servicios for select to anon, authenticated using (visible);
+create policy "admin total" on public.servicios for all to authenticated using (public.es_admin()) with check (public.es_admin());
+grant select on public.servicios to anon, authenticated;
+grant select, insert, update, delete on public.servicios to authenticated;
 
 -- perfiles: se puede editar el nombre y el contacto, NUNCA la columna "rol"
 grant select, insert, delete on public.profiles to authenticated;

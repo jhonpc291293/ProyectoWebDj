@@ -285,6 +285,19 @@ h2.title em{font-style:normal;color:var(--gold)}
 .dj .info small{color:var(--gold);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 .dj .info p{margin:9px 0 0;font-size:13px;color:var(--muted)}
 
+/* ============ SERVICIOS ============ */
+.servicios{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.servicio{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel);
+  display:flex;flex-direction:column;transition:.3s}
+.servicio:hover{transform:translateY(-5px);border-color:var(--line-g)}
+.servicio .foto{aspect-ratio:16/10;background-size:cover;background-position:center;background-color:var(--panel2);
+  display:grid;place-items:center;font-size:56px;line-height:1}
+.servicio .foto.icono{aspect-ratio:auto;height:150px;background:linear-gradient(135deg,rgba(var(--gold-rgb),.3),rgba(var(--gold-deep-rgb),.12))}
+.servicio .info{padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+.servicio .info b{font-size:18px;line-height:1.25}
+.servicio .info p{margin:0;color:var(--muted);font-size:14px;flex:1;white-space:pre-line}
+.servicio .btn{align-self:flex-start;margin-top:4px}
+
 /* ============ COMUNICADOS ============ */
 .comunicados{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
 .comunicado{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--panel);
@@ -482,6 +495,7 @@ canvas#viz{width:140px;height:38px;opacity:.9}
     <nav class="nav-links" id="navLinks">
       <a href="#catalogo">Catálogo</a>
       <a href="#membresias">Membresías</a>
+      <a href="#servicios" id="navServicios" class="hide">Servicios</a>
       <a href="#comunicados" id="navComunicados" class="hide">Comunicados</a>
       <a href="#crew">El crew</a>
       <a href="#historia">Historia</a>
@@ -515,6 +529,7 @@ canvas#viz{width:140px;height:38px;opacity:.9}
         <div class="hero-cta">
           <a href="#catalogo" class="btn btn-p">Ver el catálogo</a>
           <a href="#membresias" class="btn btn-g">Hazte miembro</a>
+          <a href="#servicios" class="btn btn-g hide" id="heroServicios">Contrátanos</a>
         </div>
       </div>
       <div class="hero-video hide" id="heroVideo"></div>
@@ -585,6 +600,18 @@ canvas#viz{width:140px;height:38px;opacity:.9}
       <p class="lead" id="pagoNota"></p>
     </div>
     <div class="planes reveal" id="planes"></div>
+  </div>
+</section>
+
+<!-- ================= SERVICIOS ================= -->
+<section class="section hide" id="servicios">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Servicios</p>
+      <h2 class="title">Contrátanos para <em>tu evento</em></h2>
+      <p class="lead">Cuéntanos qué necesitas y te enviamos una cotización sin compromiso.</p>
+    </div>
+    <div class="servicios reveal" id="serviciosGrid"></div>
   </div>
 </section>
 
@@ -764,7 +791,7 @@ const DEF = {
 };
 
 /* ---------- estado ---------- */
-let S={}, PLANES=[], CREW=[], TRACKS=[], COMUNICADOS=[], conectado=false, sesion=null, perfil=null, MEMB={estado:"ninguna"};
+let S={}, PLANES=[], CREW=[], SERVICIOS=[], TRACKS=[], COMUNICADOS=[], conectado=false, sesion=null, perfil=null, MEMB={estado:"ninguna"};
 let modoRespaldo=false, PAGE=10, pagina=1, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
 let COMPRADOS=new Set(); // ids de tracks que el usuario ya compró y le aprobaron (acceso para siempre)
 let CARRITO=[]; try{ CARRITO=JSON.parse(localStorage.getItem("vpm_carrito")||"[]"); }catch(e){}
@@ -877,7 +904,7 @@ async function cargarDatos(){
   try{
     const [ini,ses]=await Promise.all([api("inicio"), api("sesion")]);
     d={ settings:ini.settings||DEF.settings, plans:ini.planes||[], crew:ini.crew||[],
-        tracks:ini.tracks||[], comunicados:ini.comunicados||[] };
+        tracks:ini.tracks||[], comunicados:ini.comunicados||[], servicios:ini.servicios||[] };
     ARCHIVOS_TRACK=new Set((ini.con_archivo||[]).map(String));
     usuario=ses.usuario; conectado=true;
     guardarCache(d);
@@ -885,7 +912,7 @@ async function cargarDatos(){
   if(!d){ d=DEF; conectado=false; modoRespaldo=true; ARCHIVOS_TRACK=new Set();
     console.warn("[vpm] Contenido de demostración: no pude conectar con el servidor.");
   }
-  S=d.settings||DEF.settings; PLANES=d.plans||[]; CREW=d.crew||[]; TRACKS=d.tracks||[]; COMUNICADOS=d.comunicados||[];
+  S=d.settings||DEF.settings; PLANES=d.plans||[]; CREW=d.crew||[]; SERVICIOS=(d.servicios||[]).filter(v=>v.visible!==false); TRACKS=d.tracks||[]; COMUNICADOS=d.comunicados||[];
   if(usuario) await entrarSesion(usuario,false);
 }
 // "sesion" conserva la forma {user:{id,email}} que ya usaba el resto del código
@@ -1011,6 +1038,25 @@ function pintarPlanes(){
     </div>`).join("");
 }
 
+// sin precios: cada tarjeta lleva a "Cotizar" (el formulario de contacto, con el
+// servicio ya elegido). Sin servicios visibles, la sección y sus enlaces no aparecen
+const MOTIVOS_BASE=["Contratar para un evento","Pedir un edit a medida"],
+      MOTIVOS_FIJOS=["Quiero ser editor del pool","Consulta sobre mi membresía","Otro"];
+function pintarServicios(){
+  const hay=SERVICIOS.length>0;
+  ["#servicios","#navServicios","#heroServicios"].forEach(s=>$(s).classList.toggle("hide",!hay));
+  $("#serviciosGrid").innerHTML=SERVICIOS.map(v=>`
+    <div class="servicio">
+      <div class="foto ${v.foto?"":"icono"}" style="${v.foto?`background-image:url('${esc(v.foto)}')`:""}">${v.foto?"":esc(v.icono||"🎧")}</div>
+      <div class="info"><b>${esc(v.titulo)}</b>${v.descripcion?`<p>${esc(v.descripcion)}</p>`:""}
+        <button type="button" class="btn btn-p btn-sm" data-cotizar="${esc(v.titulo)}">Cotizar</button></div>
+    </div>`).join("");
+  // el "Motivo" del formulario ofrece los mismos servicios
+  const sel=$("#k-tipo"), actual=sel.value;
+  const motivos=[...new Set([...(hay?SERVICIOS.map(v=>v.titulo):MOTIVOS_BASE), ...MOTIVOS_FIJOS])];
+  sel.innerHTML=motivos.map(m=>`<option>${esc(m)}</option>`).join("");
+  if(motivos.includes(actual)) sel.value=actual;
+}
 function pintarCrew(){
   $("#crewGrid").innerHTML = CREW.map(d=>`
     <div class="dj">
@@ -1781,6 +1827,12 @@ function conectar(){
     if(p) modalPago(p);
   });
 
+  // servicios: "Cotizar" baja al formulario con ese servicio ya elegido
+  $("#serviciosGrid").addEventListener("click",e=>{ const b=e.target.closest("[data-cotizar]"); if(!b) return;
+    $("#k-tipo").value=b.dataset.cotizar;
+    $("#contacto").scrollIntoView({behavior:"smooth"});
+    setTimeout(()=>$("#k-nom").focus({preventScroll:true}),700); });
+
   // contacto
   $("#formContacto").addEventListener("submit",async e=>{
     e.preventDefault(); const f=e.target;
@@ -1825,12 +1877,12 @@ function avisoRespaldo(){
   // a la red (evita el parpadeo "plantilla por defecto → contenido real")
   const cache=leerCache();
   if(cache){
-    S=cache.settings||DEF.settings; PLANES=cache.plans||[]; CREW=cache.crew||[];
+    S=cache.settings||DEF.settings; PLANES=cache.plans||[]; CREW=cache.crew||[]; SERVICIOS=(cache.servicios||[]).filter(v=>v.visible!==false);
     TRACKS=cache.tracks||[]; COMUNICADOS=cache.comunicados||[];
-    pintarMarca(); pintarPlanes(); pintarCrew(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles();
+    pintarMarca(); pintarPlanes(); pintarCrew(); pintarServicios(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles();
   }
   await cargarDatos();
-  pintarMarca(); pintarPlanes(); pintarCrew(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles(); conectar();
+  pintarMarca(); pintarPlanes(); pintarCrew(); pintarServicios(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles(); conectar();
   avisarComunicado();
   if(modoRespaldo) avisoRespaldo();
   const tokenReset=new URLSearchParams(location.search).get("restablecer");

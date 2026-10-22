@@ -111,6 +111,19 @@ CREATE TABLE crew (
   creado  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- servicios que se ofrecen (sección "Servicios" de la web): sin precios, solo
+-- "Cotizar". SEGURIDAD EN PHP: cualquiera lee lo visible=1; solo admin escribe.
+CREATE TABLE servicios (
+  id          CHAR(36)     PRIMARY KEY,
+  orden       INT          NOT NULL DEFAULT 0,
+  titulo      VARCHAR(150) NOT NULL,
+  descripcion TEXT,
+  icono       VARCHAR(20)  NOT NULL DEFAULT '',
+  foto        VARCHAR(500) NOT NULL DEFAULT '',
+  visible     BOOLEAN      NOT NULL DEFAULT TRUE,
+  creado      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ---------------------------------------------------------------------------
 -- 4. COMUNICADOS del equipo
 --
@@ -348,6 +361,12 @@ INSERT INTO crew (id, orden, alias, nombre, cargo, bio) VALUES
   (UUID(), 3, 'DJ Invitado 3', '', 'DJ / Editor', ''),
   (UUID(), 4, 'DJ Invitado 4', '', 'DJ / Editor', ''),
   (UUID(), 5, 'DJ Invitado 5', '', 'DJ / Editor', '');
+
+INSERT INTO servicios (id, orden, titulo, descripcion, icono) VALUES
+  (UUID(), 1, 'DJ para tu evento',
+    'Bodas, quinceañeros, cumpleaños, discotecas y eventos corporativos. Música a la medida de tu público.', '🎧'),
+  (UUID(), 2, 'Edits a medida',
+    'Tu canción con la intro, el outro y el BPM que necesitas para tu set.', '🎛️');
 
 SET FOREIGN_KEY_CHECKS = 1;
 
