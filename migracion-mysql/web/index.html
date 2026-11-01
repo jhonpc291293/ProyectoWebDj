@@ -297,6 +297,19 @@ h2.title em{font-style:normal;color:var(--gold)}
 .servicio .info b{font-size:18px;line-height:1.25}
 .servicio .info p{margin:0;color:var(--muted);font-size:14px;flex:1;white-space:pre-line}
 .servicio .btn{align-self:flex-start;margin-top:4px}
+.servicio .foto{position:relative;overflow:hidden}
+/* si alguna tarjeta de la fila tiene foto o video, las que solo tienen ícono
+   toman la misma altura, para que todas queden parejas */
+.servicios:has(.foto:not(.icono)) .foto.icono{aspect-ratio:16/10;height:auto}
+.servicio .foto video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.producto .cat{color:var(--gold);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.producto .precio{font-family:var(--display);font-size:26px;line-height:1;color:var(--gold)}
+.producto .precio.consultar{font-family:var(--body);font-size:14px;font-weight:600;color:var(--muted)}
+.producto .etq{position:absolute;top:12px;left:12px;z-index:2;padding:5px 11px;border-radius:999px;font-size:11px;
+  font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#120c02}
+.producto .etq.agotado{background:#3a3440;color:var(--txt)}
+.producto .etq.proximamente{background:var(--txt);color:#120c02}
+.producto .foto.vacia{background:linear-gradient(135deg,rgba(var(--gold-rgb),.3),rgba(var(--gold-deep-rgb),.12))}
 
 /* ============ COMUNICADOS ============ */
 .comunicados{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
@@ -499,6 +512,7 @@ canvas#viz{width:140px;height:38px;opacity:.9}
       <a href="#catalogo">Catálogo</a>
       <a href="#membresias">Membresías</a>
       <a href="#servicios" id="navServicios" class="hide">Servicios</a>
+      <a href="#tienda" id="navTienda" class="hide">Tienda</a>
       <a href="#comunicados" id="navComunicados" class="hide">Comunicados</a>
       <a href="#crew">El crew</a>
       <a href="#historia">Historia</a>
@@ -615,6 +629,18 @@ canvas#viz{width:140px;height:38px;opacity:.9}
       <p class="lead">Cuéntanos qué necesitas y te enviamos una cotización sin compromiso.</p>
     </div>
     <div class="servicios reveal" id="serviciosGrid"></div>
+  </div>
+</section>
+
+<!-- ================= TIENDA ================= -->
+<section class="section hide" id="tienda" style="background:var(--bg2);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="reveal">
+      <p class="eyebrow">Tienda</p>
+      <h2 class="title">Lo nuevo de <em>la tienda</em></h2>
+      <p class="lead">Accesorios, ropa y programas para DJs. Pídelos por WhatsApp y te contamos cómo recibirlos.</p>
+    </div>
+    <div class="servicios reveal" id="productosGrid"></div>
   </div>
 </section>
 
@@ -797,7 +823,7 @@ const DEF = {
 };
 
 /* ---------- estado ---------- */
-let S={}, PLANES=[], CREW=[], SERVICIOS=[], TRACKS=[], COMUNICADOS=[], conectado=false, sesion=null, perfil=null, MEMB={estado:"ninguna"};
+let S={}, PLANES=[], CREW=[], SERVICIOS=[], PRODUCTOS=[], TRACKS=[], COMUNICADOS=[], conectado=false, sesion=null, perfil=null, MEMB={estado:"ninguna"};
 let modoRespaldo=false, PAGE=10, pagina=1, filtro={q:"",tipo:"",genero:"",bpmMin:null,bpmMax:null,dj:"",orden:"nuevo"};
 let COMPRADOS=new Set(); // ids de tracks que el usuario ya compró y le aprobaron (acceso para siempre)
 let CARRITO=[]; try{ CARRITO=JSON.parse(localStorage.getItem("vpm_carrito")||"[]"); }catch(e){}
@@ -910,7 +936,8 @@ async function cargarDatos(){
   try{
     const [ini,ses]=await Promise.all([api("inicio"), api("sesion")]);
     d={ settings:ini.settings||DEF.settings, plans:ini.planes||[], crew:ini.crew||[],
-        tracks:ini.tracks||[], comunicados:ini.comunicados||[], servicios:ini.servicios||[] };
+        tracks:ini.tracks||[], comunicados:ini.comunicados||[], servicios:ini.servicios||[],
+        productos:ini.productos||[] };
     ARCHIVOS_TRACK=new Set((ini.con_archivo||[]).map(String));
     usuario=ses.usuario; conectado=true;
     guardarCache(d);
@@ -918,7 +945,7 @@ async function cargarDatos(){
   if(!d){ d=DEF; conectado=false; modoRespaldo=true; ARCHIVOS_TRACK=new Set();
     console.warn("[vpm] Contenido de demostración: no pude conectar con el servidor.");
   }
-  S=d.settings||DEF.settings; PLANES=d.plans||[]; CREW=d.crew||[]; SERVICIOS=(d.servicios||[]).filter(v=>v.visible!==false); TRACKS=d.tracks||[]; COMUNICADOS=d.comunicados||[];
+  S=d.settings||DEF.settings; PLANES=d.plans||[]; CREW=d.crew||[]; SERVICIOS=(d.servicios||[]).filter(v=>v.visible!==false); PRODUCTOS=(d.productos||[]).filter(v=>v.visible!==false); TRACKS=d.tracks||[]; COMUNICADOS=d.comunicados||[];
   if(usuario) await entrarSesion(usuario,false);
 }
 // "sesion" conserva la forma {user:{id,email}} que ya usaba el resto del código
@@ -1053,7 +1080,7 @@ function pintarServicios(){
   ["#servicios","#navServicios","#heroServicios"].forEach(s=>$(s).classList.toggle("hide",!hay));
   $("#serviciosGrid").innerHTML=SERVICIOS.map(v=>`
     <div class="servicio">
-      <div class="foto ${v.foto?"":"icono"}" style="${v.foto?`background-image:url('${esc(v.foto)}')`:""}">${v.foto?"":esc(v.icono||"🎧")}</div>
+      ${mediaTarjeta(v, v.foto||v.video ? "" : `<span>${esc(v.icono||"🎧")}</span>`, "icono")}
       <div class="info"><b>${esc(v.titulo)}</b>${v.descripcion?`<p>${esc(v.descripcion)}</p>`:""}
         <button type="button" class="btn btn-p btn-sm" data-cotizar="${esc(v.titulo)}">Cotizar</button></div>
     </div>`).join("");
@@ -1062,6 +1089,29 @@ function pintarServicios(){
   const motivos=[...new Set([...(hay?SERVICIOS.map(v=>v.titulo):MOTIVOS_BASE), ...MOTIVOS_FIJOS])];
   sel.innerHTML=motivos.map(m=>`<option>${esc(m)}</option>`).join("");
   if(motivos.includes(actual)) sel.value=actual;
+}
+// foto o video de una tarjeta (servicio o producto); el video va en bucle y sin
+// sonido, como el del inicio. Sin ninguno de los dos, se usa "relleno"
+function mediaTarjeta(v, relleno, claseVacia, extra=""){
+  if(v.video) return `<div class="foto">${extra}<video src="${esc(v.video)}" autoplay muted loop playsinline preload="metadata"></video></div>`;
+  if(v.foto)  return `<div class="foto" style="background-image:url('${esc(v.foto)}')">${extra}</div>`;
+  return `<div class="foto ${claseVacia}">${extra}${relleno}</div>`;
+}
+const ETIQUETAS={nuevo:"Nuevo",proximamente:"Próximamente",agotado:"Agotado"};
+function pintarProductos(){
+  const hay=PRODUCTOS.length>0;
+  ["#tienda","#navTienda"].forEach(s=>$(s).classList.toggle("hide",!hay));
+  $("#productosGrid").innerHTML=PRODUCTOS.map(p=>{
+    const etq=ETIQUETAS[p.etiqueta] ? `<span class="etq ${esc(p.etiqueta)}">${ETIQUETAS[p.etiqueta]}</span>` : "";
+    const boton = p.etiqueta==="agotado" ? "Consultar disponibilidad" : p.etiqueta==="proximamente" ? "Avísame cuando llegue" : "Lo quiero";
+    return `<div class="servicio producto">
+      ${mediaTarjeta(p, `<span>🛍️</span>`, "icono vacia", etq)}
+      <div class="info">${p.categoria?`<span class="cat">${esc(p.categoria)}</span>`:""}<b>${esc(p.nombre)}</b>
+        ${p.descripcion?`<p>${esc(p.descripcion)}</p>`:""}
+        <span class="precio ${p.precio>0?"":"consultar"}">${p.precio>0?esc(money(p.precio)):"Consultar precio"}</span>
+        <button type="button" class="btn ${p.etiqueta==="agotado"?"btn-g":"btn-p"} btn-sm" data-producto="${esc(p.id)}">${boton}</button></div>
+    </div>`;
+  }).join("");
 }
 function pintarCrew(){
   $("#crewGrid").innerHTML = CREW.map(d=>`
@@ -1839,6 +1889,13 @@ function conectar(){
     $("#contacto").scrollIntoView({behavior:"smooth"});
     setTimeout(()=>$("#k-nom").focus({preventScroll:true}),700); });
 
+  // tienda: el pedido va directo por WhatsApp, con el producto ya escrito
+  $("#productosGrid").addEventListener("click",e=>{ const b=e.target.closest("[data-producto]"); if(!b) return;
+    const p=PRODUCTOS.find(x=>String(x.id)===b.dataset.producto); if(!p) return;
+    const que = p.etiqueta==="proximamente" ? "Avísenme cuando llegue" : p.etiqueta==="agotado" ? "¿Cuándo vuelve a estar disponible?" : "Me interesa";
+    const msg=`Hola ${S.marca}, ${que.charAt(0).toLowerCase()+que.slice(1)}: ${p.nombre}${p.precio>0?` (${money(p.precio)})`:""}.`;
+    window.open(`https://wa.me/${(S.whatsapp||"").replace(/\D/g,"")}?text=${encodeURIComponent(msg)}`,"_blank"); });
+
   // contacto
   $("#formContacto").addEventListener("submit",async e=>{
     e.preventDefault(); const f=e.target;
@@ -1883,12 +1940,12 @@ function avisoRespaldo(){
   // a la red (evita el parpadeo "plantilla por defecto → contenido real")
   const cache=leerCache();
   if(cache){
-    S=cache.settings||DEF.settings; PLANES=cache.plans||[]; CREW=cache.crew||[]; SERVICIOS=(cache.servicios||[]).filter(v=>v.visible!==false);
+    S=cache.settings||DEF.settings; PLANES=cache.plans||[]; CREW=cache.crew||[]; SERVICIOS=(cache.servicios||[]).filter(v=>v.visible!==false); PRODUCTOS=(cache.productos||[]).filter(v=>v.visible!==false);
     TRACKS=cache.tracks||[]; COMUNICADOS=cache.comunicados||[];
-    pintarMarca(); pintarPlanes(); pintarCrew(); pintarServicios(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles();
+    pintarMarca(); pintarPlanes(); pintarCrew(); pintarServicios(); pintarProductos(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles();
   }
   await cargarDatos();
-  pintarMarca(); pintarPlanes(); pintarCrew(); pintarServicios(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles(); conectar();
+  pintarMarca(); pintarPlanes(); pintarCrew(); pintarServicios(); pintarProductos(); pintarCatalogoDjs(); pintarComunicados(); pintarFiltros(); pintarLista(); pintarCarrito(); pintarRieles(); conectar();
   avisarComunicado();
   if(modoRespaldo) avisoRespaldo();
   const tokenReset=new URLSearchParams(location.search).get("restablecer");

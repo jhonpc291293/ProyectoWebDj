@@ -253,6 +253,7 @@ const oscurecer = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c*(1-pct)
 // nombre visible de cada tipo de track (en la base se guarda la clave, p. ej. "openshow")
 const NOMBRE_TIPO={edit:"Edit",remix:"Remix",mashup:"Mashup",intro:"Intro",acapella:"Acapella",
   transicion:"Transición",openshow:"Open Show",splice:"Splice"};
+const ETIQUETAS_PRODUCTO={"":"Sin etiqueta",nuevo:"Nuevo",proximamente:"Próximamente",agotado:"Agotado"};
 const FUENTES_TITULO=["Anton","Bebas Neue","Oswald","Archivo Black","Passion One","Alfa Slab One","Righteous","Teko","Big Shoulders Display"];
 const FUENTES_TEXTO=["Space Grotesk","Inter","Poppins","Work Sans","Manrope","Sora","DM Sans","Outfit","Nunito Sans"];
 function cargarFuente(nombre,pesos){
@@ -378,6 +379,7 @@ const MENU_ADMIN = [
   {v:"settings",     t:"Marca y contacto"},
   {v:"crew",         t:"El crew"},
   {v:"servicios",    t:"Servicios"},
+  {v:"productos",    t:"Tienda"},
   {v:"comunicados",  t:"Comunicados"},
   {v:"editores", t:"Editores y roles"},
   {v:"mensajes", t:"Mensajes", pill:"pillMsg"}
@@ -398,7 +400,7 @@ function pintarMenu(){
 $("#menu").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(b) ver(b.dataset.v); });
 
 const TITULOS = {resumen:"Resumen",tracks:"Catálogo",pagos:"Pagos por aprobar",compras:"Compras sueltas",
-  miembros:"Miembros",plans:"Planes de membresía",settings:"Marca y contacto",crew:"El crew",servicios:"Servicios",
+  miembros:"Miembros",plans:"Planes de membresía",settings:"Marca y contacto",crew:"El crew",servicios:"Servicios",productos:"Tienda",
   comunicados:"Comunicados",editores:"Editores y roles",mensajes:"Mensajes"};
 function ver(v){
   const permitidas = esAdmin()
@@ -411,7 +413,7 @@ function ver(v){
   viejo.replaceWith(nuevo);
   nuevo.innerHTML=`<div class="vacio"><span class="spin"></span> Cargando…</div>`;
   ({resumen:vistaResumen, tracks:vistaTracks, pagos:vistaPagos, compras:vistaCompras, miembros:vistaMiembros,
-    plans:vistaPlanes, settings:vistaMarca, crew:vistaCrew, servicios:vistaServicios, comunicados:vistaComunicados,
+    plans:vistaPlanes, settings:vistaMarca, crew:vistaCrew, servicios:vistaServicios, productos:vistaProductos, comunicados:vistaComunicados,
     editores:vistaEditores, mensajes:vistaMensajes}[v]||vistaResumen)();
 }
 window.ver=ver;
@@ -975,17 +977,33 @@ const ENT={
       {k:"descripcion",l:"Descripción",t:"textarea",
        help:"Qué incluye. Sin precios: el visitante toca «Cotizar», llena el formulario y te llega por WhatsApp y a Mensajes."},
       {k:"foto",l:"Foto",t:"file",bucket:"portadas",help:"Horizontal, de un evento o del servicio. Menos de 800 KB."},
+      {k:"video",l:"O un video (reemplaza la foto)",t:"file",bucket:"previews",accept:"video/*",limite:30,
+       help:"Se reproduce en bucle y sin sonido. Corto (10-20 s) y liviano, menos de 20-30 MB. Quítalo para volver a la foto."},
+      {k:"visible",l:"Mostrar en la web",t:"bool",def:true}]},
+  productos:{titulo:"Tienda",singular:"producto",orden:"orden",ordenable:true,
+    cols:[{k:"foto",l:"",t:"img"},{k:"nombre",l:"Producto",t:"fuerte"},{k:"categoria",l:"Categoría"},
+          {k:"precio",l:"Precio",t:"precio_opc"},{k:"etiqueta",l:"Etiqueta",t:"etiqueta"},{k:"visible",l:"Estado",t:"visible"}],
+    campos:[{k:"nombre",l:"Nombre del producto",t:"text",req:true,mitad:true,ph:"Polo VIP PAITA MIX"},
+      {k:"categoria",l:"Categoría",t:"text",mitad:true,ph:"Ropa, Accesorios, Programas…"},
+      {k:"precio",l:"Precio",t:"number",step:"0.01",mitad:true,help:"Déjalo vacío para mostrar «Consultar precio»."},
+      {k:"etiqueta",l:"Etiqueta",t:"select",def:"",mitad:true,opts:ETIQUETAS_PRODUCTO},
+      {k:"descripcion",l:"Descripción",t:"textarea",help:"Tallas, colores, qué incluye… El cliente lo pide por WhatsApp."},
+      {k:"foto",l:"Foto",t:"file",bucket:"portadas",help:"Cuadrada u horizontal, menos de 800 KB."},
+      {k:"video",l:"O un video (reemplaza la foto)",t:"file",bucket:"previews",accept:"video/*",limite:30,
+       help:"Se reproduce en bucle y sin sonido. Corto y liviano, menos de 20-30 MB."},
       {k:"visible",l:"Mostrar en la web",t:"bool",def:true}]}
 };
 
 async function vistaPlanes(){ vistaEntidad("plans"); }
 async function vistaCrew(){ vistaEntidad("crew"); }
 async function vistaServicios(){ vistaEntidad("servicios"); }
+async function vistaProductos(){ vistaEntidad("productos"); }
 
 // nombre de la vista en el panel -> tabla y acciones en el servidor
 const ENT_API={ plans:{tabla:"planes",lista:"planes",guardar:"guardar_plan"},
                 crew: {tabla:"crew",  lista:"crew",  guardar:"guardar_crew"},
-                servicios:{tabla:"servicios", lista:"servicios", guardar:"guardar_servicio"} };
+                servicios:{tabla:"servicios", lista:"servicios", guardar:"guardar_servicio"},
+                productos:{tabla:"productos", lista:"productos", guardar:"guardar_producto"} };
 
 async function vistaEntidad(nombre){
   const def=ENT[nombre], ea=ENT_API[nombre];
@@ -1026,6 +1044,8 @@ function celda(c,r){
     case "visible":return `<span class="chip ${v?"ok":""}">${v?"visible":"oculto"}</span>`;
     case "si":     return v?"sí":"—";
     case "limite": return v>0?`${v}/día`:"ilimitado";
+    case "precio_opc": return v>0?`<b style="color:var(--gold)">${money(v)}</b>`:`<span class="mini">Consultar</span>`;
+    case "etiqueta":   return v?`<span class="chip">${esc(ETIQUETAS_PRODUCTO[v]||v)}</span>`:"—";
     case "img":    return v?`<img src="${esc(v)}" style="width:38px;height:38px;object-fit:cover;border-radius:7px">`:"—";
     default:       return v||v===0?esc(v):"—";
   }

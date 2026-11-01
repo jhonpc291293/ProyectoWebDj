@@ -120,8 +120,26 @@ CREATE TABLE servicios (
   descripcion TEXT,
   icono       VARCHAR(20)  NOT NULL DEFAULT '',
   foto        VARCHAR(500) NOT NULL DEFAULT '',
+  video       VARCHAR(500) NOT NULL DEFAULT '',  -- si tiene, se muestra en vez de la foto
   visible     BOOLEAN      NOT NULL DEFAULT TRUE,
   creado      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- productos a la venta (sección "Tienda" de la web): accesorios, ropa,
+-- programas... Se piden por WhatsApp; precio NULL = "Consultar precio".
+-- SEGURIDAD EN PHP: cualquiera lee lo visible=1; solo admin escribe.
+CREATE TABLE productos (
+  id          CHAR(36)      PRIMARY KEY,
+  orden       INT           NOT NULL DEFAULT 0,
+  nombre      VARCHAR(150)  NOT NULL,
+  categoria   VARCHAR(100)  NOT NULL DEFAULT '',
+  descripcion TEXT,
+  precio      DECIMAL(10,2) NULL,
+  etiqueta    ENUM('','nuevo','proximamente','agotado') NOT NULL DEFAULT '',
+  foto        VARCHAR(500)  NOT NULL DEFAULT '',
+  video       VARCHAR(500)  NOT NULL DEFAULT '',
+  visible     BOOLEAN       NOT NULL DEFAULT TRUE,
+  creado      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------------

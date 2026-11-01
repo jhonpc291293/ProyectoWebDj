@@ -461,15 +461,40 @@ try {
       if ($titulo === '') throw new InvalidArgumentException('Falta el nombre del servicio');
       $datos = [
         'titulo' => $titulo, 'descripcion' => texto($in, 'descripcion', 2000), 'icono' => texto($in, 'icono', 20),
-        'foto' => texto($in, 'foto', 500), 'visible' => si_no($in, 'visible', true),
+        'foto' => texto($in, 'foto', 500), 'video' => texto($in, 'video', 500), 'visible' => si_no($in, 'visible', true),
       ];
       responder(['id' => guardar_fila($pdo, 'servicios', $in['id'] ?? null, $datos)]);
+    }
+
+    case 'productos': {
+      solo_admin($pdo, $yo);
+      $filas = $pdo->query('SELECT * FROM productos ORDER BY orden')->fetchAll(PDO::FETCH_ASSOC);
+      foreach ($filas as &$p) $p['precio'] = $p['precio'] === null ? null : (float) $p['precio'];
+      unset($p);
+      responder(['productos' => array_map(fn($p) => normalizar_bools($p, ['visible']), $filas)]);
+    }
+
+    case 'guardar_producto': {
+      solo_admin($pdo, $yo);
+      $in = entrada();
+      $nombre = texto($in, 'nombre', 150);
+      if ($nombre === '') throw new InvalidArgumentException('Falta el nombre del producto');
+      $etiqueta = $in['etiqueta'] ?? '';
+      if (!in_array($etiqueta, ['', 'nuevo', 'proximamente', 'agotado'], true)) throw new InvalidArgumentException('Etiqueta no válida');
+      // sin precio (vacío o 0) la web muestra "Consultar precio"
+      $precio = isset($in['precio']) && $in['precio'] !== '' && (float) $in['precio'] > 0 ? round((float) $in['precio'], 2) : null;
+      $datos = [
+        'nombre' => $nombre, 'categoria' => texto($in, 'categoria', 100), 'descripcion' => texto($in, 'descripcion', 2000),
+        'precio' => $precio, 'etiqueta' => $etiqueta, 'foto' => texto($in, 'foto', 500), 'video' => texto($in, 'video', 500),
+        'visible' => si_no($in, 'visible', true),
+      ];
+      responder(['id' => guardar_fila($pdo, 'productos', $in['id'] ?? null, $datos)]);
     }
 
     case 'borrar_fila': {
       solo_admin($pdo, $yo);
       $in = entrada();
-      $tabla = ['planes' => 'planes', 'crew' => 'crew', 'servicios' => 'servicios'][$in['tabla'] ?? ''] ?? null;
+      $tabla = ['planes' => 'planes', 'crew' => 'crew', 'servicios' => 'servicios', 'productos' => 'productos'][$in['tabla'] ?? ''] ?? null;
       if (!$tabla) throw new InvalidArgumentException('Tabla no válida');
       $pdo->prepare("DELETE FROM $tabla WHERE id = ?")->execute([$in['id'] ?? '']);
       responder([]);
@@ -478,7 +503,7 @@ try {
     case 'intercambiar_orden': {
       solo_admin($pdo, $yo);
       $in = entrada();
-      $tabla = ['planes' => 'planes', 'crew' => 'crew', 'servicios' => 'servicios'][$in['tabla'] ?? ''] ?? null;
+      $tabla = ['planes' => 'planes', 'crew' => 'crew', 'servicios' => 'servicios', 'productos' => 'productos'][$in['tabla'] ?? ''] ?? null;
       if (!$tabla) throw new InvalidArgumentException('Tabla no válida');
       $st = $pdo->prepare("SELECT id, orden FROM $tabla WHERE id IN (?, ?)");
       $st->execute([$in['a'] ?? '', $in['b'] ?? '']);
@@ -612,13 +637,14 @@ function url_en_uso(PDO $pdo, ?string $url): bool {
   $st = $pdo->prepare(
     'SELECT 1 FROM tracks WHERE portada = ? OR preview = ?
      UNION SELECT 1 FROM crew WHERE foto = ?
-     UNION SELECT 1 FROM servicios WHERE foto = ?
+     UNION SELECT 1 FROM servicios WHERE ? IN (foto, video)
+     UNION SELECT 1 FROM productos WHERE ? IN (foto, video)
      UNION SELECT 1 FROM comunicados WHERE imagen = ?
      UNION SELECT 1 FROM settings WHERE ? IN (logo_url, hero_img, hero_video_fondo, todos_foto, yape_qr,
                                               video_archivo, audio_destacado_archivo)
      LIMIT 1'
   );
-  $st->execute([$url, $url, $url, $url, $url, $url]);
+  $st->execute([$url, $url, $url, $url, $url, $url, $url]);
   return (bool) $st->fetchColumn();
 }
 
@@ -632,7 +658,7 @@ function guardar_fila(PDO $pdo, string $tabla, ?string $id, array $datos): strin
     return $id;
   }
   $id = uuid_v4();
-  if (in_array($tabla, ['planes', 'crew', 'servicios'], true) && !isset($datos['orden'])) {
+  if (in_array($tabla, ['planes', 'crew', 'servicios', 'productos'], true) && !isset($datos['orden'])) {
     $datos['orden'] = (int) $pdo->query("SELECT COALESCE(MAX(orden), 0) + 1 FROM $tabla")->fetchColumn();
   }
   $cols = implode(', ', array_keys($datos));

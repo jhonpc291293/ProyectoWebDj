@@ -124,11 +124,17 @@ try {
       foreach ($comunicados as &$c) $c['fijado'] = (bool) $c['fijado'];
       unset($c);
 
-      $servicios = $pdo->query('SELECT id, orden, titulo, descripcion, icono, foto FROM servicios WHERE visible = 1 ORDER BY orden')
+      $servicios = $pdo->query('SELECT id, orden, titulo, descripcion, icono, foto, video FROM servicios WHERE visible = 1 ORDER BY orden')
         ->fetchAll(PDO::FETCH_ASSOC);
+      $productos = $pdo->query(
+        'SELECT id, orden, nombre, categoria, descripcion, precio, etiqueta, foto, video FROM productos WHERE visible = 1 ORDER BY orden'
+      )->fetchAll(PDO::FETCH_ASSOC);
+      foreach ($productos as &$p) $p['precio'] = $p['precio'] === null ? null : (float) $p['precio'];
+      unset($p);
 
       responder(['settings' => $s, 'planes' => $planes, 'crew' => $crew, 'tracks' => $tracks,
-                 'con_archivo' => $conArchivo, 'comunicados' => $comunicados, 'servicios' => $servicios]);
+                 'con_archivo' => $conArchivo, 'comunicados' => $comunicados, 'servicios' => $servicios,
+                 'productos' => $productos]);
     }
 
     // ---------------- cuenta del miembro ----------------
