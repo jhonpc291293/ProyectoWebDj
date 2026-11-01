@@ -53,6 +53,17 @@ post adm guardar_producto "{\"id\":\"$P2\",\"nombre\":\"Audífonos de cabina\",\
 verificar "editar: ya tiene precio y sin etiqueta" "120.00|" "$(sql "SELECT CONCAT(precio,'|',etiqueta) FROM productos WHERE id='$P2'")"
 
 echo ""
+echo "=== Enlaces a la tienda completa ==="
+post adm guardar_producto "{\"id\":\"$P1\",\"nombre\":\"Polo VIP PAITA MIX\",\"precio\":45,\"enlace\":\"https://tienda.vippaitamix.com/producto/polo\",\"visible\":true}" >/dev/null
+verificar "el producto guarda su enlace" "https://tienda.vippaitamix.com/producto/polo" "$(inicio | json "['productos']" | python -c "import sys,ast; print([p['enlace'] for p in ast.literal_eval(sys.stdin.read()) if p['nombre']=='Polo VIP PAITA MIX'][0])")"
+verificar "un enlace «javascript:» se rechaza (400)" "400" "$(cod adm guardar_producto '{"nombre":"x","enlace":"javascript:alert(1)"}')"
+verificar "un texto que no es dirección se rechaza (400)" "400" "$(cod adm guardar_producto '{"nombre":"x","enlace":"no es un enlace"}')"
+post adm guardar_settings '{"tienda_url":"tienda.vippaitamix.com"}' >/dev/null
+verificar "sin https:// se completa solo" "https://tienda.vippaitamix.com" "$(inicio | json "['settings']['tienda_url']")"
+verificar "enlace de tienda «javascript:» se rechaza (400)" "400" "$(cod adm guardar_settings '{"tienda_url":"javascript:alert(1)"}')"
+verificar "y el enlace bueno sigue intacto" "https://tienda.vippaitamix.com" "$(inicio | json "['settings']['tienda_url']")"
+
+echo ""
 echo "=== Video en servicios ==="
 S1=$(sql "SELECT id FROM servicios ORDER BY orden LIMIT 1")
 post adm guardar_servicio "{\"id\":\"$S1\",\"titulo\":\"DJ para tu evento\",\"video\":\"/subidas/previews/evento.mp4\",\"visible\":true}" >/dev/null

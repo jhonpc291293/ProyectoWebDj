@@ -312,6 +312,9 @@ h2.title em{font-style:normal;color:var(--gold)}
 /* productos: recuadro cuadrado, como en las tiendas online (las fotos de polos
    y accesorios suelen ser cuadradas); vale también para los que solo tienen ícono */
 .producto .foto,.servicios:has(.foto:not(.icono)) .producto .foto.icono,.producto .foto.icono{aspect-ratio:1/1;height:auto}
+.tienda-todo{display:flex;justify-content:center;margin-top:28px}
+/* productos: columnas fijas aunque haya pocos, para que el cuadro no crezca de más */
+#productosGrid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .producto .foto.vacia{background:linear-gradient(135deg,rgba(var(--gold-rgb),.3),rgba(var(--gold-deep-rgb),.12))}
 
 /* ============ COMUNICADOS ============ */
@@ -641,9 +644,10 @@ canvas#viz{width:140px;height:38px;opacity:.9}
     <div class="reveal">
       <p class="eyebrow">Tienda</p>
       <h2 class="title">Lo nuevo de <em>la tienda</em></h2>
-      <p class="lead">Accesorios, ropa y programas para DJs. Pídelos por WhatsApp y te contamos cómo recibirlos.</p>
+      <p class="lead" id="tiendaLead">Accesorios, ropa y programas para DJs. Pídelos por WhatsApp y te contamos cómo recibirlos.</p>
     </div>
     <div class="servicios reveal" id="productosGrid"></div>
+    <div class="tienda-todo hide" id="tiendaTodo"><a class="btn btn-p" id="tiendaUrl" href="#" target="_blank" rel="noopener">Ver toda la tienda →</a></div>
   </div>
 </section>
 
@@ -1100,10 +1104,17 @@ function mediaTarjeta(v, relleno, claseVacia, extra=""){
   if(v.foto)  return `<div class="foto" style="background-image:url('${esc(v.foto)}')">${extra}</div>`;
   return `<div class="foto ${claseVacia}">${extra}${relleno}</div>`;
 }
+// solo enlaces http(s): el servidor ya lo valida, esto es la segunda capa
+const enlaceSeguro = u => /^https?:\/\//i.test(String(u||"").trim()) ? String(u).trim() : "";
 const ETIQUETAS={nuevo:"Nuevo",proximamente:"Próximamente",agotado:"Agotado"};
 function pintarProductos(){
-  const hay=PRODUCTOS.length>0;
-  ["#tienda","#navTienda"].forEach(s=>$(s).classList.toggle("hide",!hay));
+  const hay=PRODUCTOS.length>0, url=enlaceSeguro(S.tienda_url);
+  ["#tienda","#navTienda"].forEach(s=>$(s).classList.toggle("hide",!hay&&!url));
+  $("#tiendaTodo").classList.toggle("hide",!url);
+  if(url) $("#tiendaUrl").href=url;
+  $("#tiendaLead").textContent = url
+    ? "Accesorios, ropa y programas para DJs. Aquí ves lo más nuevo; el resto está en nuestra tienda online."
+    : "Accesorios, ropa y programas para DJs. Pídelos por WhatsApp y te contamos cómo recibirlos.";
   $("#productosGrid").innerHTML=PRODUCTOS.map(p=>{
     const etq=ETIQUETAS[p.etiqueta] ? `<span class="etq ${esc(p.etiqueta)}">${ETIQUETAS[p.etiqueta]}</span>` : "";
     const boton = p.etiqueta==="agotado" ? "Consultar disponibilidad" : p.etiqueta==="proximamente" ? "Avísame cuando llegue" : "Lo quiero";
@@ -1112,7 +1123,9 @@ function pintarProductos(){
       <div class="info">${p.categoria?`<span class="cat">${esc(p.categoria)}</span>`:""}<b>${esc(p.nombre)}</b>
         ${p.descripcion?`<p>${esc(p.descripcion)}</p>`:""}
         <span class="precio ${p.precio>0?"":"consultar"}">${p.precio>0?esc(money(p.precio)):"Consultar precio"}</span>
-        <button type="button" class="btn ${p.etiqueta==="agotado"?"btn-g":"btn-p"} btn-sm" data-producto="${esc(p.id)}">${boton}</button></div>
+        ${enlaceSeguro(p.enlace) && p.etiqueta!=="agotado" && p.etiqueta!=="proximamente"
+          ? `<a class="btn btn-p btn-sm" href="${esc(enlaceSeguro(p.enlace))}" target="_blank" rel="noopener">Comprar</a>`
+          : `<button type="button" class="btn ${p.etiqueta==="agotado"?"btn-g":"btn-p"} btn-sm" data-producto="${esc(p.id)}">${boton}</button>`}</div>
     </div>`;
   }).join("");
 }

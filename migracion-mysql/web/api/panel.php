@@ -486,6 +486,7 @@ try {
       $datos = [
         'nombre' => $nombre, 'categoria' => texto($in, 'categoria', 100), 'descripcion' => texto($in, 'descripcion', 2000),
         'precio' => $precio, 'etiqueta' => $etiqueta, 'foto' => texto($in, 'foto', 500), 'video' => texto($in, 'video', 500),
+        'enlace' => url_externa(texto($in, 'enlace', 500), 'El enlace del producto'),
         'visible' => si_no($in, 'visible', true),
       ];
       responder(['id' => guardar_fila($pdo, 'productos', $in['id'] ?? null, $datos)]);
@@ -571,7 +572,7 @@ try {
       $textos = ['marca', 'creador', 'ciudad', 'claim', 'hero_l1', 'hero_l2', 'hero_l3', 'logo_url', 'hero_img',
         'hero_video_fondo', 'todos_foto', 'whatsapp', 'email', 'moneda', 'yape_nombre', 'yape_numero', 'yape_qr', 'pago_nota',
         'color_fondo', 'color_tarjetas', 'color_encabezado', 'color_piepagina', 'color_texto', 'color_acento',
-        'fuente_titulos', 'fuente_texto', 'video_url', 'video_archivo',
+        'fuente_titulos', 'fuente_texto', 'video_url', 'video_archivo', 'tienda_url',
         'audio_destacado_titulo', 'audio_destacado_archivo'];
       $datos = [];
       foreach ($textos as $k) if (array_key_exists($k, $in)) $datos[$k] = texto($in, $k, 2000);
@@ -580,6 +581,7 @@ try {
           throw new InvalidArgumentException("Color no válido en $k");
         }
       }
+      if (isset($datos['tienda_url'])) $datos['tienda_url'] = url_externa($datos['tienda_url'], 'El enlace de la tienda');
       if (array_key_exists('desde', $in)) $datos['desde'] = (int) $in['desde'];
       if (array_key_exists('video_activo', $in)) $datos['video_activo'] = si_no($in, 'video_activo');
       if (array_key_exists('tema', $in)) {
@@ -629,6 +631,16 @@ try {
   if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
   error_log((string) $e);
   responder(['error' => 'Error interno del servidor'], 500);
+}
+
+// un enlace hacia afuera (la tienda completa): solo http(s), nada de
+// "javascript:" ni otras cosas que el navegador ejecutaría al hacer clic
+function url_externa(string $url, string $que): string {
+  $url = trim($url);
+  if ($url === '') return '';
+  if (!preg_match('~^https?://~i', $url)) $url = 'https://' . $url;  // "tienda.vippaitamix.com" -> con https
+  if (!filter_var($url, FILTER_VALIDATE_URL)) throw new InvalidArgumentException("$que no es una dirección web válida");
+  return $url;
 }
 
 // ¿alguna otra parte del sitio sigue usando este archivo público?

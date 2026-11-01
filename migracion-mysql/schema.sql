@@ -63,6 +63,7 @@ CREATE TABLE settings (
   hero_img    VARCHAR(500) NOT NULL DEFAULT '',
   hero_video_fondo VARCHAR(500) NOT NULL DEFAULT '',
   todos_foto  VARCHAR(500) NOT NULL DEFAULT '',  -- foto de la tarjeta "Todos" del catálogo
+  tienda_url  VARCHAR(500) NOT NULL DEFAULT '',  -- la tienda completa (WooCommerce): botón "Ver toda la tienda"
   whatsapp    VARCHAR(30)  NOT NULL DEFAULT '51999999999',
   email       VARCHAR(255) NOT NULL DEFAULT 'contacto@vippaitamix.com',
   moneda      VARCHAR(10)  NOT NULL DEFAULT 'S/',
@@ -138,6 +139,7 @@ CREATE TABLE productos (
   etiqueta    ENUM('','nuevo','proximamente','agotado') NOT NULL DEFAULT '',
   foto        VARCHAR(500)  NOT NULL DEFAULT '',
   video       VARCHAR(500)  NOT NULL DEFAULT '',
+  enlace      VARCHAR(500)  NOT NULL DEFAULT '',  -- su página en la tienda completa
   visible     BOOLEAN       NOT NULL DEFAULT TRUE,
   creado      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
