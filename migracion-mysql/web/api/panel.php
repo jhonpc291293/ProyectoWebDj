@@ -170,7 +170,7 @@ try {
       $titulo = texto($in, 'titulo');
       if ($titulo === '') throw new InvalidArgumentException('Falta el título');
       $tipo = $in['tipo'] ?? 'edit';
-      if (!in_array($tipo, ['edit','remix','mashup','intro','acapella','transicion'], true)) {
+      if (!in_array($tipo, ['edit','remix','mashup','intro','acapella','transicion','openshow','splice'], true)) {
         throw new InvalidArgumentException('Tipo no válido');
       }
       $plan = $in['plan_minimo_id'] ?? null;

@@ -250,6 +250,9 @@ const hexRgb = hex => { let h=(hex||"").replace("#",""); if(h.length===3) h=h.sp
 const aHex = n => Math.max(0,Math.min(255,Math.round(n))).toString(16).padStart(2,"0");
 const aclarar = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c+(255-c)*pct; return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
 const oscurecer = (hex,pct) => { const [r,g,b]=hexRgb(hex); const f=c=>c*(1-pct); return "#"+aHex(f(r))+aHex(f(g))+aHex(f(b)); };
+// nombre visible de cada tipo de track (en la base se guarda la clave, p. ej. "openshow")
+const NOMBRE_TIPO={edit:"Edit",remix:"Remix",mashup:"Mashup",intro:"Intro",acapella:"Acapella",
+  transicion:"Transición",openshow:"Open Show",splice:"Splice"};
 const FUENTES_TITULO=["Anton","Bebas Neue","Oswald","Archivo Black","Passion One","Alfa Slab One","Righteous","Teko","Big Shoulders Display"];
 const FUENTES_TEXTO=["Space Grotesk","Inter","Poppins","Work Sans","Manrope","Sora","DM Sans","Outfit","Nunito Sans"];
 function cargarFuente(nombre,pesos){
@@ -449,7 +452,7 @@ async function vistaResumen(){
         <thead><tr><th>Track</th><th>Tipo</th><th>Editor</th><th style="width:32%">Descargas</th><th>Plays</th></tr></thead>
         <tbody>${top.data.map(t=>`<tr>
           <td><b>${esc(t.titulo)}</b><div class="mini">${esc(t.artista||"")}</div></td>
-          <td><span class="chip g">${esc(t.tipo)}</span></td>
+          <td><span class="chip g">${esc(NOMBRE_TIPO[t.tipo]||t.tipo)}</span></td>
           <td class="mini">${esc(t.editor||"—")}</td>
           <td><div style="display:flex;align-items:center;gap:10px">
             <div class="bar" style="width:${Math.round((t.descargas||0)/maxDl*100)}%"></div>
@@ -490,7 +493,7 @@ async function resumenEditor(){
         <thead><tr><th>Track</th><th>Tipo</th><th style="width:34%">Descargas</th><th>Estado</th></tr></thead>
         <tbody>${[...t].sort((a,b)=>(b.descargas||0)-(a.descargas||0)).map(x=>`<tr>
           <td><b>${esc(x.titulo)}</b><div class="mini">${esc(x.artista||"")} · ${x.bpm||"?"} BPM</div></td>
-          <td><span class="chip g">${esc(x.tipo)}</span></td>
+          <td><span class="chip g">${esc(NOMBRE_TIPO[x.tipo]||x.tipo)}</span></td>
           <td><div style="display:flex;align-items:center;gap:10px">
             <div class="bar" style="width:${Math.round((x.descargas||0)/maxDl*100)}%"></div>
             <span class="mini">${x.descargas||0}</span></div></td>
@@ -507,7 +510,7 @@ async function resumenEditor(){
 const CAMPOS_TRACK = [
   {k:"titulo",l:"Título",t:"text",req:true},
   {k:"artista",l:"Artista original",t:"text",ph:"Sensación / Varios"},
-  {k:"tipo",l:"Tipo",t:"select",opts:["edit","remix","mashup","intro","acapella","transicion"],def:"edit",mitad:true},
+  {k:"tipo",l:"Tipo",t:"select",opts:NOMBRE_TIPO,def:"edit",mitad:true},
   {k:"genero",l:"Género",t:"text",ph:"Cumbia",mitad:true},
   {k:"bpm",l:"BPM",t:"number",mitad:true},
   {k:"tonalidad",l:"Tonalidad",t:"text",ph:"Am",mitad:true},
@@ -577,7 +580,7 @@ async function vistaTracks(){
               <div><b>${esc(t.titulo)}</b><div class="mini">${esc(t.artista||"—")}${t.gratis?' · <span style="color:var(--ok)">gratis</span>':""}${
                 t.plan_minimo_id?` · <span style="color:var(--gold)">desde ${esc(cache.planes.find(p=>p.id===t.plan_minimo_id)?.nombre||"plan")}</span>`:""}</div></div>
             </div></td>
-            <td><span class="chip g">${esc(t.tipo)}</span></td>
+            <td><span class="chip g">${esc(NOMBRE_TIPO[t.tipo]||t.tipo)}</span></td>
             <td class="mini">${esc(t.genero||"—")}${t.bpm?` · ${t.bpm}`:""}</td>
             ${esAdmin()?`<td class="mini">${esc(t.editor||"—")}</td>`:""}
             <td>${cache.archivos[t.id]?`<span class="chip ok">cargado</span>`:`<span class="chip warn">falta</span>`}

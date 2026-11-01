@@ -177,7 +177,7 @@ CREATE TABLE tracks (
   id          CHAR(36)      PRIMARY KEY,
   titulo      VARCHAR(255)  NOT NULL,
   artista     VARCHAR(255)  NOT NULL DEFAULT '',
-  tipo        ENUM('edit','remix','mashup','intro','acapella','transicion') NOT NULL DEFAULT 'edit',
+  tipo        ENUM('edit','remix','mashup','intro','acapella','transicion','openshow','splice') NOT NULL DEFAULT 'edit',
   genero      VARCHAR(100)  NOT NULL DEFAULT '',
   bpm         SMALLINT,
   tonalidad   VARCHAR(10)   NOT NULL DEFAULT '',
