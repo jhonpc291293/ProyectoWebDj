@@ -309,6 +309,9 @@ h2.title em{font-style:normal;color:var(--gold)}
   font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#120c02}
 .producto .etq.agotado{background:#3a3440;color:var(--txt)}
 .producto .etq.proximamente{background:var(--txt);color:#120c02}
+/* productos: recuadro cuadrado, como en las tiendas online (las fotos de polos
+   y accesorios suelen ser cuadradas); vale también para los que solo tienen ícono */
+.producto .foto,.servicios:has(.foto:not(.icono)) .producto .foto.icono,.producto .foto.icono{aspect-ratio:1/1;height:auto}
 .producto .foto.vacia{background:linear-gradient(135deg,rgba(var(--gold-rgb),.3),rgba(var(--gold-deep-rgb),.12))}
 
 /* ============ COMUNICADOS ============ */
